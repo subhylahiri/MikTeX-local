@@ -1,0 +1,87 @@
+\newcommand{\mlim}[2]{{\stackrel{\scriptstyle #1}{#2}}}
+\newcommand{\ra}{\rightarrow}
+\newcommand{\lr}{\leftrightarrow}
+\newcommand{\cdt}{\!\cdot\!}
+\newcommand{\vp}{\vspace{0.5cm}}
+%
+%e.g., i.e. with normal spaces
+\newcommand{\eg}{e.g.\ }
+\newcommand{\ie}{i.e.\ }
+\newcommand{\cf}{cf.\ }
+\newcommand{\etc}{etc.\ }
+\newcommand{\Eg}{E.g.\ }
+\newcommand{\Ie}{I.e.\ }
+\newcommand{\Cf}{Cf.\ }
+\newcommand{\Etc}{Etc.\ }
+%
+% indices
+\newcommand{\up}[1]{\mbox{}^{#1}}
+\newcommand{\dn}[1]{\mbox{}_{#1}}
+\newcommand{\rp}[1]{^{(#1)}}
+\newcommand{\lp}[1]{_{(#1)}}
+%
+% brackets etc.
+\newcommand{\prn}[1]{\left ( #1 \right )}
+\newcommand{\brc}[1]{\left\{ #1 \right\}}
+\newcommand{\brk}[1]{\left [ #1 \right ]}
+\newcommand{\abs}[1]{\left\lvert #1 \right\rvert}
+\newcommand{\nrm}[1]{\left\lVert #1 \right\rVert}
+\newcommand{\av}[1]{\left\langle #1 \right\rangle}
+%
+% QM Dirac notation
+\newcommand{\bra}[1]{\left\langle #1 \right \rvert}
+\newcommand{\ket}[1]{\left \lvert #1 \right\rangle}
+\newcommand{\braket}[2]{\left\langle #1 \midddle | #2 \right\rangle}
+\newcommand{\bracket}[3]{\left\langle #1 \middle | #2 \middle | #3 \right\rangle}
+%
+% Derivatives, etc. First argument is optional.
+\newcommand{\diff}[3][\rule{0mm}{0mm}]{\frac{\mathrm{d}^{#1} #2}{\mathrm{d}{#3}^{#1}}}
+\newcommand{\pdiff}[3][\rule{0mm}{0mm}]{\frac{\partial^{#1} #2}{\partial {#3}^{#1}}}
+\newcommand{\pdiffc}[3][\rule{0mm}{0mm}]{\left (\frac{\partial #2}{\partial {#3}}\right )_{\!\!#1}}
+\newcommand{\pdl}[1][\rule{0mm}{0mm}]{\overleftarrow{\partial}_{#1}}
+\newcommand{\pdr}[1][\rule{0mm}{0mm}]{\overrightarrow{\partial}_{#1}}
+\newcommand{\pdlr}[1][\rule{0mm}{0mm}]{\overleftrightarrow{\partial_{#1}}}
+\newcommand{\fdf}[2]{\frac{\delta #1}{\delta #2}}
+\newcommand{\intd}[2][\rule{0mm}{0mm}]{\int #1\!\!\dr #2\,}
+%
+% Un-italicised letters
+\newcommand{\dr}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ir}{\mathrm{i}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Det}{Det}
+\DeclareMathOperator{\cov}{Cov}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator{\bias}{Bias}
+%
+% The default \Im and \Re look crap
+\renewcommand{\Im}{\operatorname{\mathfrak{Im}}}
+\renewcommand{\Re}{\operatorname{\mathfrak{Re}}}
+%
+% Referencing sections, figures, etc
+\newcommand{\sref}[1]{\S\ref{#1}}
+\newcommand{\cref}[1]{Ch.\ref{#1}}
+\newcommand{\Cref}[1]{Ch.\ref{#1}}
+\newcommand{\fref}[1]{fig.\ref{#1}}
+\newcommand{\Fref}[1]{Fig.\ref{#1}}
+\newcommand{\tref}[1]{tab.\ref{#1}}
+\newcommand{\Tref}[1]{Tab.\ref{#1}}
+%
+\newcommand{\nn}{\nonumber}
+%
+% Put the preprint numbers in the top right corner of the page.
+% Use after \maketitle.
+% First argument: How high it needs to be raised,
+% Second argument: Width of the box,
+% Third argument: The preprint numbers.
+\newcommand{\preprintno}[3]{\hfill\raisebox{#1}[0cm][0cm]{
+\begin{minipage}[t]{#2}\begin{flushright} #3 \end{flushright}\end{minipage}}
+\vspace*{-\baselinestretch\baselineskip}}
+%
+% If you have changed the line spacing, e.g. with \renewcommand{\baselinestretch}{1.5},
+% the command \sgap produces a line break with the normal spacing.
+\newlength{\lingap}
+\setlength{\lingap}{\baselinestretch\baselineskip}
+\addtolength{\lingap}{-\baselineskip}
+\newcommand{\sgap}{\\[-\lingap]}

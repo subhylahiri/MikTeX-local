@@ -1,0 +1,106 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{collect}[2006/09/04 v0.91 Collect citations, Niklas Beisert]
+
+\newif\if@colhypref
+
+\DeclareOption{parsep}{\def\collectsep{\par}}
+\DeclareOption{nosep}{\let\collectsep\@empty}
+\DeclareOption{bulletsep}{\def\collectsep{\nolinebreak$\bullet$}}
+\DeclareOption{hyperref}{\@colhypreftrue}
+\DeclareOption{nohyperref}{\@colhypreffalse}
+
+\ExecuteOptions{nosep,nohyperref}
+
+\ProcessOptions
+
+
+\newcommand{\@getcsname}[1]{\csname #1\endcsname}
+\newcommand{\@setcsname}[2]{\expandafter\xdef\csname #1\endcsname{#2}}
+
+\newcommand{\nocollect}[1]{\@setcsname{ncp@#1}{}}
+
+\let\nc@old@citex\@citex
+
+\def\@citex[#1]#2{%
+ \let\@citecomma\@empty%
+ \let\@citestring\@empty%
+ \let\@citelast\@empty%
+ \@for\@citethis:=#2\do{%
+  \edef\@citethis{\expandafter\@firstofone\@citethis\@empty}%
+%
+%
+\ifx\@citelast\@empty%
+%
+%
+\@ifundefined{ncp@\@citethis}{}{\@setcsname{ncs@\@getcsname{ncp@\@citethis}}{}}%
+\@setcsname{ncp@\@citethis}{}%
+%
+%
+\else 
+%
+%
+\edef\@citesucc{\@ifundefined{ncs@\@citelast}{\@citethis}{\@getcsname{ncs@\@citelast}}}%
+\edef\@citepred{\@ifundefined{ncp@\@citethis}{\@citelast}{\@getcsname{ncp@\@citethis}}}%
+%
+\ifx\@citesucc\@citethis%
+\ifx\@citepred\@citelast%
+\@setcsname{ncs@\@citelast}{\@citethis}%
+\@setcsname{ncp@\@citethis}{\@citelast}%
+\else%
+\@setcsname{ncs@\@citelast}{}%
+\@setcsname{ncp@\@citethis}{}%
+\@setcsname{ncp@\@citesucc}{}%
+\@setcsname{ncs@\@citepred}{}%
+\fi%
+\else%
+\@setcsname{ncs@\@citelast}{}%
+\@setcsname{ncp@\@citethis}{}%
+\@setcsname{ncp@\@citesucc}{}%
+\@setcsname{ncs@\@citepred}{}%
+\fi%
+%
+%
+\fi%
+%
+{\def\hyper@@link[##1]##2##3##4{##4}\xdef\@citelabel{\@getcsname{b@\@citethis}}}%
+\ifx\@citelabel\@empty\else%
+\edef\@citestring{\@citestring\@citecomma\@citethis}\fi%
+%
+%
+  \if@filesw\immediate\write\@auxout{\string\citation{\@citethis}}\fi%
+  \edef\@citelast{\@citethis}%
+  \def\@citecomma{,}%
+ }%
+\@ifundefined{ncs@\@citelast}{}{\@setcsname{ncp@\@getcsname{ncs@\@citelast}}{}}%
+\@setcsname{ncs@\@citelast}{}%
+ \nc@old@citex[#1]{\@citestring}%
+}
+
+\xdef\@biblast{asldjfhasklfh}
+
+\if@colhypref
+\def\bibitem{\@ifnextchar[\n@lbibitem\n@bibitem}
+\def\nc@old@bibitem{\@bibitem}
+\def\nc@old@lbibitem{\@lbibitem}
+\else
+\let\nc@old@bibitem\@bibitem
+\let\nc@old@lbibitem\@lbibitem
+\def\@bibitem{\n@bibitem}
+\def\@lbibitem{\n@lbibitem}
+\fi
+
+\def\n@bibitem#1{%
+\edef\@bibpred{\@ifundefined{ncp@#1}{}{\@getcsname{ncp@#1}}}%
+\ifx\@biblast\@bibpred \collectsep%
+ \if@filesw\immediate\write\@auxout{\string\bibcite{#1}{}}\fi
+\else\nc@old@bibitem{#1}\fi%
+\xdef\@biblast{#1}}
+
+\def\n@lbibitem[#1]#2{%
+\edef\@bibpred{\@ifundefined{ncp@#2}{}{\@getcsname{ncp@#2}}}%
+\ifx\@biblast\@bibpred \collectsep%
+ \if@filesw\immediate\write\@auxout{\string\bibcite{#2}{}}\fi
+\else\nc@old@lbibitem[#1]{#2}\fi%
+\xdef\@biblast{#2}}
+
+\endinput

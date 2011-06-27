@@ -8,12 +8,8 @@
 *.bak
 *.sav
 *.prj
-
 *.toc
-
 *.lof
-
 *.lot
-
-
 *-generated.pdf
+signature*.*

@@ -302,14 +302,14 @@ FUNCTION {add.doi}
 FUNCTION {start.doi}
 { doi empty$
         {}
-        {"\href{http://dx.doi.org/" doi * "}{" *}
+        {"\href{http://dx.doi.org/" doi * "}{" * write$}
   if$
 }
 
 FUNCTION {end.doi}
 { doi empty$
         {}
-        { "}" }
+        { "}" write$}
   if$
 }
 

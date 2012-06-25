@@ -795,12 +795,21 @@ FUNCTION {article}
   format.title "title" output.check
 %  new.block
   crossref missing$
-    { journal emphasize add.doi "journal" output.check
+    { 
+%    journal emphasize add.doi "journal" output.check
+%      eid empty$
+%        { format.vol.num.pages add.doi output }
+%        { format.vol.num.eid add.doi output }
+%      if$
+%      format.date add.doi "year" output.check
+    journal emphasize "journal" output.check
+    start.doi
       eid empty$
-        { format.vol.num.pages add.doi output }
-        { format.vol.num.eid add.doi output }
+        { format.vol.num.pages output }
+        { format.vol.num.eid output }
       if$
-      format.date add.doi "year" output.check
+      format.date "year" output.check
+      end.doi
     }
     { format.article.crossref output.nonnull
       eid empty$

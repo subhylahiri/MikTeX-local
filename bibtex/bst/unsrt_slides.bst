@@ -1174,6 +1174,7 @@ MACRO {tcs} {"Theoretical Computer Science"}
 MACRO {arXiv}     {"http://arxiv.org/abs"}
 MACRO {cogprints} {"http://cogprints.org"}
 MACRO {pubmed}    {"http://www.ncbi.nlm.nih.gov/pubmed"}
+MACRO {pmc}       {"http://www.ncbi.nlm.nih.gov/pmc/articles/"}
 
 
 READ

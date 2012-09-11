@@ -1,0 +1,17 @@
+% Preamble:
+%\usepackage{a4wide}
+%\usepackage{ams} for finding documentation only
+\usepackage[centertags]{amsmath}
+\usepackage{amssymb}
+\usepackage[sort&compress,numbers]{natbib}
+\usepackage{ifpdf}
+%
+\ifpdf
+ \usepackage[pdftex,bookmarks,bookmarksopen,pdfstartview=FitH]{hyperref}
+\else
+ \usepackage[hypertex]{hyperref}
+\fi
+% ----------------------------------------------------------------
+\vfuzz2pt % Don't report over-full v-boxes if over-edge is small
+\hfuzz2pt % Don't report over-full h-boxes if over-edge is small
+% ----------------------------------------------------------------

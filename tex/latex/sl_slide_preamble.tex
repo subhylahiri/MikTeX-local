@@ -1,0 +1,48 @@
+% For finding documentation:
+%\usepackage[centertags]{amsmath}
+%\usepackage{amssymb}
+%\usepackage{xcolor}
+%\usepackage{pgf}
+%\usepackage{graphicx}
+%\usepackage{hyperref}
+\usetheme{Madrid}
+%---------Format--------------------------------------------------------------------------
+%new section slides:
+\AtBeginSection[]{\frame{\sectionpage}}
+% For double screen:
+\usepackage{pgfpages}
+\setbeameroption{show notes on second screen=right}
+%videos:
+\usepackage{multimedia}
+%---Slide bookmarks-----------------------------------------------------------------------
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\makeatletter
+\apptocmd{\beamer@@frametitle}{\only<1>{\bookmark[page=\the\c@page,level=3]{#1}}}%
+{\message{** patching of \string\beamer@@frametitle succeeded **}}%
+{\message{** patching of \string\beamer@@frametitle failed **}}%
+\makeatother
+%---Back references-----------------------------------------------------------------------
+\usepackage[hyperpageref]{backref}
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+ \ifcase #1 %
+  %
+ \or
+  #2
+ \else
+  #2
+ \fi
+}
+\renewcommand*{\backrefentrycount}[2]{\beamerbutton{#1}}
+\renewcommand*{\backrefsep}{ }
+\renewcommand*{\backreftwosep}{ }
+\renewcommand*{\backreflastsep}{ }
+%---------Colours-------------------------------------------------------------------------
+\definecolor{darkgrey}{rgb}{.5 .5 .5}
+\definecolor{darkblue}{rgb}{0.27843137 0.27058824 0.5372549}
+\definecolor{darkred}{rgb}{0.5372549 0.27843137 0.27058824}
+%---------Citations-----------------------------------------------------------------------
+\newcommand{\rref}[1]{\hfill {\small{\color{darkgrey} [#1]}}}
+\newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
+\newcommand{\citerr}[1]{\hfill {\footnotesize{\color{darkgrey}\cite{#1}}}}

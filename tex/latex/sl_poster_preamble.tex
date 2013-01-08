@@ -1,0 +1,29 @@
+%---------Packages--------------------------------------------------------
+% For finding documentation:
+%\documentclass{beamer}
+%\usepackage{ams}
+%\usepackage[centertags]{amsmath}
+%\usepackage{amssymb}
+%\usepackage{xcolor}
+%\usepackage{color}
+%\usepackage{pgf}
+%\usepackage{graphicx}
+%\usepackage{graphics}
+%\usepackage{hyperref}
+%---------Theme-----------------------------------------------------------
+\usetheme{Subhy}
+%---------Required--------------------------------------------------------
+\usepackage{times}
+\usepackage[orientation=Landscape,size=a0,scale=1.0]{beamerposter}
+%---------Sections--------------------------------------------------------
+\AtBeginSection[]{\usebeamertemplate{section title block}}
+%---------Packages-------------------------------------------------------
+\addtolength{\abovedisplayshortskip}{-\baselinestretch\baselineskip}
+%---------Colours---------------------------------------------------------
+\definecolor{darkgrey}{rgb}{.5 .5 .5}
+\definecolor{darkblue}{rgb}{0.27843137 0.27058824 0.5372549}
+\definecolor{darkred}{rgb}{0.5372549 0.27843137 0.27058824}
+%---------Citations-------------------------------------------------------
+\newcommand{\rref}[1]{\hfill \small{\color{darkgrey} [#1]}}
+\newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
+\newcommand{\citerr}[1]{\hfill {\footnotesize{\color{darkgrey}\cite{#1}}}}

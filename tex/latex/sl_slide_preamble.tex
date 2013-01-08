@@ -22,6 +22,15 @@
 {\message{** patching of \string\beamer@@frametitle succeeded **}}%
 {\message{** patching of \string\beamer@@frametitle failed **}}%
 \makeatother
+%---Patch labels & notes-------------------------------------------------------------------
+%%% begin patch
+\makeatletter
+\patchcmd\beamer@framenotesend{\global\setbox\beamer@frameboxcopy=\copy\beamer@framebox}{%
+\global\setbox\beamer@frameboxcopy=\copy\beamer@framebox
+\global\setbox\beamer@frameboxcopy=\hbox{\leaders\copy\beamer@frameboxcopy\hskip\wd\beamer@frameboxcopy}%from Stephan Lehmke's comment on http://tex.stackexchange.com/q/82250/17427
+}{}{\showtokens{failed to patch \beamer@framenotesend}}
+\makeatother
+%%% end patch
 %---Back references-----------------------------------------------------------------------
 \usepackage[hyperpageref]{backref}
 \renewcommand*{\backref}[1]{}

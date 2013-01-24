@@ -24,7 +24,11 @@
 %
 \usepackage{paralist}
 \newenvironment{myenuma}{\begin{inparaenum}[(a)]}{\end{inparaenum}}
-\newenvironment{myenumi}{\begin{inparaenum}[(i)]}{\end{inparaenum}}
+\newenvironment{myenumi}{\begin{inparaenum}[i)]}{\end{inparaenum}}
 \newenvironment{myenumA}{\begin{inparaenum}[\bfseries A.]}{\end{inparaenum}}
 \newenvironment{myenumI}{\begin{inparaenum}[\bfseries I.]}{\end{inparaenum}}
+%for nested lists, \ref only produces innermost item:  (hacky)
+\makeatletter % for internal macros with @
+\renewcommand\p@enumii{}
+\makeatother
 %

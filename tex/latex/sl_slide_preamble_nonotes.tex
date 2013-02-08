@@ -1,0 +1,55 @@
+% For finding documentation:
+%\usepackage[centertags]{amsmath}
+%\usepackage{amssymb}
+%\usepackage{xcolor}
+%\usepackage{pgf}
+%\usepackage{graphicx}
+%\usepackage{hyperref}
+\usetheme{Madrid}
+%---------Format--------------------------------------------------------------------------
+%new section slides:
+\AtBeginSection[]{\frame{\sectionpage}}
+%videos:
+\usepackage{multimedia}
+%---Slide bookmarks-----------------------------------------------------------------------
+\usepackage{bookmark}
+\usepackage{etoolbox}
+\makeatletter
+\apptocmd{\beamer@@frametitle}{\only<1>{\bookmark[page=\the\c@page,level=3]{#1}}}%
+{\message{** patching of \string\beamer@@frametitle succeeded **}}%
+{\message{** patching of \string\beamer@@frametitle failed **}}%
+\makeatother
+%---Patch labels & notes-------------------------------------------------------------------
+%Not needed after beamer update
+%%%% begin patch
+%\makeatletter
+%\patchcmd\beamer@framenotesend{\global\setbox\beamer@frameboxcopy=\copy\beamer@framebox}{%
+%\global\setbox\beamer@frameboxcopy=\copy\beamer@framebox
+%\global\setbox\beamer@frameboxcopy=\hbox{\leaders\copy\beamer@frameboxcopy\hskip\wd\beamer@frameboxcopy}%from Stephan Lehmke's comment on http://tex.stackexchange.com/q/82250/17427
+%}{}{\showtokens{failed to patch \beamer@framenotesend}}
+%\makeatother
+%%%% end patch
+%---Back references-----------------------------------------------------------------------
+\usepackage[hyperpageref]{backref}
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+ \ifcase #1 %
+  %
+ \or
+  #2
+ \else
+  #2
+ \fi
+}
+\renewcommand*{\backrefentrycount}[2]{\beamerbutton{#1}}
+\renewcommand*{\backrefsep}{ }
+\renewcommand*{\backreftwosep}{ }
+\renewcommand*{\backreflastsep}{ }
+%---------Colours-------------------------------------------------------------------------
+\definecolor{darkgrey}{rgb}{.5 .5 .5}
+\definecolor{darkblue}{rgb}{0.27843137 0.27058824 0.5372549}
+\definecolor{darkred}{rgb}{0.5372549 0.27843137 0.27058824}
+%---------Citations-----------------------------------------------------------------------
+\newcommand{\rref}[1]{\hfill {\small{\color{darkgrey} [#1]}}}
+\newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
+\newcommand{\citerr}[1]{\hfill {\footnotesize{\color{darkgrey}\cite{#1}}}}

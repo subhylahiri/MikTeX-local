@@ -1,0 +1,25 @@
+\usepackage{ifpdf}
+%\usepackage[hypcap]{caption}%links to figures
+%\usepackage{graphicx}
+%\usepackage{graphics} for finding documentation only
+%\usepackage{xcolor}
+%\usepackage{pgf}
+%
+\usepackage{epstopdf}
+\epstopdfsetup{update,suffix=-generated}
+%
+\IfFileExists{"C:/Program Files (x86)/Inkscape/inkscape.exe"}{\newcommand{\inkscapedir}{C:/Program Files (x86)/Inkscape/}}{}
+\IfFileExists{"C:/Program Files/Inkscape/inkscape.exe"}{\newcommand{\inkscapedir}{C:/Program Files/Inkscape/}}{}
+\IfFileExists{"/Applications/Inkscape.app/Contents/Resources/bin/inkscape"}{\newcommand{\inkscapedir}{/Applications/Inkscape.app/Contents/Resources/bin/}}{}
+%
+\ifpdf
+ \epstopdfDeclareGraphicsRule{.svg}{pdf}{.pdf}{%
+ "\inkscapedir inkscape" -f #1 -D -A \OutputFile
+ }
+\else
+ \DeclareGraphicsRule{.png}{eps}{.bb}{}
+\fi
+%
+\usepackage{adjustbox}
+\newcommand{\aligntop}[1]{\adjustbox{valign=t}{#1}}
+%

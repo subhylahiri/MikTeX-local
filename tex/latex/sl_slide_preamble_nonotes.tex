@@ -19,16 +19,6 @@
 {\message{** patching of \string\beamer@@frametitle succeeded **}}%
 {\message{** patching of \string\beamer@@frametitle failed **}}%
 \makeatother
-%---Patch labels & notes-------------------------------------------------------------------
-%Not needed after beamer update
-%%%% begin patch
-%\makeatletter
-%\patchcmd\beamer@framenotesend{\global\setbox\beamer@frameboxcopy=\copy\beamer@framebox}{%
-%\global\setbox\beamer@frameboxcopy=\copy\beamer@framebox
-%\global\setbox\beamer@frameboxcopy=\hbox{\leaders\copy\beamer@frameboxcopy\hskip\wd\beamer@frameboxcopy}%from Stephan Lehmke's comment on http://tex.stackexchange.com/q/82250/17427
-%}{}{\showtokens{failed to patch \beamer@framenotesend}}
-%\makeatother
-%%%% end patch
 %---Back references-----------------------------------------------------------------------
 \usepackage[hyperpageref]{backref}
 \renewcommand*{\backref}[1]{}
@@ -53,3 +43,4 @@
 \newcommand{\rref}[1]{\hfill {\small{\color{darkgrey} [#1]}}}
 \newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
 \newcommand{\citerr}[1]{\hfill {\footnotesize{\color{darkgrey}\cite{#1}}}}
+\newcommand{\citerrr}[1]{ {\footnotesize{\color{darkgrey}\cite{#1}}}}

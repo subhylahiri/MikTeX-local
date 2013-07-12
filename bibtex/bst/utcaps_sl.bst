@@ -1220,6 +1220,8 @@ MACRO {mpl} {"Mod. Phys. Lett."}
 
 MACRO {pr} {"Phys. Rev."}
 
+MACRO {pnas} {"Proc. Natl. Acad. Sci. U.S.A."}
+
 MACRO {arXiv}     {"http://arxiv.org/abs"}
 MACRO {cogprints} {"http://cogprints.org"}
 MACRO {pubmed}    {"http://www.ncbi.nlm.nih.gov/pubmed"}

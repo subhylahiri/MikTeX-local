@@ -520,6 +520,24 @@ FUNCTION {format.date}
   extra.label *
 }
 
+
+FUNCTION {format.date.paren}
+{ year empty$
+    { month empty$
+	{ "" }
+	{ "there's a month but no year in " cite$ * warning$
+	  month
+	}
+      if$
+    }
+    { month empty$
+	{"(" year * ") " *}
+	{"(" month * ", " * year * ") " *}
+      if$
+    }
+  if$
+}
+
 FUNCTION {format.btitle}
 { title emphasize
 }
@@ -795,12 +813,21 @@ FUNCTION {article}
   format.title "title" output.check
   new.block
   crossref missing$
-    { journal emphasize add.doi "journal" output.check
+    {
+%    journal emphasize add.doi "journal" output.check
+%      eid empty$
+%        { format.vol.num.pages add.doi output }
+%        { format.vol.num.eid add.doi output }
+%      if$
+%      format.date add.doi "year" output.check
+    journal emphasize "journal" output.check
+    start.doi
       eid empty$
-        { format.vol.num.pages add.doi output }
-        { format.vol.num.eid add.doi output }
+        { format.vol.num.pages output }
+        { format.vol.num.eid output }
       if$
-      format.date add.doi "year" output.check
+      format.date.paren "year" output.check
+      end.doi
     }
     { format.article.crossref output.nonnull
       eid empty$
@@ -1170,6 +1197,8 @@ MACRO {toois} {"ACM Transactions on Office Information Systems"}
 MACRO {toplas} {"ACM Transactions on Programming Languages and Systems"}
 
 MACRO {tcs} {"Theoretical Computer Science"}
+
+MACRO {pnas} {"Proc. Natl. Acad. Sci. U.S.A."}
 
 MACRO {arXiv}     {"http://arxiv.org/abs"}
 MACRO {cogprints} {"http://cogprints.org"}

@@ -836,7 +836,7 @@ FUNCTION {article}
       if$
     }
   if$
-  format.issn output
+%  format.issn output
   format.eprint output
 %  format.doi output
 %  format.url output

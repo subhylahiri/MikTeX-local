@@ -379,7 +379,11 @@ FUNCTION {add.doi}
 { duplicate$ empty$
     { skip$ }
     { doi empty$
-        {}
+        { url empty$
+          {}
+          {"\href{" url * "}{" * swap$ * "}" *}
+          if$
+        }
         {"\href{http://dx.doi.org/" doi * "}{" * swap$ * "}" *}
       if$
     }
@@ -835,8 +839,8 @@ FUNCTION {article}
     }
   if$
   new.sentence
-  format.url output
-  new.sentence
+%  format.url output
+%  new.sentence
   note output
   new.sentence
   format.SLACcitation output

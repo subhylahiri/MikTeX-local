@@ -301,13 +301,19 @@ FUNCTION {add.doi}
 
 FUNCTION {start.doi}
 { doi empty$
-        {}
+        { url empty$
+          {}
+          {"\href{" url * "}{" * write$}
+          if$
+        }
         {"\href{http://dx.doi.org/" doi * "}{" * write$}
   if$
 }
 
 FUNCTION {end.doi}
 { doi empty$
+  url empty$
+  and
         {}
         { "}" write$}
   if$
@@ -827,7 +833,7 @@ FUNCTION {article}
         { format.vol.num.eid output }
       if$
       format.date.paren "year" output.check
-      end.doi
+    end.doi
     }
     { format.article.crossref output.nonnull
       eid empty$
@@ -948,6 +954,7 @@ FUNCTION {incollection}
   new.block
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
+    start.doi
       format.bvolume output
       format.number.series output
       format.chapter.pages output
@@ -956,14 +963,15 @@ FUNCTION {incollection}
       address output
       format.edition output
       format.date "year" output.check
+    end.doi
     }
     { format.incoll.inproc.crossref output.nonnull
       format.chapter.pages output
     }
   if$
   format.isbn output
-  format.doi output
-  format.url output
+%  format.doi output
+%  format.url output
   new.block
   note output
   fin.entry
@@ -978,6 +986,7 @@ FUNCTION {inproceedings}
   new.block
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
+    start.doi
       format.bvolume output
       format.number.series output
       format.pages output
@@ -994,6 +1003,7 @@ FUNCTION {inproceedings}
           publisher output
         }
       if$
+    end.doi
     }
     { format.incoll.inproc.crossref output.nonnull
       format.pages output

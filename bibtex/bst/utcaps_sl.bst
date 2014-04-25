@@ -877,8 +877,8 @@ FUNCTION {book}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output

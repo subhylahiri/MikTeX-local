@@ -28,3 +28,4 @@ You'll need
 * fp
 * caption
 * paralist
+* cancel

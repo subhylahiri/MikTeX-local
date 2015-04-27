@@ -29,3 +29,4 @@ You'll need
 * caption
 * paralist
 * cancel
+* appendix

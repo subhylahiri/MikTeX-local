@@ -841,7 +841,7 @@ FUNCTION {article}
       if$
     }
   if$
-  format.issn output
+%  format.issn output
   format.eprint output
 %  format.doi output
 %  format.url output
@@ -948,13 +948,13 @@ FUNCTION {incollection}
 { output.bibitem
   format.authors "author" output.check
   author format.key output
-  new.block
+%  new.block
   format.title "title" output.check
-  new.block
+%  new.block
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
-    start.doi
       format.bvolume output
+    start.doi
       format.number.series output
       format.chapter.pages output
       new.sentence
@@ -969,8 +969,8 @@ FUNCTION {incollection}
     }
   if$
   format.isbn output
-  format.doi output
-  format.url output
+%  format.doi output
+%  format.url output
   new.block
   note output
   fin.entry
@@ -985,8 +985,8 @@ FUNCTION {inproceedings}
   new.block
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
-    start.doi
       format.bvolume output
+    start.doi
       format.number.series output
       format.pages output
       address empty$
@@ -1009,8 +1009,8 @@ FUNCTION {inproceedings}
     }
   if$
   format.isbn output
-  format.doi output
-  format.url output
+%  format.doi output
+%  format.url output
   new.block
   note output
   fin.entry

@@ -402,10 +402,10 @@ FUNCTION {format.eprint}
      { ""}
      { archive empty$
           {"\href{http://arxiv.org/abs/" eprint * "}" *
-             "{\texttt{ " * format.archive * eprint *
+             "{\texttt{" * format.archive * eprint *
               format.primaryClass * "}}" *}
           {"\href{" archive *  "/" * eprint * "}" *
-             "{\texttt{ " * format.archive * eprint *
+             "{\texttt{" * format.archive * eprint *
               format.primaryClass * "}}" *}
        if$
      }
@@ -423,7 +423,11 @@ FUNCTION {add.doi}
 { duplicate$ empty$
     { skip$ }
     { doi empty$
-        {}
+        { url empty$
+          {}
+          {"\href{" url * "}{" * swap$ * "}" *}
+          if$
+        }
         {"\href{http://dx.doi.org/" doi * "}{" * swap$ * "}" *}
       if$
     }
@@ -552,6 +556,7 @@ FUNCTION {format.date.paren}
     }
     { month empty$
 	{"(" year * ") " *}
+%	{"(" year * ") " *}
 	{"(" month * ", " * year * ") " *}
       if$
     }
@@ -679,7 +684,7 @@ FUNCTION {format.pages.nopp}
 FUNCTION {format.volume}
 { volume empty$
     { "" }
-    { "\textbf{ " volume * "} " * }
+    { "\textbf{" volume * "} " * }
   if$
 }
 
@@ -846,7 +851,11 @@ FUNCTION {format.journal}
      format.date.paren *
      month empty$
 	     { format.number }
-	     'skip$
+% Modified by SL:
+%Was giving error: "You can't pop an empty literal stack..."
+%	     'skip$
+%Replaced with:
+	     { "" }
         if$ * " " *
       format.pages.nopp *
       }
@@ -857,8 +866,8 @@ FUNCTION {article}
 { output.bibitem
   format.collaboration output
   format.authors "author" output.check
-  format.title "title" output.check
-  blank.sep
+%  format.title "title" output.check
+%  blank.sep
   crossref missing$
   { journal missing$
         {}
@@ -876,9 +885,9 @@ FUNCTION {article}
   if$
   new.sentence
 %  format.url output
-  new.sentence
-  note output
-  new.sentence
+%  new.sentence
+%  note output
+%  new.sentence
 %  format.SLACcitation output
   fin.entry
 }
@@ -1259,6 +1268,8 @@ MACRO {ijmp} {"Int. Jour. Mod. Phys."}
 MACRO {mpl} {"Mod. Phys. Lett."}
 
 MACRO {pr} {"Phys. Rev."}
+
+MACRO {pnas} {"Proc. Natl. Acad. Sci. U.S.A."}
 
 MACRO {arXiv}     {"http://arxiv.org/abs"}
 MACRO {cogprints} {"http://cogprints.org"}

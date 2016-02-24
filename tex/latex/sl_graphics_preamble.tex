@@ -14,7 +14,7 @@
 %
 \ifpdf
  \epstopdfDeclareGraphicsRule{.svg}{pdf}{.pdf}{%
- "\inkscapedir inkscape" -f #1 -D -A \OutputFile
+ "\inkscapedir inkscape" -f #1 -C -A \OutputFile
  }
 \else
  \DeclareGraphicsRule{.png}{eps}{.bb}{}

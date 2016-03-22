@@ -1212,19 +1212,37 @@ MACRO {nup} {"Nucl. Phys."}
 
 MACRO {cmp} {"Comm. Math. Phys."}
 
-MACRO {prl} {"Phys. Rev. Lett."}
-
-MACRO {pl} {"Phys. Lett."}
-
 MACRO {rmp} {"Rev. Mod. Phys."}
 
 MACRO {ijmp} {"Int. Jour. Mod. Phys."}
 
 MACRO {mpl} {"Mod. Phys. Lett."}
 
+MACRO {pl} {"Phys. Lett."}
+
+MACRO {pla} {"Phys. Lett. A"}
+
+MACRO {plb} {"Phys. Lett. B"}
+
+MACRO {prl} {"Phys. Rev. Lett."}
+
 MACRO {pr} {"Phys. Rev."}
 
+MACRO {pra} {"Phys. Rev. A"}
+
+MACRO {prb} {"Phys. Rev. B"}
+
+MACRO {prc} {"Phys. Rev. C"}
+
+MACRO {prd} {"Phys. Rev. D"}
+
+MACRO {pre} {"Phys. Rev. E"}
+
+MACRO {prx} {"Phys. Rev. X"}
+
 MACRO {pnas} {"Proc. Natl. Acad. Sci. U.S.A."}
+
+MACRO {procrsl} {"Proc. Roy. Soc. London"}
 
 MACRO {arXiv}     {"http://arxiv.org/abs"}
 MACRO {cogprints} {"http://cogprints.org"}

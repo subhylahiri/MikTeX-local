@@ -300,13 +300,16 @@ FUNCTION {add.doi}
 }
 
 FUNCTION {start.doi}
-{ doi empty$
-        { url empty$
-          {}
-          {"\href{" url * "}{" * write$}
-          if$
-        }
-        {"\href{http://dx.doi.org/" doi * "}{" * write$}
+{ journal empty$
+    {}
+    {doi empty$
+          { url empty$
+            {}
+            {"\href{" url * "}{" * write$}
+            if$
+          }
+          {"\href{http://dx.doi.org/" doi * "}{" * write$}
+    if$}
   if$
 }
 
@@ -314,6 +317,8 @@ FUNCTION {end.doi}
 { doi empty$
   url empty$
   and
+  journal empty$
+  or
         {}
         { "}" write$}
   if$

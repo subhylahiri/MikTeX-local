@@ -1242,8 +1242,6 @@ MACRO {pre} {"Phys. Rev. E"}
 
 MACRO {prx} {"Phys. Rev. X"}
 
-MACRO {pnas} {"Proc. Natl. Acad. Sci. U.S.A."}
-
 MACRO {procrsl} {"Proc. Roy. Soc. London"}
 
 MACRO {arXiv}     {"http://arxiv.org/abs"}

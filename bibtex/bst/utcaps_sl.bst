@@ -511,8 +511,8 @@ FUNCTION {format.date.paren}
       if$
     }
     { month empty$
-	{"(" year * ") " *}
-	{"(" month * ", " * year * ") " *}
+	{"(" year * ")" *}
+	{"(" month * ", " * year * ")" *}
       if$
     }
   if$
@@ -617,8 +617,8 @@ FUNCTION {format.pages}
 { pages empty$
     { "" }
     { pages multi.page.check
-	{ "pp.~" pages n.dashify * }
-	{ "p.~" pages * }
+	{ " pp.~" pages n.dashify * }
+	{ " p.~" pages * }
       if$
     }
   if$
@@ -628,8 +628,8 @@ FUNCTION {format.pages.nopp}
 { pages empty$
     { "" }
     { pages multi.page.check
-	{ pages n.dashify  }
-	{ pages }
+	{ " " pages n.dashify * }
+	{ " " pages * }
       if$
     }
   if$
@@ -811,7 +811,7 @@ FUNCTION {format.journal}
 %	     'skip$
 %Replaced with:
 	     { "" }
-        if$ * " " *
+        if$ *
       format.pages.nopp *
       }
     if$

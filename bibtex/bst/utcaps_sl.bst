@@ -1216,6 +1216,8 @@ MACRO {rmp} {"Rev. Mod. Phys."}
 
 MACRO {ijmp} {"Int. Jour. Mod. Phys."}
 
+MACRO {jmp} {"J. Math. Phys."}
+
 MACRO {mpl} {"Mod. Phys. Lett."}
 
 MACRO {pl} {"Phys. Lett."}

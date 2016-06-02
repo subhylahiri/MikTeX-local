@@ -25,23 +25,23 @@
 \newcommand{\aligntop}[1]{\adjustbox{valign=t}{#1}}
 \newcommand{\alignmid}[1]{\adjustbox{valign=c}{#1}}
 %
-%\usepackage{paralist}
-%\newenvironment{myenuma}{\begin{inparaenum}[(a)]}{\end{inparaenum}}
-%\newenvironment{myenumi}{\begin{inparaenum}[i)]}{\end{inparaenum}}
-%\newenvironment{myenumA}{\begin{inparaenum}[\bfseries A.]}{\end{inparaenum}}
-%\newenvironment{myenumI}{\begin{inparaenum}[\bfseries I.]}{\end{inparaenum}}
-%\newenvironment{myenumr}{\begin{inparaenum}[1.]}{\end{inparaenum}}
-%%for nested lists, \ref only produces innermost item:  (hacky)
-%\makeatletter % for internal macros with @
-%\renewcommand\p@enumii{}
-%\makeatother
+\usepackage{paralist}
+\newenvironment{myenuma}{\begin{inparaenum}[(a)]}{\end{inparaenum}}
+\newenvironment{myenumi}{\begin{inparaenum}[i)]}{\end{inparaenum}}
+\newenvironment{myenumA}{\begin{inparaenum}[\bfseries A.]}{\end{inparaenum}}
+\newenvironment{myenumI}{\begin{inparaenum}[\bfseries I.]}{\end{inparaenum}}
+\newenvironment{myenumr}{\begin{inparaenum}[1.]}{\end{inparaenum}}
+%for nested lists, \ref only produces innermost item:  (hacky)
+\makeatletter % for internal macros with @
+\renewcommand\p@enumii{}
+\makeatother
 %
-\usepackage[inline]{enumitem}
-\newlist{myenuma}{enumerate*}{10}
-\setlist[myenuma]{label=(\alph*),ref=\alph*}
-\newlist{myenumA}{enumerate*}{10}
-\setlist[myenumA]{label=\Alph*.,ref=\Alph*}
-\newlist{myenumi}{enumerate*}{10}
-\setlist[myenumi]{label=\roman*),ref=\roman*}
-\newlist{myenumI}{enumerate*}{10}
-\setlist[myenumI]{label=\Roman*.,ref=\Roman*}
+%\usepackage[inline]{enumitem}
+%\newlist{myenuma}{enumerate*}{10}
+%\setlist[myenuma]{label=(\alph*),ref=\alph*}
+%\newlist{myenumA}{enumerate*}{10}
+%\setlist[myenumA]{label=\Alph*.,ref=\Alph*}
+%\newlist{myenumi}{enumerate*}{10}
+%\setlist[myenumi]{label=\roman*),ref=\roman*}
+%\newlist{myenumI}{enumerate*}{10}
+%\setlist[myenumI]{label=\Roman*.,ref=\Roman*}

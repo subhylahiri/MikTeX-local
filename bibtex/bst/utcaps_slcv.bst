@@ -1261,6 +1261,7 @@ ITERATE {longest.label.pass}
 
 FUNCTION {begin.bib}
 {
+  "\providecommand{\myname}{}" write$ newline$
   "\def\FormatName#1{%" write$ newline$
   "  \IfSubStr{#1}{\myname}{\textbf{#1}}{#1}%" write$ newline$
   "}" write$ newline$

@@ -1721,7 +1721,9 @@ FUNCTION {begin.bib}
   "\providecommand{\natexlab}[1]{#1}"
   write$ newline$
   "\providecommand{\href}[2]{#2}"
-  "\begingroup\raggedright\begin{thebibliography}{" * longest.label  *
+  write$ newline$
+  "\begingroup\raggedright"  write$ newline$
+  "\begin{thebibliography}{"  number.label int.to.str$  *
   "}" * write$ newline$ }
 %Copied from plainnat, 27/7/16
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1734,7 +1736,8 @@ ITERATE {call.type$}
 
 FUNCTION {end.bib}
 { newline$
-  "\end{thebibliography}\endgroup" write$ newline$
+  "\end{thebibliography}" write$ newline$
+  "\endgroup" write$ newline$
 }
 
 EXECUTE {end.bib}

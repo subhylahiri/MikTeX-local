@@ -1,0 +1,83 @@
+%%  This uses the package ``titling'' to add affiliations for authors
+%%
+%% Requires packages: titling, etoolbox and cleveref
+%% MUST be loaded AFTER hyperref
+%%
+%% Add affiliations with
+%%          \affiliation*{My University}
+%% if you don't need numbers
+%%
+%% Or use
+%%          \affiliation{My University\label{key}}
+%% to number them
+%% **** note that the label is inside the \affiliation command ****
+%%
+%% You can pair authors with affiliations like this:
+%%          \author{Alice Smith\afref{key1} and Bob Jones\afref{key2}}
+%%
+%% Provides command \email{alice@smith.com}
+%%   uses \thanks - appears as footnote, marker has zero width
+%%   when using midline, put it before comma or follow with \thaksgap
+%%   \thanksgap redefined to \hspace{\thanksgaplen}
+%%   \thanksgaplen defined as width of ^*
+%%
+%% You can customise formatting:
+%%  \preaffiliation{<commands to put at start of each affiliation>}
+%%  \postaffiliation{<commands to put at end of each affiliation>>}
+%%
+%%  \renewcommand{\affilformat}[1]{<command for label{#1}>}
+%%
+%% defaults:
+%%   \preaffiliation{\centering\it}
+%%   \postaffiliation{\par}
+%%   \newcommand{\affilformat}[1]{\textsuperscript{(#1)}}
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-titling}
+         [2016/07/27 v0.01beta titling macros for affiliations (SL)]
+
+
+
+
+\RequirePackage{titling}
+\RequirePackage{etoolbox}
+\RequirePackage{cleveref}
+
+\makeatletter
+
+\newcounter{affil}
+\renewcommand{\theaffil}{\arabic{affil}}
+
+\newcommand{\affilformat}[1]{\textsuperscript{#1}}
+
+\@ifpackageloaded{hyperref}{%
+\newcommand{\afref}[1]{\affilformat{\labelcref*{#1}}}%
+\providecommand{\email}[1]{\thanks{\href{mailto:#1}{email: \texttt{#1}}}}%
+}{%
+\newcommand{\afref}[1]{\affilformat{\labelcref{#1}}}%
+\providecommand{\email}[1]{\thanks{email: \texttt{#1}}}%
+}
+\newlength{\thanksgaplen}
+\settowidth{\thanksgaplen}{\textsuperscript{*}}
+\renewcommand{\thanksgap}{\hspace{\thanksgaplen}}
+
+\newcommand{\preaffiliation}[1]{\def\@bspreaffiliation{#1}}
+\newcommand{\postaffiliation}[1]{\def\@bspostaffiliation{#1}}
+
+\preaffiliation{\centering\itshape}
+\postaffiliation{\par}
+
+\def\affiliation{\@ifstar\@affiliationstar\@affiliation}
+\def\@affiliationstar#1{\appto\maketitlehookc{\begingroup%
+\@bspreaffiliation#1\@bspostaffiliation%
+\endgroup}}
+\def\@affiliation#1{\appto\maketitlehookc{\begingroup%
+\refstepcounter{affil}\affilformat{\theaffil}%
+\@bspreaffiliation#1\@bspostaffiliation%
+\endgroup}}
+
+\makeatother
+
+\endinput
+%%
+%% End of file `sl-titling.sty'.

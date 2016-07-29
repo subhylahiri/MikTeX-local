@@ -493,26 +493,19 @@ FUNCTION {add.doi}
 }
 %added by SL 26/7/16
 FUNCTION {start.doi}
-{ journal empty$
-  booktitle empty$ and
-    {}
-    {doi empty$
-          { url empty$
-            {}
-            {"\href{" * url * "}{" * }
-            if$
-          }
-          {"\href{http://dx.doi.org/" * doi * "}{" * }
-    if$}
+{ doi empty$
+        { url empty$
+          {}
+          {"\href{" * url * "}{" * }
+          if$
+        }
+        {"\href{http://dx.doi.org/" * doi * "}{" * }
   if$
 }
 
 FUNCTION {end.doi}
 { doi empty$
   url empty$       and
-  journal empty$
-  booktitle empty$ and
-  or
         {}
         { "}" * }
   if$
@@ -1058,22 +1051,24 @@ FUNCTION {inbook}
     }
   if$
   format.btitle "title" output.check
+  start.doi
   crossref missing$
     { format.bvolume output
-      format.chapter.pages add.doi "chapter and pages" output.check
+      format.chapter.pages "chapter and pages" output.check
       new.block
       format.number.series output
       new.block
       publisher "publisher" output.check
       address output
     }
-    { format.chapter.pages add.doi "chapter and pages" output.check
+    { format.chapter.pages "chapter and pages" output.check
       new.block
       format.book.crossref output.nonnull
     }
   if$
   format.edition output
   format.date "year" output.check
+  end.doi
   new.block
   format.eprint output
   new.block
@@ -1288,17 +1283,19 @@ FUNCTION {techreport}
 { output.bibitem
   format.collaboration output
   format.authors "author" output.check
-  format.title add.doi "title" output.check
+  format.title "title" output.check
   blank.sep
+  start.doi
   format.tr.number output.nonnull
   institution "institution" output.check
   address output
   format.date "year" output.check
+  end.doi
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   fin.entry
 }

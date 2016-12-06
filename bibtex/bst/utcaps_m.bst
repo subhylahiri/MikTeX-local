@@ -423,7 +423,11 @@ FUNCTION {add.doi}
 { duplicate$ empty$
     { skip$ }
     { doi empty$
-        {}
+        { url empty$
+          {}
+          {"\href{" url * "}{" * swap$ * "}" *}
+          if$
+        }
         {"\href{http://dx.doi.org/" doi * "}{" * swap$ * "}" *}
       if$
     }
@@ -913,8 +917,8 @@ FUNCTION {book}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output
@@ -944,8 +948,8 @@ FUNCTION {booklet}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output
@@ -984,8 +988,8 @@ FUNCTION {inbook}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output
@@ -1015,8 +1019,8 @@ FUNCTION {incollection}
   if$
   new.block
   format.eprint output
-  new.block
-  format.url output
+%  new.block
+%  format.url output
   new.block
   note output
   new.sentence
@@ -1048,8 +1052,8 @@ FUNCTION {inproceedings}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output
@@ -1090,8 +1094,8 @@ FUNCTION {manual}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   fin.entry
 }
@@ -1106,8 +1110,8 @@ FUNCTION {mastersthesis}
   address output
   format.date "year" output.check
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   fin.entry
 }
@@ -1150,8 +1154,8 @@ FUNCTION {phdthesis}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output
@@ -1178,8 +1182,8 @@ FUNCTION {proceedings}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   new.sentence
   format.SLACcitation output
@@ -1199,8 +1203,8 @@ FUNCTION {techreport}
   new.block
   format.eprint output
   new.block
-  format.url output
-  new.block
+%  format.url output
+%  new.block
   note output
   fin.entry
 }

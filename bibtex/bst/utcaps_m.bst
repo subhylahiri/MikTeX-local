@@ -850,7 +850,11 @@ FUNCTION {format.journal}
      format.date.paren *
      month empty$
 	     { format.number }
-	     'skip$
+% Modified by SL:
+%Was giving error: "You can't pop an empty literal stack..."
+%	     'skip$
+%Replaced with:
+	     { "" }
         if$ * " " *
       format.pages.nopp *
       }
@@ -880,7 +884,7 @@ FUNCTION {article}
   if$
   new.sentence
 %  format.url output
-  new.sentence
+%  new.sentence
   note output
   new.sentence
 %  format.SLACcitation output

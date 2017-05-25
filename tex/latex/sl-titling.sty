@@ -41,65 +41,76 @@
 
 %\usepackage{etoolbox}
 
-\makeatletter
-
 \RequirePackage{etoolbox}
 \newtoggle{hyper}
-\newtoggle{clever}
+%\newtoggle{clever}
 
 \DeclareOption{nohyper}{\togglefalse{hyper}}
 \DeclareOption{hyper}{\toggletrue{hyper}}
-\DeclareOption{noclever}{\togglefalse{clever}}
-\DeclareOption{clever}{\toggletrue{clever}}
+%\DeclareOption{noclever}{\togglefalse{clever}}
+%\DeclareOption{clever}{\toggletrue{clever}}
 
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{titling}}
 
-\ExecuteOptions{nohyper,noclever}
+\ExecuteOptions{nohyper}
 \ProcessOptions
 
 \RequirePackage{titling}
+%\input{pgfutil-common.tex}
+\RequirePackage{pgffor}
 
+%\usepackage{titling}
+%\usepackage{etoolbox}
+%\usepackage{pgffor}
 
+\makeatletter
 \@ifpackageloaded{hyperref}{\toggletrue{hyper}}{}
-\@ifpackageloaded{cleveref}{\toggletrue{clever}}{}
+%\@ifpackageloaded{cleveref}{\toggletrue{clever}}{}
+\makeatother
 
 
 \newcounter{affil}
 \renewcommand{\theaffil}{\arabic{affil}}
-\iftoggle{clever}{\AtBeginDocument{%
- \crefname{affil}{affiliation}{affiliations}
- \crefformat{affil}{#2#1#3}
- \crefrangeformat{affil}{#3#1#4--#5#2#6}
- \crefmultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
- \crefrangemultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
- \labelcrefformat{affil}{#2#1#3}
- \labelcrefrangeformat{affil}{#3#1#4--#5#2#6}
- \labelcrefmultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
- \labelcrefrangemultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
-}}{}
-
+%\iftoggle{clever}{\AtBeginDocument{%
+% \crefname{affil}{affiliation}{affiliations}
+% \crefformat{affil}{#2#1#3}
+% \crefrangeformat{affil}{#3#1#4--#5#2#6}
+% \crefmultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
+% \crefrangemultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
+% \labelcrefformat{affil}{#2#1#3}
+% \labelcrefrangeformat{affil}{#3#1#4--#5#2#6}
+% \labelcrefmultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
+% \labelcrefrangemultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
+%}}{}
 \newcommand{\affilformat}[1]{\textsuperscript{#1}}
-\newcommand{\affilrefcmd}[1]{\ref{#1}}
-\newcommand{\afref}[1]{\affilformat{\affilrefcmd{#1}}}
-
+\newcommand*{\affilrefcmd}[1]{\ref{#1}}
+%\newcommand{\afref}[1]{\affilformat{\affilrefcmd{#1}}}
+%\newcommand*{\afref}[1]{\affilformat{\forcsvlist{\affilrefcmd}{#1}}}
+\newcommand{\afref}[1]{\protect\affilformat{%
+\foreach \x [count=\ix] in {#1} {\ifnumequal{\ix}{1}%
+{\affilrefcmd{\x}}%
+{,\affilrefcmd{\x}}%
+}}}
 \iftoggle{hyper}{%
- \iftoggle{clever}{%
-  \renewcommand{\affilrefcmd}[1]{\labelcref*{#1}}%
- }{%
+% \iftoggle{clever}{%
+%  \renewcommand{\affilrefcmd}[1]{\labelcref*{#1}}%
+% }{%
   \renewcommand{\affilrefcmd}[1]{\ref*{#1}}%
- }
+% }
  \providecommand{\email}[1]{\thanks{\href{mailto:#1}{email: \texttt{#1}}}}%
 }{%
- \iftoggle{clever}{%
-  \renewcommand{\affilrefcmd}[1]{\labelcref{#1}}%
- }{%
+% \iftoggle{clever}{%
+%  \renewcommand{\affilrefcmd}[1]{\labelcref{#1}}%
+% }{%
   \renewcommand{\affilrefcmd}[1]{\ref{#1}}%
- }
+% }
  \providecommand{\email}[1]{\thanks{email: \texttt{#1}}}%
 }
 \newlength{\thanksgaplen}
 \settowidth{\thanksgaplen}{\textsuperscript{*}}
 \renewcommand{\thanksgap}{\hspace{\thanksgaplen}}
+
+\makeatletter
 
 \newcommand{\preaffiliation}[1]{\def\@bspreaffiliation{#1}}
 \newcommand{\postaffiliation}[1]{\def\@bspostaffiliation{#1}}

@@ -1194,6 +1194,7 @@ MACRO {pnas} {"Proc. Natl. Acad. Sci. U.S.A."}
 MACRO {procrsl} {"Proc. Roy. Soc. London"}
 
 MACRO {arXiv}     {"http://arxiv.org/abs"}
+MACRO {bioRxiv}   {"https://www.biorxiv.org/content/early/"}
 MACRO {cogprints} {"http://cogprints.org"}
 MACRO {pubmed}    {"http://www.ncbi.nlm.nih.gov/pubmed"}
 

@@ -58,10 +58,11 @@
 \RequirePackage{titling}
 %\input{pgfutil-common.tex}
 \RequirePackage{pgffor}
-
+\RequirePackage{xkeyval}
 %\usepackage{titling}
 %\usepackage{etoolbox}
 %\usepackage{pgffor}
+%\usepackage{xkeyval}
 
 \makeatletter
 \@ifpackageloaded{hyperref}{\toggletrue{hyper}}{}
@@ -82,15 +83,19 @@
 % \labelcrefmultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
 % \labelcrefrangemultiformat{affil}{#2#1#3}{,#2#1#3}{,#2#1#3}{,#2#1#3}
 %}}{}
+
 \newcommand{\affilformat}[1]{\textsuperscript{#1}}
 \newcommand*{\affilrefcmd}[1]{\ref{#1}}
+
 %\newcommand{\afref}[1]{\affilformat{\affilrefcmd{#1}}}
 %\newcommand*{\afref}[1]{\affilformat{\forcsvlist{\affilrefcmd}{#1}}}
 \newcommand{\afref}[1]{\protect\affilformat{%
-\foreach \x [count=\ix] in {#1} {\ifnumequal{\ix}{1}%
-{\affilrefcmd{\x}}%
-{,\affilrefcmd{\x}}%
+\foreach \x [count=\ix] in {#1}%
+{\ifnumequal{\ix}{1}%
+{\affilrefcmd{\x}}%then
+{,\affilrefcmd{\x}}%else
 }}}
+
 \iftoggle{hyper}{%
 % \iftoggle{clever}{%
 %  \renewcommand{\affilrefcmd}[1]{\labelcref*{#1}}%
@@ -107,8 +112,10 @@
  \providecommand{\email}[1]{\thanks{email: \texttt{#1}}}%
 }
 \newlength{\thanksgaplen}
-\settowidth{\thanksgaplen}{\textsuperscript{*}}
-\renewcommand{\thanksgap}{\hspace{\thanksgaplen}}
+\renewcommand{\thanksgap}[1][\textsuperscript{*}]{%
+\settowidth{\thanksgaplen}{#2}%
+\hspace{\thanksgaplen}%
+}
 
 \makeatletter
 
@@ -119,9 +126,11 @@
 \postaffiliation{\par}
 
 \def\affiliation{\@ifstar\@affiliationstar\@affiliation}
+%
 \def\@affiliationstar#1{\appto\maketitlehookc{\begingroup%
 \@bspreaffiliation#1\@bspostaffiliation%
 \endgroup}}
+%
 \def\@affiliation#1{\appto\maketitlehookc{\begingroup%
 \refstepcounter{affil}\affilformat{\theaffil}%
 \@bspreaffiliation#1\@bspostaffiliation%

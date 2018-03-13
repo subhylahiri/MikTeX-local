@@ -584,7 +584,7 @@ abstract = "Summary Absence of functional \{FMRP\} causes Fragile X syndrome. Ab
   abstract={Recent experimental advances in neuroscience have opened new vistas into the immense complexity of neuronal networks. This proliferation of data challenges us on two parallel fronts. First, how can we form adequate theoretical frameworks for understanding how dynamical network processes cooperate across widely disparate spatiotemporal scales to solve important computational problems? Second, how can we extract meaningful models of neuronal systems from high dimensional datasets? To aid in these challenges, we give a pedagogical review of a collection of ideas and theoretical methods arising at the intersection of statistical physics, computer science and neurobiology. We introduce the interrelated replica and cavity methods, which originated in statistical physics as powerful ways to quantitatively analyze large highly heterogeneous systems of many interacting degrees of freedom. We also introduce the closely related notion of message passing in graphical models, which originated in computer science as a distributed algorithm capable of solving large inference and optimization problems involving many coupled variables. We then show how both the statistical physics and computer science perspectives can be applied in a wide diversity of contexts to problems arising in theoretical neuroscience and data analysis. Along the way we discuss spin glasses, learning theory, illusions of structure in noise, random matrices, dimensionality reduction and compressed sensing, all within the unified formalism of the replica method. Moreover, we review recent conceptual connections between message passing in graphical models, and neural computation and learning. Overall, these ideas illustrate how statistical physics and computer science might provide a lens through which we can uncover emergent computational functions buried deep within the dynamical complexities of neuronal networks.}
 }
 	
-@incollection{Lahiri2013synapse,
+@inproceedings{Lahiri2013synapse,
 title = {A memory frontier for complex synapses},
 author = {Lahiri, Subhaneil and Ganguli, Surya},
 booktitle = {Adv. Neural Inf. Process. Syst. 26},
@@ -594,6 +594,7 @@ pages = {1034--1042},
 year = {2013},
 url = {http://papers.nips.cc/paper/4872-a-memory-frontier-for-complex-synapses},
 }
+crossref     = {NIPS2013},
 
 @article{Ben-DayanRubin2007sparse,
 author = {{Ben-Dayan Rubin}, Daniel D and Fusi, Stefano},
@@ -833,16 +834,29 @@ year = {2015}
   publisher={Erlbaum}
 }
 
+@proceedings{NIPS2013,
+  editor       = {C.J.C. Burges and L. Bottou and M. Welling and Z. Ghahramani and K.Q. Weinberger},
+  TITLE        = {Adv. Neural Inf. Process. Syst. 26},
+  YEAR         = {2013},
+  organization = {NIPS},
+  publisher    = {NIPS},
+  volume       = {26},
+}
+
+
 @inproceedings{Savin2013correlNIPS,
 author = {Savin, Cristina and Dayan, Peter and Lengyel, M{\'{a}}t{\'{e}}},
 booktitle = {Adv. Neural Inf. Process. Syst. 26},
 file = {:D$\backslash$:/Users/Subhy/AppData/Local/Mendeley Ltd./Mendeley Desktop/Downloaded/Savin, Dayan, Lengyel - 2013 - Correlations strike back (again) the case of associative memory retrieval.pdf:pdf;:D$\backslash$:/Users/Subhy/AppData/Local/Mendeley Ltd./Mendeley Desktop/Downloaded/Savin, Dayan, Lengyel - 2013 - Correlations strike back (again) the case of associative memory retrieval(2).pdf:pdf},
 mendeley-groups = {Learning and Memory/Memory Theory},
 pages = {288--296},
+editor = {C.J.C. Burges and L. Bottou and M. Welling and Z. Ghahramani and K.Q. Weinberger},
+publisher = {NIPS},
 title = {{Correlations strike back (again): the case of associative memory retrieval}},
 url = {http://papers.nips.cc/paper/4871-correlations-strike-back-again-the-case-of-associative-memory-retrieval},
-year = {2013}
+year = {2013},
 }
+  crossref     = {NIPS2013},
 
 @article{Savin2014correlcascade,
 abstract = {A venerable history of classical work on autoassociative memory has significantly shaped our understanding of several features of the hippocampus, and most prominently of its CA3 area, in relation to memory storage and retrieval. However, existing theories of hippocampal memory processing ignore a key biological constraint affecting memory storage in neural circuits: the bounded dynamical range of synapses. Recent treatments based on the notion of metaplasticity provide a powerful model for individual bounded synapses; however, their implications for the ability of the hippocampus to retrieve memories well and the dynamics of neurons associated with that retrieval are both unknown. Here, we develop a theoretical framework for memory storage and recall with bounded synapses. We formulate the recall of a previously stored pattern from a noisy recall cue and limited-capacity (and therefore lossy) synapses as a probabilistic inference problem, and derive neural dynamics that implement approximate inference algorithms to solve this problem efficiently. In particular, for binary synapses with metaplastic states, we demonstrate for the first time that memories can be efficiently read out with biologically plausible network dynamics that are completely constrained by the synaptic plasticity rule, and the statistics of the stored patterns and of the recall cue. Our theory organises into a coherent framework a wide range of existing data about the regulation of excitability, feedback inhibition, and network oscillations in area CA3, and makes novel and directly testable predictions that can guide future experiments.},

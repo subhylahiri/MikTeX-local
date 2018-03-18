@@ -1,0 +1,435 @@
+%%  This uses the package ``titling'' to add affiliations for authors
+%%
+%% Requires packages: titling, xkeyval and etoolbox
+%%
+%% If you don't need numbers, add affiliations with:
+%%          \affiliation*{My University}
+%%
+%% Or, to number them, use:
+%%          \affiliation[key]{My University\label{key}}
+%%
+%% You can pair authors with affiliations, emails, other annotations like this:
+%%          \author[affil=key,email=alice@university,thanks=first]{Alice Smith}
+%%          \author[affil={key,key2},thanks=first]{Bob Jones}
+%%
+%% with other annotations defined by:
+%%          \thanks[first]{Equal contribution.}
+%%
+%% You can customise formatting:
+%%   \preaffiliation{<commands to put at start of each affiliation>}
+%%   \postaffiliation{<commands to put at end of each affiliation>>}
+%%   \preemail{<commands to put at start of each email>}
+%%   \postemail{<commands to put at end of each email>>}
+%%   \prethanks{<commands to put at start of each thanks>}
+%%   \postthanks{<commands to put at end of each thanks>>}
+%%
+%%   \renewcommand{\affilformat}[1]{<command for label{#1}>}
+%%   \renewcommand{\emailformat}[1]{<command for label{#1}>}
+%%
+%% defaults:
+%%   \preaffiliation{\centering\itshape}
+%%   \postaffiliation{\par}
+%%   \preemail{\centering Email: }
+%%   \postemail{\par}
+%%   \prethanks{\relax}
+%%   \postthanks{\relax}
+%%   \newcommand{\affilformat}[1]{\makebox[0pt][r]{\textsuperscript{(#1)}}}
+%%   \newcommand{\emailformat}[1]{\textsuperscript{(#1)}}
+%%
+%% History: 2016/07/27 v0.01beta (SL) manual \label and \ref
+%%          2017/12/28 v1.0      (SL) using xkeyval and lists to automate
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-author-info}
+         [2017/12/28 v1.0 titling macros for affiliations etc. (SL)]
+
+
+
+\RequirePackage{titling}
+\RequirePackage{xkeyval}
+\RequirePackage{etoolbox}
+\newtoggle{oxfordcomma}
+\newtoggle{emailfoot}
+
+\makeatletter
+\newcommand{\email@write}[1]{\footnotetext{#1}}
+
+\DeclareOption{nooxfordcomma}{\togglefalse{oxfordcomma}}
+\DeclareOption{oxfordcomma}{\toggletrue{oxfordcomma}}
+%where to place emails?
+\DeclareOption{emailfoot}{\renewcommand{\email@write}[1]{\footnotetext{#1}}\toggletrue{emailfoot}}
+\DeclareOption{emailaddr}{\renewcommand{\email@write}[1]{\gappto\maketitlehookc{#1}}}
+\DeclareOption{emaildate}{\renewcommand{\email@write}[1]{\gappto\maketitlehookd{#1}}}
+
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{titling}}
+
+\ExecuteOptions{oxfordcomma,emailaddr}
+\ProcessOptions
+
+%--------------------------------------------------------------------------------
+%hook for processing author info
+\newcommand{\@author@info}{}
+%placed after author list has been processed
+%delay appending until after any \postauthor commands in preamble
+\preto\maketitlehooka{\appto\@bspostauthor{\@author@info}}
+%--------------------------------------------------------------------------------
+%utilities for selecting from list
+\newbool{list@member@used}
+%for a list {key}{val}|{key}{val}|...
+%check if key == #1, then do #2.
+%To adapt for more than one {val}, replace 4 with 3+#{val}.
+\newcommand{\check@list}[4]{%
+  \ifstrequal{#1}{#3}%
+    {#2}%then
+    {}%else
+  }
+%for lists #2,#3 = {key}{val}|{key}{val}|...
+%if (key != #1) for all keys in #3
+%then copy {key==#1}{val}| from #2 to #3
+\newcommand{\copyfromlist}[3]{%
+  \boolfalse{list@member@used}%
+  %do: check if #1 has already been called
+  \renewcommand*{\do}[1]{\check@list{#1}{\booltrue{list@member@used}}##1}%
+  %dolistloop: check if #1 is in list of already called
+  \dolistloop{#3}%
+  %check if it was used
+  \ifbool{list@member@used}
+    {}%if it has been called, do nothing
+    {%if it hasn't already been called: find it in #2 and copy it to #3
+     %do: if key == #1, copy entry{key}{val}
+     \renewcommand*{\do}[1]{\check@list{#1}{\listgadd{#3}{##1}}##1}%
+     \dolistloop{#2}%find key in list
+    }%
+}
+%--------------------------------------------------------------------------------
+%First we set up display of affiliations
+
+%used for tag labels
+\newcommand{\affilformat}[1]{\makebox[0pt][r]{\textsuperscript{#1}}}
+
+%format affiliation display
+\newcommand{\preaffiliation}[1]{\def\@bspreaffiliation{#1}}
+\newcommand{\postaffiliation}[1]{\def\@bspostaffiliation{#1}}
+
+\preaffiliation{\centering\itshape}
+\postaffiliation{\par}
+
+
+%affiliation counter
+\newcounter{affil}
+%format affiliation labels
+\renewcommand{\theaffil}{\arabic{affil}}
+
+%internal lists of affiliations defined & used
+\newcommand{\affil@list}{}
+\newcommand{\affil@used}{}
+
+%The actual affiliation defining command
+\def\affiliation{\@ifstar\@affiliationstar\@affiliation}
+
+%defining & using affiliation w/o number
+\def\@affiliationstar#1{\appto\maketitlehookc{\begingroup%
+\@bspreaffiliation#1\@bspostaffiliation%
+\endgroup}}
+
+%defining affiliation w/ number: add to list of defined
+\def\@affiliation[#1]#2{\listgadd{\affil@list}{{#1}{#2}}}
+
+%called by author key when used: copy to list of used
+\newcommand{\search@affil}[1]{\copyfromlist{#1}{\affil@list}{\affil@used}}%
+
+%insert affiliations from list of used
+\newcommand{\affil@insert}[2]{%
+\gappto\maketitlehookc{%
+\begingroup%
+\refstepcounter{affil}\label{#1}\affilformat{\theaffil}%
+\@bspreaffiliation#2\@bspostaffiliation%
+\endgroup}
+}
+
+%process list of used affiliations, after author list has been processed
+\appto\@author@info{\ifdefempty{\affil@used}{}{%
+  \renewcommand*{\do}[1]{\affil@insert#1}%
+  \dolistloop{\affil@used} }}
+
+
+%--------------------------------------------------------------------------------
+
+%Now set up email display
+
+%used for tag labels
+\newcommand{\emailformat}[1]{\textsuperscript{#1}}
+
+\newcommand{\email@list}{}%internal list of emails
+\newcounter{email@count}%how many emails are there?
+\newcounter{email}%which email is this?
+
+%format email labels
+\renewcommand{\theemail}{\alph{email}}
+\newcommand{\email@sep}{,}
+\newcommand{\email@end}{.}
+\newcommand{\preemail}[1]{\def\@bspreemail{#1}}
+\newcommand{\postemail}[1]{\def\@bspostemail{#1}}
+\iftoggle{emailfoot}
+  {\preemail{Email: }
+   \postemail{\relax}}
+  {\preemail{\centering Email: }
+   \postemail{\par}}
+
+%format email entries
+\providecommand{\email}[1]{\texttt{#1}}
+
+%insert emails from list
+\newcommand{\insert@email}[1]{\begingroup%
+  \refstepcounter{email}\label{#1}
+  \emailformat{\theemail}\email{#1}%
+  \ifnumcomp{\value{email}}{<}{\value{email@count}}%is this the last one?
+  {\email@sep\ }{\email@end}%
+\endgroup%
+}
+
+%process email list, after author list has been processed
+\appto\@author@info{%
+  \ifdefempty{\email@list}
+    {}
+    {\email@write{%
+      \begingroup
+      \renewcommand*{\do}[1]{\stepcounter{email@count}}%
+      \dolistloop{\email@list}%
+      \@bspreemail \forlistloop{\insert@email}{\email@list}%
+      \@bspostemail\endgroup
+      }
+    }
+}
+
+%--------------------------------------------------------------------------------
+
+%Dealing with thanks
+\newcounter{thanks}
+\renewcommand{\thethanks}{\fnsymbol{thanks}}
+
+%format thanks display
+\newcommand{\prethanks}[1]{\def\@bsprethanks{#1}}
+\newcommand{\postthanks}[1]{\def\@bspostthanks{#1}}
+
+\prethanks{\relax}
+\postthanks{\relax}
+
+%internal lists for thanks defined and used
+\newcommand{\thanks@list}{}
+\newcommand{\thanks@used}{}
+
+%The actual thanks defining command
+\def\thanks{\@ifstar\@thanksstar\@thanksnostar}
+
+%defining thanks w/o number
+\newcommand{\@thanksstar}[1]{%
+  \gappto\@thanks{\footnotetext{%
+    \@bsprethanks#1\@bspostthanks}}}
+
+%defining thanks w/ number: at to list of defined
+\newcommand{\@thanksnostar}[2][]{\listgadd{\thanks@list}{{#1}{#2}}}
+
+%called by author key when used: copy to list of used
+\newcommand{\search@thanks}[1]{\copyfromlist{#1}{\thanks@list}{\thanks@used}}
+
+%insert thanks entry from list of used
+\newcommand{\thanks@insert}[2]{\gappto\@thanks{%
+  \refstepcounter{thanks}\footnotetext[\value{thanks}]{%
+    \notblank{#1}{\label{#1}}{}%
+    \@bsprethanks#2\@bspostthanks}%
+    }}
+
+%process list of used thanks, after author list has been processed
+\appto\@author@info{\ifdefempty{\thanks@used}{}{%
+  \renewcommand*{\do}[1]{\thanks@insert#1}%
+  \dolistloop{\thanks@used} }}
+
+%--------------------------------------------------------------------------------
+%Now run through tags for a single author
+
+%format tag labels
+\newcommand*{\aurefcmd}[1]{\ref{#1}}
+\newcommand{\au@tag@sep}{,}
+\newcommand{\autagformat}[1]{\textsuperscript{#1}}
+
+%Internal list of tags for this author
+\newcommand{\this@auth@tags}{}
+
+%affiliation/email labels for one author
+\newcounter{auth@tag@count}%how many affiliations does this author have?
+\newcounter{auth@tag}%which affiliation is this?
+\newcommand{\au@tag}[1]{%for second run (actually add ref)
+  \stepcounter{auth@tag}#1%write the label
+  \ifnumcomp{\value{auth@tag}}{<}{\value{auth@tag@count}}%is this the last one?
+  {\au@tag@sep}%more to come
+  {}%last one
+}
+%add one tag to author
+\newcommand{\au@tag@add}[1]{\listgadd{\this@auth@tags}{\aurefcmd{#1}}}
+%run through authors tags
+\newcommand*{\auth@tag@loop}[1]{\notblank{#1}{%
+  \setcounter{auth@tag@count}{0}%reset counters
+  \setcounter{auth@tag}{0}%reset counters
+  \renewcommand*{\do}[1]{\stepcounter{auth@tag@count}}%
+  \dolistloop{#1}%count affiliations
+  \forlistloop{\au@tag}{#1}%author affiliation labels
+}{}}
+
+\define@key[sltitle]{author}{affil}{%
+  \forcsvlist{\au@tag@add}{#1}%
+  \forcsvlist{\search@affil}{#1}}
+\define@key[sltitle]{author}{email}{%
+  \au@tag@add{#1}%
+  \listgadd{\email@list}{#1}}
+\define@key[sltitle]{author}{thanks}{%
+  \forcsvlist{\au@tag@add}{#1}%
+  \forcsvlist{\search@thanks}{#1}}
+\define@key[sltitle]{author}{none}[none]{\relax}
+
+%--------------------------------------------------------------------------------
+%process a single author
+
+\newcommand{\auth@list}{}%Internal list of authors
+%consists of {name1}{tags1}|{name2}{tags2}|...
+
+%add author & keys to list
+\renewcommand{\author}[2][none]{%
+  \listgadd{\auth@list}{%
+    {#2}%author name
+    {\autagformat{\begingroup% commands to process author keys
+       \renewcommand{\this@auth@tags}{}%
+       \setkeys*[sltitle]{author}{#1}%
+       \auth@tag@loop{\this@auth@tags}%
+     \endgroup}}
+   }
+}
+%list entries: {author}{tag-using commands}
+
+%--------------------------------------------------------------------------------
+
+%process author list
+
+\newcounter{authors@count}%how many authors?
+\newcounter{authors}%which author is this
+
+\newcommand{\auth@write}[1]{\stepcounter{authors}\auth@process#1}%write author out
+%no braces, as #1={name}{key commands}
+
+\newcommand{\authsep}[4]{%
+  \def\authsep@pair##1{#1}%
+  \def\authsep@antepenultimate##1{#2}%
+  \def\authsep@penultimate##1{#3}%
+  \def\authsep@ultimate##1{#4}
+}
+
+%\newcommand{\phantomcomma}{\rlap{,}\textsubscript{\hphantom{\normalsize,}}}
+\iftoggle{oxfordcomma}%
+  {\authsep{#1 and }{\rlap{,}#1 }{\rlap{,}#1 and }{\rlap{#1}}}
+  {\authsep{#1 and }{\rlap{,}#1 }{#1 and }{\rlap{#1}}}
+
+%display one author
+\newcommand{\auth@process}[2]{#1%
+\ifnumequal{\value{authors}}{\value{authors@count}}%is this the last one?
+  {\authsep@ultimate{#2}}%last one
+  {\ifnumequal{\value{authors}}{\value{authors@count}-1}%is this the second last one?
+    {\ifnumequal{\value{authors@count}}{2}%is this the first of two
+      {\authsep@pair{#2}}%first of two
+      {\authsep@penultimate{#2}}%second last
+    }%
+    {\authsep@antepenultimate{#2}}%before second last
+  }%
+}
+%tag-using commands are in #2
+
+%process author list
+\renewcommand{\@author}{%
+  \ifdefempty{\auth@list}{}{
+    \renewcommand*{\do}[1]{\stepcounter{authors@count}}
+    \dolistloop{\auth@list}%
+    \forlistloop{\auth@write}{\auth@list}%
+   }
+}
+%Execution of this command is where tag-using commands are executed
+
+%--------------------------------------------------------------------------------
+
+\newcommand{\preprint}[1]{\appto\maketitlehooka{%
+\begin{flushright}
+  #1
+\end{flushright}%
+}}
+
+
+%get rid of author affiliation hyperlinks
+\AtBeginDocument{\@ifpackageloaded{hyperref}{%
+  \renewcommand{\aurefcmd}[1]{\ref*{#1}}%
+  \renewcommand{\email}[1]{\href{mailto:#1}{\texttt{#1}}}
+}{}}
+
+%\newlength{\thanksgaplen}
+%\renewcommand{\thanksgap}[1][\textsuperscript{*}]{%
+%\settowidth{\thanksgaplen}{#1}%
+%\hspace{\thanksgaplen}%
+%}
+
+%--------------------------------------------------------------------------------
+
+\appto\bsmtitlempty{%
+\global\let\email@write\relax
+\global\let\@author@info\relax
+\global\let\auth@write\relax
+\global\let\auth@process\relax
+\global\let\auth@list\relax
+\global\let\this@auth@tags\relax
+\global\let\au@tag\relax
+\global\let\auth@tag@loop\relax
+\global\let\au@tag@add\relax
+\global\let\au@tag@sep\relax
+\global\let\aurefcmd\relax
+}
+\appto\bsmtitlempty{%
+\global\let\insert@email\relax
+\global\let\email@list\relax
+\global\let\email@sep\relax
+\global\let\email@end\relax
+\global\let\emailformat\relax
+\global\let\preemail\relax
+\global\let\postemail\relax
+\global\let\@bspreemail\relax
+\global\let\@bspostemail\relax
+}
+\appto\bsmtitlempty{%
+\global\let\@bspreaffiliation\relax
+\global\let\@bspostaffiliation\relax
+\global\let\@affiliation\relax
+\global\let\@affiliationstar\relax
+\global\let\affiliation\relax
+\global\let\affilformat\relax
+\global\let\preaffiliation\relax
+\global\let\postaffiliation\relax
+\global\let\affil@list\relax
+\global\let\affil@used\relax
+\global\let\search@affil\relax
+\global\let\affil@insert\relax
+}
+\appto\bsmtitlempty{%
+\global\let\@bsprethanks\relax
+\global\let\@bspostthanks\relax
+\global\let\@thanksnostar\relax
+\global\let\@thanksstar\relax
+\global\let\prethanks\relax
+\global\let\postthanks\relax
+\global\let\thanks@list\relax
+\global\let\thanks@used\relax
+\global\let\search@thanks\relax
+\global\let\thanks@insert\relax
+}
+%
+
+
+\makeatother
+
+\endinput
+%%
+%% End of file `sl-titling.sty'.

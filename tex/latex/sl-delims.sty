@@ -1,0 +1,63 @@
+%%  This uses the package ``delim'' to define custom delimiters
+%%
+%% Requires packages: delim
+%%
+%% All delimiters use \left,\middle,\right by default.
+%% They can be changed on a case--by--case basis by prefixing the command
+%% with \mnorm, \mbigg, \mauto, etc.
+%% e.g.
+%%    \begin{equation}
+%%      \mbigg\brk{\sum_a^b \mnorm\set{x^2}{x \in R}}.
+%%    \end{equation}
+%%
+%% Delimiters defined:
+%%    \prn{}
+%%    \brc{}
+%%    \brk{}
+%%    \abs{}
+%%    \nrm{}
+%%    \av{}
+%%    \avc{}{}
+%%    \set{}{}
+%%    \cond{}{}
+%%    \condb{}{}
+%%    \bra{}
+%%    \ket{}
+%%    \braket{}{}
+%%    \brackets{}{}{}
+%%
+%% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-delims}[2018/3/17 v1.0 custom delimiters (SL)]
+
+\RequirePackage{delim}
+\RequirePackage{etoolbox}
+
+\makeatletter
+\newcommand{\dlm@opt}[1]{\ifblank{#1}{\:\cdot\:}{#1}}
+
+
+% brackets etc.
+\delimdef\prn#1{\dleft( \dlm@opt{#1} \dright)}
+\delimdef\brc#1{\dleft\{ \dlm@opt{#1} \dright\}}
+\delimdef\brk#1{\dleft[ \dlm@opt{#1} \dright]}
+\delimdef\abs#1{\dleft\lvert \dlm@opt{#1} \dright\rvert}
+\delimdef\nrm#1{\dleft\lVert \dlm@opt{#1} \dright\rVert}
+\delimdef\av#1{\dleft\langle \dlm@opt{#1} \dright\rangle}
+\delimdef\avc#1#2{\dleft\langle \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright\rangle}
+%\newenvironment{cases}{\dleft\{\begin{aligned}}{\end{aligned}\dright.}
+%
+% Sets
+\delimdef\set#1#2{\dleft\{ \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright\}}
+\delimdef\cond#1#2{\!\dleft( \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright)}
+\delimdef\condb#1#2{\!\dleft[ \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright]}
+%
+% QM Dirac notation
+\delimdef\bra#1{\dleft\langle \dlm@opt{#1} \dright\rvert}
+\delimdef\ket#1{\dleft\lvert \dlm@opt{#1} \dright\rangle}
+\delimdef\braket#1#2{\dleft\langle \dlm@opt{#1} \midddle\vert\mathopen{} \dlm@opt{#2} \dright\rangle}
+\delimdef\brackets#1#2#3{\dleft\langle \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dmiddle\vert\mathopen{} \dlm@opt{#3} \dright\rangle}
+%
+
+\makeatother

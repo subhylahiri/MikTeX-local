@@ -1,0 +1,100 @@
+%%  This defines custom derivative notation.
+%%
+%% Requires packages: etoolbox
+%%
+%% All delimiters use \left,\middle,\right by default.
+%% They can be changed on a case--by--case basis by prefixing the command
+%% with \mnorm, \mbigg, \mauto, etc.
+%% e.g.
+%%    \begin{equation}
+%%      \diff[2]{u}{v} = \pdiffm{f}{x,y,z} \pdiff{w}{k}.
+%%    \end{equation}
+%%
+%% Derivatives defined:
+%%    \diff[n]{y}{x}
+%%    \pdiff[n]{y}{x}
+%%    \pdiffc[y]{z}{x}
+%%    \pdiffm{w}{x,y,z}
+%%    \fdf{S}{q(t)}
+%%    \fdfm{S}{q(t),p(t')}
+%%    \pdl
+%%    \pdr
+%%    \pdlr
+%%    \intd[_0^\infty]{t} f(t)
+%%    \integ[f(x)]{x}
+%%
+%% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
+
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-derivs}[2018/3/17 v1.0 derivative notation (SL)]
+
+\RequirePackage{etoolbox}
+
+\makeatletter
+%--------------------------------------------------------------------------------
+% Helper functions
+%
+% for defining higher order derivatives:
+%    \drv@ndef{<command>}{<diff op>}
+%    ==> <command>[<order>]{<dep var>}{<indep var>}
+%        ==> \frac{<diff op>^<order><dep var>}{<diff op><indep var>^<order>}
+\newcommand{\drv@ord}[1]{\notblank{#1}{^{#1}}{}}
+%
+\newcommand{\drv@ndef}[2]{%
+  \newcommand{#1}[3][]{%
+    \begingroup%
+      \def\drv@op{#2}%
+      \frac{\drv@op\drv@ord{##1} ##2}%
+           {\drv@op{##3}\drv@ord{##1}}%
+    \endgroup%
+}}
+%
+%
+% for defining derivatives with multiple independent variables:
+%    \drv@mdef{<command>}{<diff>}
+%    ==> <command>{<dep>}{<ind1>,<ind2>,...,<indN>}
+%        ==> \frac{<diff>^><dep>}{<diff><ind1>}<diff><ind2>}...<diff><indN>}
+\newcommand{\drv@count}[1]{%
+  \numdef\drv@num{0}%
+  \def\drv@denom{}%
+  \renewcommand*{\do}[1]{%
+    \numdef\drv@num{\drv@num+1}%
+    \appto\drv@denom{\drv@op ##1}}%
+  \docsvlist{#1}%
+}
+%
+\newcommand{\drv@mdef}[2]{%
+  \newcommand{#1}[2]{%
+    \begingroup%
+      \def\drv@op{#2}%
+      \drv@count{##2}%
+      \frac{\drv@op^{\drv@num}##1}%
+           {\drv@denom}%
+    \endgroup%
+}}
+%--------------------------------------------------------------------------------
+
+% Derivatives, etc. First argument is optional.
+% ordinary derivative
+\drv@ndef{\diff}{\mathrm{d}}
+% partial derivatives (higher order/constant independent variables)
+\drv@ndef{\pdiff}{\partial}
+\newcommand{\pdiffc}[3][]{\left (\frac{\partial #2}{\partial {#3}}\right )_{\!\!#1}}
+% functional derivative
+\newcommand{\fdf}[2]{\frac{\delta #1}{\delta #2}}
+%multiple independent variables
+\drv@mdef{\pdiffm}{\partial}
+\drv@mdef{\fdfm}{\delta}
+%
+\newcommand{\pdl}[1][]{\overleftarrow{\partial}_{#1}}
+\newcommand{\pdr}[1][]{\overrightarrow{\partial}_{#1}}
+\newcommand{\pdlr}[1][]{\overleftrightarrow{\partial_{#1}}}
+%
+\newcommand{\intd}[2][]{\int \ifblank{#1}{}{#1\!\!}%
+  \!\mathrm{d} #2\,\mathopen{}}
+\newcommand{\integ}[3][]{\int \ifblank{#1}{}{#1\!\!}\mathopen{}%
+  \ifblank{#2}{\cdots\;}{\! #2\,}%
+  \mathrm{d}#3}
+%
+%--------------------------------------------------------------------------------
+\makeatother

@@ -161,8 +161,7 @@
 \newcommand{\emailformat}[1]{\textsuperscript{#1}}
 
 \newcommand{\email@list}{}%internal list of emails
-\newcounter{email@count}%how many emails are there?
-\newcounter{email}%which email is this?
+\newcounter{email}%which number email is this?
 
 %format email labels
 \renewcommand{\theemail}{\alph{email}}
@@ -171,9 +170,9 @@
 \newcommand{\preemail}[1]{\def\@bspreemail{#1}}
 \newcommand{\postemail}[1]{\def\@bspostemail{#1}}
 \iftoggle{emailfoot}
-  {\preemail{Email: }
+  {\preemail{Email:\ }
    \postemail{\relax}}
-  {\preemail{\centering Email: }
+  {\preemail{\centering Email:\ }
    \postemail{\par}}
 
 %format email entries
@@ -182,9 +181,9 @@
 %insert emails from list
 \newcommand{\insert@email}[1]{\begingroup%
   \refstepcounter{email}\label{#1}
+  \ifnumcomp{\value{email}}{>}{1}%is this the first one?
+  {\email@sep\ }{}%
   \emailformat{\theemail}\email{#1}%
-  \ifnumcomp{\value{email}}{<}{\value{email@count}}%is this the last one?
-  {\email@sep\ }{\email@end}%
 \endgroup%
 }
 
@@ -194,10 +193,8 @@
     {}
     {\email@write{%
       \begingroup
-      \renewcommand*{\do}[1]{\stepcounter{email@count}}%
-      \dolistloop{\email@list}%
       \@bspreemail \forlistloop{\insert@email}{\email@list}%
-      \@bspostemail\endgroup
+      \email@end\@bspostemail\endgroup
       }
     }
 }
@@ -257,22 +254,19 @@
 \newcommand{\this@auth@tags}{}
 
 %affiliation/email labels for one author
-\newcounter{auth@tag@count}%how many affiliations does this author have?
-\newcounter{auth@tag}%which affiliation is this?
+\newcounter{auth@tag}%which affiliation number is this?
 \newcommand{\au@tag}[1]{%for second run (actually add ref)
-  \stepcounter{auth@tag}#1%write the label
-  \ifnumcomp{\value{auth@tag}}{<}{\value{auth@tag@count}}%is this the last one?
+  \stepcounter{auth@tag}%
+  \ifnumcomp{\value{auth@tag}}{>}{1}%is this the last one?
   {\au@tag@sep}%more to come
   {}%last one
+  #1%write the label
 }
 %add one tag to author
 \newcommand{\au@tag@add}[1]{\listgadd{\this@auth@tags}{\aurefcmd{#1}}}
 %run through authors tags
 \newcommand*{\auth@tag@loop}[1]{\notblank{#1}{%
-  \setcounter{auth@tag@count}{0}%reset counters
-  \setcounter{auth@tag}{0}%reset counters
-  \renewcommand*{\do}[1]{\stepcounter{auth@tag@count}}%
-  \dolistloop{#1}%count affiliations
+  \setcounter{auth@tag}{0}%reset counter
   \forlistloop{\au@tag}{#1}%author affiliation labels
 }{}}
 

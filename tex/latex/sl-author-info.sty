@@ -255,12 +255,12 @@
 
 %affiliation/email labels for one author
 \newcounter{auth@tag}%which affiliation number is this?
-\newcommand{\au@tag}[1]{%for second run (actually add ref)
+\newcommand{\au@tag}[1]{%             for second run (actually add ref)
   \stepcounter{auth@tag}%
-  \ifnumcomp{\value{auth@tag}}{>}{1}%is this the last one?
-  {\au@tag@sep}%more to come
-  {}%last one
-  #1%write the label
+  \ifnumcomp{\value{auth@tag}}{>}{1}% is this the first one?
+  {\au@tag@sep}%                      not first
+  {}%                                 first one
+  #1%                                 write the label
 }
 %add one tag to author
 \newcommand{\au@tag@add}[1]{\listgadd{\this@auth@tags}{\aurefcmd{#1}}}
@@ -281,6 +281,11 @@
   \forcsvlist{\search@thanks}{#1}}
 \define@key[sltitle]{author}{none}[none]{\relax}
 
+\define@key[sltitle]{dummy}{affil}{\relax}
+\define@key[sltitle]{dummy}{email}{\relax}
+\define@key[sltitle]{dummy}{thanks}{\relax}
+\define@key[sltitle]{dummy}{none}[none]{\relax}
+
 %--------------------------------------------------------------------------------
 %process a single author
 
@@ -293,7 +298,9 @@
     {#2}%author name
     {\autagformat{\begingroup% commands to process author keys
        \renewcommand{\this@auth@tags}{}%
-       \setkeys*[sltitle]{author}{#1}%
+       \setkeys*[sltitle]{dummy}{#1}%   just capture extras, ignore keys
+       \notblank{\XKV@rm}{\expandafter\sltitle@author@affil\expandafter{\XKV@rm}}{}%  treat extras as affils
+       \setkeys*[sltitle]{author}{#1}%  now set keys for real
        \auth@tag@loop{\this@auth@tags}%
      \endgroup}}
    }

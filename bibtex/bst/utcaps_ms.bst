@@ -150,6 +150,11 @@ FUNCTION {init.state.consts}
 
 STRINGS { s t }
 
+% Puts current string on stack aside,
+% adds appropriate punctuation to previous string,
+% writes previous string out
+% puts current string back on stack.
+% We've already checked that the current string is not empty by now.
 FUNCTION {output.nonnull}
 { 's :=
   output.state mid.sentence =
@@ -182,6 +187,7 @@ FUNCTION {output.nonnull}
   s
 }
 
+% check that current string is non-empty, then perform output.nonnull
 FUNCTION {output}
 { duplicate$ empty$
     'pop$
@@ -189,6 +195,8 @@ FUNCTION {output}
   if$
 }
 
+% check that current string is non-empty,
+% then perform output.nonnull or produce a warning.
 FUNCTION {output.check}
 { 't :=
   duplicate$ empty$
@@ -211,6 +219,13 @@ FUNCTION {blank.sep}
 { after.quote 'output.state :=
 }
 
+% Like output.nonnull, except it appends current string to previous
+% instead of writing previous string out (makes hyperlinking easier).
+% Puts current string on stack aside,
+% adds appropriate punctuation to previous string,
+% puts current string back on stack,
+% concatenates current & previous strings.
+% We've already checked that the current string is not empty by now.
 FUNCTION {next.nonnull}
 { 's :=
   output.state mid.sentence =
@@ -237,6 +252,8 @@ FUNCTION {next.nonnull}
   s *
 }
 
+% Like output, except it appends current string to previous
+% instead of writing previous string out.
 FUNCTION {next}
 { duplicate$ empty$
     'pop$
@@ -244,6 +261,8 @@ FUNCTION {next}
   if$
 }
 
+% Like output.check, except it appends current string to previous
+% instead of writing previous string out.
 FUNCTION {next.check}
 { 't :=
   duplicate$ empty$
@@ -529,6 +548,13 @@ FUNCTION {add.comma}
       { ttt "," * }
      if$
 }
+
+%FUNCTION {add.comma}
+%{ would.add.period
+%   { }
+%   { "," * }
+%  if$
+%}
 
 % Modified by SL:
 FUNCTION {format.title}

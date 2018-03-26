@@ -206,6 +206,58 @@ FUNCTION {output.bibitem}
   before.all 'output.state :=
 }
 
+% Like output.nonnull, except it appends current string to previous
+% instead of writing previous string out (makes hyperlinking easier).
+% Puts current string on stack aside,
+% adds appropriate punctuation to previous string,
+% puts current string back on stack,
+% concatenates current & previous strings.
+% We've already checked that the current string is not empty by now.
+FUNCTION {next.nonnull}
+{ 's :=
+  output.state mid.sentence =
+    { ", " *  }
+    { output.state after.quote =
+	{ " " *  }
+	{ output.state after.block =
+	    { add.period$ "\newblock " * }
+	    { output.state before.all =
+		'skip$
+		{ output.state after.quoted.block =
+		    { "\newblock " * }
+		    { add.period$ " " *  }
+		  if$
+		}
+	      if$
+	    }
+	  if$
+	}
+      if$
+      mid.sentence 'output.state :=
+    }
+  if$
+  s *
+}
+
+% Like output, except it appends current string to previous
+% instead of writing previous string out.
+FUNCTION {next}
+{ duplicate$ empty$
+    'pop$
+    'next.nonnull
+  if$
+}
+
+% Like output.check, except it appends current string to previous
+% instead of writing previous string out.
+FUNCTION {next.check}
+{ 't :=
+  duplicate$ empty$
+    { pop$ "empty " t * " in " * cite$ * warning$ }
+    'next.nonnull
+  if$
+}
+
 FUNCTION {blank.sep}
 { after.quote 'output.state :=
 }
@@ -960,21 +1012,22 @@ FUNCTION {incollection}
 { output.bibitem
   format.collaboration output
   format.authors "author" output.check
-  format.title add.doi "title" output.check
+  format.title "title" output.check
   blank.sep
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
-      format.bvolume output
-      format.number.series output
-      format.chapter.pages output
+      format.bvolume next
+      format.number.series next
+      format.chapter.pages next
       new.block
-      publisher "publisher" output.check
-      address output
-      format.edition output
-      format.date "year" output.check
+      publisher "publisher" next.check
+      address next
+      format.edition next
+      format.date "year" next.check
+      add.doi
     }
     { format.incoll.inproc.crossref output.nonnull
-      format.chapter.pages output
+      format.chapter.pages add.doi output
     }
   if$
   new.block
@@ -992,21 +1045,22 @@ FUNCTION {inproceedings}
 { output.bibitem
   format.collaboration output
   format.authors "author" output.check
-  format.title add.doi "title" output.check
+  format.title "title" output.check
   blank.sep
   crossref missing$
     { format.in.ed.booktitle "booktitle" output.check
-      format.bvolume output
-      format.number.series output
-      format.pages output
-      organization output
+      format.bvolume next
+      format.number.series next
+      format.pages next
+      organization next
       new.block
-      publisher output
-      address output
-      format.date "year" output.check
+      publisher next
+      address next
+      format.date "year" next.check
+      add.doi
     }
     { format.incoll.inproc.crossref output.nonnull
-      format.pages output
+      format.pages add.doi output
     }
   if$
   new.block

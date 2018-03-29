@@ -79,9 +79,9 @@
 \drv@ndef{\diff}{\mathrm{d}}
 % partial derivatives (higher order/constant independent variables)
 \drv@ndef{\pdiff}{\partial}
-\newcommand{\pdiffc}[3][]{\left (\frac{\partial #2}{\partial {#3}}\right )_{\!\!#1}}
+\newcommand{\pdiffc}[3][]{\left(\pdiff{#2}{#3}\right)_{\!\!#1}}
 % functional derivative
-\newcommand{\fdf}[2]{\frac{\delta #1}{\delta #2}}
+\drv@ndef{\fdf}{\delta}
 %multiple independent variables
 \drv@mdef{\pdiffm}{\partial}
 \drv@mdef{\fdfm}{\delta}
@@ -98,3 +98,4 @@
 %
 %--------------------------------------------------------------------------------
 \makeatother
+\endinput

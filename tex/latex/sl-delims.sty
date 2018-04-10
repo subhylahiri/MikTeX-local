@@ -25,6 +25,9 @@
 %%    \ket{}
 %%    \braket{}{}
 %%    \brackets{}{}{}
+%%    \prnfrac{}{}
+%%    \brcfrac{}{}
+%%    \brkfrac{}{}
 %%
 %% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
 
@@ -59,5 +62,9 @@
 \delimdef\braket#1#2{\dleft\langle \dlm@opt{#1} \midddle\vert\mathopen{} \dlm@opt{#2} \dright\rangle}
 \delimdef\brackets#1#2#3{\dleft\langle \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dmiddle\vert\mathopen{} \dlm@opt{#3} \dright\rangle}
 %
+% Bracketed fractions
+\newcommand{\prnfrac}[2]{\prn{\frac{#1}{#2}}}
+\newcommand{\brcfrac}[2]{\brc{\frac{#1}{#2}}}
+\newcommand{\brkfrac}[2]{\brk{\frac{#1}{#2}}}
 
 \makeatother

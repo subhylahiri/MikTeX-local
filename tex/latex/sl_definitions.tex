@@ -2,6 +2,7 @@
 \newcommand{\ra}{\rightarrow}
 \newcommand{\lr}{\leftrightarrow}
 \newcommand{\cdt}{\!\cdot\!}
+\newcommand{\half}{\frac{1}{2}}
 \newcommand{\vp}{\vspace{0.5cm}}
 \newcommand{\hp}{\hspace{0.5cm}}
 %
@@ -23,6 +24,8 @@
 \newcommand{\dn}[1]{\mbox{}_{#1}}
 \newcommand{\rp}[1]{^{(#1)}}
 \newcommand{\lp}[1]{_{(#1)}}
+\newcommand{\psq}{^{\prime\,2}}
+\newcommand{\ppsq}{^{\prime\prime\,2}}
 %
 % brackets etc.
 \newcommand{\prn}[1]{\left ( #1 \right )}
@@ -47,19 +50,26 @@
 \newcommand{\bracket}[3]{\left\langle #1 \middle | #2 \middle | #3 \right\rangle}
 %
 % Derivatives, etc. First argument is optional.
-\newcommand{\diff}[3][\rule{0mm}{0mm}]{\frac{\mathrm{d}^{#1} #2}{\mathrm{d}{#3}^{#1}}}
-\newcommand{\pdiff}[3][\rule{0mm}{0mm}]{\frac{\partial^{#1} #2}{\partial {#3}^{#1}}}
-\newcommand{\pdiffc}[3][\rule{0mm}{0mm}]{\left (\frac{\partial #2}{\partial {#3}}\right )_{\!\!#1}}
-\newcommand{\pdl}[1][\rule{0mm}{0mm}]{\overleftarrow{\partial}_{#1}}
-\newcommand{\pdr}[1][\rule{0mm}{0mm}]{\overrightarrow{\partial}_{#1}}
-\newcommand{\pdlr}[1][\rule{0mm}{0mm}]{\overleftrightarrow{\partial_{#1}}}
+\newcommand{\diff}[3][]{\frac{\mathrm{d}^{#1} #2}{\mathrm{d}{#3}^{#1}}}
+\newcommand{\pdiff}[3][]{\frac{\partial^{#1} #2}{\partial {#3}^{#1}}}
+\newcommand{\pdiffc}[3][]{\left (\frac{\partial #2}{\partial {#3}}\right )_{\!\!#1}}
+\newcommand{\pdl}[1][]{\overleftarrow{\partial}_{#1}}
+\newcommand{\pdr}[1][]{\overrightarrow{\partial}_{#1}}
+\newcommand{\pdlr}[1][]{\overleftrightarrow{\partial_{#1}}}
+\newcommand{\bp}{\bar{\partial}}
+\newcommand{\p}{\partial}
 \newcommand{\fdf}[2]{\frac{\delta #1}{\delta #2}}
-\newcommand{\intd}[2][\rule{0mm}{0mm}]{\int #1\!\!\dr #2\,}
+\newcommand{\intd}[2][]{\int #1\!\!\dr #2\,}
 %
 % Un-italicised letters
 \newcommand{\dr}{\mathrm{d}}
 \newcommand{\e}{\mathrm{e}}
 \newcommand{\ir}{\mathrm{i}}
+\newcommand{\dt}{\mathrm{d}t}
+\newcommand{\dx}{\mathrm{d}x}
+\newcommand{\dy}{\mathrm{d}y}
+\newcommand{\dz}{\mathrm{d}z}
+\newcommand{\dzb}{\mathrm{d}\bar{z}}
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\Tr}{Tr}
 \DeclareMathOperator{\Det}{Det}
@@ -79,6 +89,7 @@
 \newcommand{\trans}{^\mathrm{T}}
 \newcommand{\transp}{{}^\mathrm{T}}
 \newcommand{\dg}{^\mathrm{dg}}
+\newcommand{\I}{\mathbf{I}}
 %
 % The default \Im and \Re look crap
 \renewcommand{\Im}{\operatorname{\mathfrak{Im}}}

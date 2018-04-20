@@ -2,9 +2,6 @@
 %%
 %% Requires packages: etoolbox
 %%
-%% All delimiters use \left,\middle,\right by default.
-%% They can be changed on a case--by--case basis by prefixing the command
-%% with \mnorm, \mbigg, \mauto, etc.
 %% e.g.
 %%    \begin{equation}
 %%      \diff[2]{u}{v} = \pdiffm{f}{x,y,z} \pdiff{w}{k}.
@@ -17,11 +14,13 @@
 %%    \pdiffm{w}{x,y,z}
 %%    \fdf{S}{q(t)}
 %%    \fdfm{S}{q(t),p(t')}
-%%    \pdl
-%%    \pdr
-%%    \pdlr
+%%    \pdl[\mu]
+%%    \pdr[\mu]
+%%    \pdlr[\mu]
+%%    \bp[\mu]
+%%    \pdg[\mu]
 %%    \intd[_0^\infty]{t} f(t)
-%%    \integ[f(x)]{x}
+%%    \integ[_0^\infty]{f(x)}{x}
 %%
 %% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
 
@@ -53,7 +52,7 @@
 % for defining derivatives with multiple independent variables:
 %    \drv@mdef{<command>}{<diff>}
 %    ==> <command>{<dep>}{<ind1>,<ind2>,...,<indN>}
-%        ==> \frac{<diff>^><dep>}{<diff><ind1>}<diff><ind2>}...<diff><indN>}
+%        ==> \frac{<diff>^N<dep>}{<diff><ind1><diff><ind2>...<diff><indN>}
 \newcommand{\drv@count}[1]{%
   \numdef\drv@num{0}%
   \def\drv@denom{}%
@@ -89,10 +88,21 @@
 \newcommand{\pdl}[1][]{\overleftarrow{\partial}_{#1}}
 \newcommand{\pdr}[1][]{\overrightarrow{\partial}_{#1}}
 \newcommand{\pdlr}[1][]{\overleftrightarrow{\partial_{#1}}}
+\newcommand{\bp}[1][]{\bar{\partial}_{#1}}
+\newcommand{\pdg}[1][]{\partial^\dag_{#1}}
 %
-\newcommand{\intd}[2][]{\int \ifblank{#1}{}{#1\!\!}%
-  \!\mathrm{d} #2\,\mathopen{}}
-\newcommand{\integ}[3][]{\int \ifblank{#1}{}{#1\!\!}\mathopen{}%
+%
+\newcommand{\dt}{\mathrm{d}t}
+\newcommand{\dx}{\mathrm{d}x}
+\newcommand{\dy}{\mathrm{d}y}
+\newcommand{\dz}{\mathrm{d}z}
+\newcommand{\dzb}{\mathrm{d}\bar{z}}
+%
+\newcommand{\intd}[2][]{\int%
+  \ifblank{#1}{}{#1\!\!}%
+  \!\mathrm{d}#2\,\mathopen{}}
+\newcommand{\integ}[3][]{\int%
+  \ifblank{#1}{}{#1\!\!}\mathopen{}%
   \ifblank{#2}{\cdots\;}{\! #2\,}%
   \mathrm{d}#3}
 %

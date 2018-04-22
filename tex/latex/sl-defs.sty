@@ -1,0 +1,146 @@
+%%  My standard definitions.
+%%
+%% Requires packages: amsmath, amssymb, delim
+%%
+%%
+%--------------------------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-defs}[2018/4/20 v1.0 standard definitions (SL)]
+%--------------------------------------------------------------------------------
+\RequirePackage{etoolbox}
+\newtoggle{sl@del}
+\newtoggle{sl@der}
+\newtoggle{sl@symb}
+%--------------------------------------------------------------------------------
+\DeclareOption{nodelims}{\togglefalse{sl@del}}
+\DeclareOption{delims}{\toggletrue{sl@del}}
+\DeclareOption{noderivs}{\togglefalse{sl@der}}
+\DeclareOption{derivs}{\toggletrue{sl@der}}
+\DeclareOption{nosymb}{\togglefalse{sl@symb}}
+\DeclareOption{symb}{\toggletrue{sl@symb}}
+
+%\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{}}
+\ExecuteOptions{delims,derivs,symb}
+\ProcessOptions
+%--------------------------------------------------------------------------------
+\iftoggle{sl@del}{\RequirePackage{sl-delims}}{}
+\iftoggle{sl@der}{\RequirePackage{sl-derivs}}{}
+%--------------------------------------------------------------------------------
+\newcommand{\vp}{\vspace{0.5cm}}
+\newcommand{\hp}{\hspace{0.5cm}}
+%
+%e.g., i.e. with normal spaces
+\newcommand{\eg}{e.g.\ }
+\newcommand{\ie}{i.e.\ }
+\newcommand{\cf}{cf.\ }
+\newcommand{\etc}{etc.\ }
+\newcommand{\wrt}{wrt.\ }
+\newcommand{\wlg}{wlg.\ }
+\newcommand{\Eg}{E.g.\ }
+\newcommand{\Ie}{I.e.\ }
+\newcommand{\Cf}{Cf.\ }
+\newcommand{\Etc}{Etc.\ }
+\newcommand{\Wlg}{Wlg.\ }
+%
+\newcommand{\ra}{\rightarrow}
+\newcommand{\lr}{\leftrightarrow}
+\newcommand{\cdt}{\!\cdot\!}
+%
+% indices
+\newcommand{\up}[1]{\mbox{}^{#1}}
+\newcommand{\dn}[1]{\mbox{}_{#1}}
+\newcommand{\rp}[1]{^{(#1)}}
+\newcommand{\lp}[1]{_{(#1)}}
+\newcommand{\psq}{^{\prime\,2}}
+\newcommand{\ppsq}{^{\prime\prime\,2}}
+%
+% Un-italicised letters
+\newcommand{\dr}{\mathrm{d}}
+\newcommand{\e}{\mathrm{e}}
+\newcommand{\ir}{\mathrm{i}}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Tr}{Tr}
+\DeclareMathOperator{\Det}{Det}
+\DeclareMathOperator{\cov}{Cov}
+\DeclareMathOperator{\var}{Var}
+\DeclareMathOperator{\bias}{Bias}
+\DeclareMathOperator{\rank}{rank}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\sech}{sech}
+\DeclareMathOperator{\diag}{diag}
+\newcommand{\lmax}{_\text{max}}
+\newcommand{\lmin}{_\text{min}}
+%
+% Matrix notation
+\newcommand{\inv}{^{-1}}
+\newcommand{\invsq}{^{-2}}
+\newcommand{\trans}{^\mathrm{T}}
+\newcommand{\transp}{{}^\mathrm{T}}
+\newcommand{\dg}{^\mathrm{dg}}
+\newcommand{\I}{\mathbf{I}}
+%
+% The default \Im and \Re look crap
+\renewcommand{\Im}{\operatorname{\mathfrak{Im}}}
+\renewcommand{\Re}{\operatorname{\mathfrak{Re}}}
+%
+% logic
+\newcommand{\means}{\Longleftrightarrow}
+\newcommand{\requires}{\Longleftarrow}
+%--------------------------------------------------------------------------------
+\iftoggle{sl@symb}{%
+  %
+  \newcommand{\R}{\mathbb{R}}
+  \newcommand{\C}{\mathbb{C}}
+%  \newcommand{\CP}{\mathbb{CP}} %use \C\Pr instead
+  \newcommand{\Z}{\mathbb{Z}}
+  \newcommand{\E}{\mathbb{E}}
+  \renewcommand{\Pr}{\mathbb{P}}
+  %
+  \newcommand{\CA}{\mathcal{A}}
+  \newcommand{\CB}{\mathcal{B}}
+  \newcommand{\CC}{\mathcal{C}}
+  \newcommand{\CD}{\mathcal{D}}
+  \newcommand{\CE}{\mathcal{E}}
+  \newcommand{\CF}{\mathcal{F}}
+  \newcommand{\CG}{\mathcal{G}}
+  \newcommand{\CH}{\mathcal{H}}
+  \newcommand{\CI}{\mathcal{I}}
+  \newcommand{\CJ}{\mathcal{J}}
+  \newcommand{\CK}{\mathcal{K}}
+  \newcommand{\CL}{\mathcal{L}}
+  \newcommand{\CM}{\mathcal{M}}
+  \newcommand{\CN}{\mathcal{N}}
+  \newcommand{\CO}{\mathcal{O}}
+  \newcommand{\CP}{\mathcal{P}}
+  \newcommand{\CQ}{\mathcal{Q}}
+  \newcommand{\CR}{\mathcal{R}}
+  \newcommand{\CS}{\mathcal{S}}
+  \newcommand{\CT}{\mathcal{T}}
+  \newcommand{\CU}{\mathcal{U}}
+  \newcommand{\CV}{\mathcal{V}}
+  \newcommand{\CW}{\mathcal{W}}
+  \newcommand{\CX}{\mathcal{X}}
+  \newcommand{\CY}{\mathcal{Y}}
+  \newcommand{\CZ}{\mathcal{Z}}
+  %
+  \newcommand{\ad}{{\dot{\alpha}}}
+  \newcommand{\bd}{{\dot{\beta}}}
+  \newcommand{\gd}{{\dot{\gamma}}}
+  \newcommand{\dd}{{\dot{\delta}}}
+  \newcommand{\ed}{{\dot{\epsilon}}}
+  %
+  \newcommand{\bs}{\overline{\sigma}}
+  \newcommand{\br}{\overline{\rho}}
+  \newcommand{\bpsi}{\overline{\psi}}
+  \newcommand{\bPsi}{\overline{\Psi}}
+  \newcommand{\zb}{\bar{z}}
+  \newcommand{\wb}{\overline{w}}
+  \newcommand{\ab}{\bar{a}}
+  \newcommand{\bb}{\bar{b}}
+  \newcommand{\cb}{\bar{c}}
+  %
+  \newcommand{\apm}{{\alpha^{\prime}}}
+  \newcommand{\adg}{a^\dagger}
+}{}
+%--------------------------------------------------------------------------------
+\endinput

@@ -41,51 +41,53 @@
 \@ifpackageloaded{cleveref}{% rest of package in this case!
 %--------------------------------------------------------------------------------
 % Factory for cleveref formats with compact equation references, name outside link
-\newcommand{\eqcref@nameout}[1]{% #1: c or C for lower/uppercase version.
+\newcommand{\eqcref@nameout}[3]{% #1: c/C/labelc for lower/uppercase version, #2/3 name(s).
 %  \csuse{#1refname}{equation}%
 %      {\csuse{#1ref@equation@name}}{\csuse{#1ref@equation@name@plural}}
   \csuse{#1refformat}{equation}%
-      {\csuse{#1ref@equation@name}~\eq@pre##2##1##3\eq@post}
+      {#2~\eq@pre##2##1##3\eq@post}
   \csuse{#1refrangeformat}{equation}%
-      {\csuse{#1ref@equation@name@plural}~\eq@pre##3##1##4--##5\crefstripprefix{##1}{##2}##6\eq@post}
+      {#3~\eq@pre##3##1##4--##5\crefstripprefix{##1}{##2}##6\eq@post}
   \csuse{#1refmultiformat}{equation}%
-      {\csuse{#1ref@equation@name@plural}~\eq@pre##2##1##3\edef\eqcref@prefix{##1}}%
+      {#3~\eq@pre##2##1##3\edef\eqcref@prefix{##1}}%
       {,##2\crefstripprefix{\eqcref@prefix}{##1}##3\eq@post}%
       {,##2\crefstripprefix{\eqcref@prefix}{##1}##3}%
       {,##2\crefstripprefix{\eqcref@prefix}{##1}##3\eq@post}
   \csuse{#1refrangemultiformat}{equation}%
-      {\csuse{#1ref@equation@name@plural}~\eq@pre##3##1##4--##5\crefstripprefix{##1}{##2}##6\edef\eqcref@prefix{##1}}%
+      {#3~\eq@pre##3##1##4--##5\crefstripprefix{##1}{##2}##6\edef\eqcref@prefix{##1}}%
       {,##3\crefstripprefix{\eqcref@prefix}{##1}##4--##5\crefstripprefix{##1}{##2}##6\eq@post}%
       {,##3\crefstripprefix{\eqcref@prefix}{##1}##4--##5\crefstripprefix{##1}{##2}##6}%
       {,##3\crefstripprefix{\eqcref@prefix}{##1}##4--##5\crefstripprefix{##1}{##2}##6\eq@post}
 }
 %--------------------------------------------------------------------------------
 % Factory for cleveref formats with compact equation references, name in link
-\newcommand{\eqcref@namein}[1]{% #1: c or C for lower/uppercase version.
+\newcommand{\eqcref@namein}[3]{% #1: c/C/labelc for lower/uppercase version, #2/3 name(s).
 %  \csuse{#1refname}{equation}%
 %      {\csuse{#1ref@equation@name}}{\csuse{#1ref@equation@name@plural}}
   \csuse{#1refformat}{equation}%
-      {##2\csuse{#1ref@equation@name}~\eq@pre##1\eq@post##3}
+      {##2#2~\eq@pre##1\eq@post##3}
   \csuse{#1refrangeformat}{equation}%
-      {##3\csuse{#1ref@equation@name@plural}~\eq@pre##1##4--##5\crefstripprefix{##1}{##2}\eq@post##6}
+      {##3#3~\eq@pre##1##4--##5\crefstripprefix{##1}{##2}\eq@post##6}
   \csuse{#1refmultiformat}{equation}%
-      {##2\csuse{#1ref@equation@name@plural}~\eq@pre##1##3\edef\eqcref@prefix{##1}}%
+      {##2#3~\eq@pre##1##3\edef\eqcref@prefix{##1}}%
       {,##2\crefstripprefix{\eqcref@prefix}{##1}\eq@post##3}%
       {,##2\crefstripprefix{\eqcref@prefix}{##1}##3}%
       {,##2\crefstripprefix{\eqcref@prefix}{##1}\eq@post##3}
   \csuse{#1refrangemultiformat}{equation}%
-      {##3\csuse{#1ref@equation@name@plural}~\eq@pre##1##4--##5\crefstripprefix{##1}{##2}##6\edef\eqcref@prefix{##1}}%
+      {##3#3~\eq@pre##1##4--##5\crefstripprefix{##1}{##2}##6\edef\eqcref@prefix{##1}}%
       {,##3\crefstripprefix{\eqcref@prefix}{##1}##4--##5\crefstripprefix{##1}{##2}\eq@post##6}%
       {,##3\crefstripprefix{\eqcref@prefix}{##1}##4--##5\crefstripprefix{##1}{##2}##6}%
       {,##3\crefstripprefix{\eqcref@prefix}{##1}##4--##5\crefstripprefix{##1}{##2}\eq@post##6}
 }
 %--------------------------------------------------------------------------------
 \@ifpackagewith{cleveref}{nameinlink}{%
-  \eqcref@namein{c}
-  \eqcref@namein{C}
+  \eqcref@namein{c}{\cref@equation@name~}{\cref@equation@name@plural~}
+  \eqcref@namein{C}{\Cref@equation@name~}{\Cref@equation@name@plural~}
+  \eqcref@namein{labelc}{}{}
 }{%
-  \eqcref@nameout{c}
-  \eqcref@nameout{C}
+  \eqcref@nameout{c}{\cref@equation@name~}{\cref@equation@name@plural~}
+  \eqcref@nameout{C}{\Cref@equation@name~}{\Cref@equation@name@plural~}
+  \eqcref@nameout{labelc}{}{}
 }
 %--------------------------------------------------------------------------------
 %\@ifpackageloaded{cleveref} closed here

@@ -361,21 +361,21 @@ FUNCTION {format.names}
     { namesleft #0 > }
     { "\FormatName{" s nameptr "{f.~}{vv~}{ll}{, jj}" format.name$ * "}" * 't :=
       nameptr #1 >
-	{ namesleft #1 >
+      { namesleft #1 >
 	    { ", " * t * }
 	    { numnames #2 >
-		{ "," * }
-		'skip$
+   		  { "," * }
+   		  'skip$
 	      if$
 	      t "others" =
-		{ " {\em et al.}" * }
-		{ " and " * t * }
+		    { " {\em et al.}" * }
+		    { " and " * t * }
 	      if$
 	    }
 	  if$
-	}
+	  }
 	't
-      if$
+    if$
       nameptr #1 + 'nameptr :=
       namesleft #1 - 'namesleft :=
     }
@@ -409,11 +409,11 @@ FUNCTION {format.eprint}
 { eprint empty$
      { ""}
      { archive empty$
-          {"\href{http://arxiv.org/abs/" eprint * "}" *
-             "{{\tt " * format.archive * eprint *
+          {" \href{http://arxiv.org/abs/" eprint * "}" *
+             "{\texttt{" * format.archive * eprint *
               format.primaryClass * "}}" *}
-          {"\href{" archive *  "/" * eprint * "}" *
-             "{{\tt " * format.archive * eprint *
+          {" \href{" archive *  "/" * eprint * "}" *
+             "{\texttt{" * format.archive * eprint *
               format.primaryClass * "}}" *}
        if$
      }
@@ -563,8 +563,8 @@ FUNCTION {format.date.paren}
       if$
     }
     { month empty$
-	{"(" year * ") " *}
-	{"(" month * ", " * year * ") " *}
+	{" (" year * ")" *}
+	{" (" month * ", " * year * ")" *}
       if$
     }
   if$
@@ -573,7 +573,7 @@ FUNCTION {format.date.paren}
 FUNCTION {format.collaboration}
 { collaboration empty$
     { "" }
-    { "{\bf " collaboration * "} " * "Collaboration" * }
+    { " {\bf " collaboration * "} " * "Collaboration" * }
   if$
 }
 
@@ -606,7 +606,7 @@ FUNCTION {either.or.check}
 FUNCTION {format.bvolume}
 { volume empty$
     { "" }
-    { "vol.~" volume *
+    { " vol.~" volume *
       series empty$
 	'skip$
 	{ " of " * series emphasize * }
@@ -621,8 +621,8 @@ FUNCTION {format.number.series}
     { number empty$
 	{ series field.or.null }
 	{ output.state mid.sentence =
-	    { "no.~" }
-	    { "No.~" }
+	    { " no.~" }
+	    { " No.~" }
 	  if$
 	  number *
 	  series empty$
@@ -639,7 +639,7 @@ FUNCTION {format.number.series}
 FUNCTION {format.edition}
 { edition empty$
     { "" }
-    { edition "l" change.case$ "~ed." * }
+    { " " edition "l" change.case$ * "~ed." * }
   if$
 }
 
@@ -669,8 +669,8 @@ FUNCTION {format.pages}
 { pages empty$
     { "" }
     { pages multi.page.check
-	{ "pp.~" pages n.dashify * }
-	{ "p.~" pages * }
+	{ " pp.~" pages n.dashify * }
+	{ " p.~" pages * }
       if$
     }
   if$
@@ -680,8 +680,8 @@ FUNCTION {format.pages.nopp}
 { pages empty$
     { "" }
     { pages multi.page.check
-	{ pages n.dashify  }
-	{ pages }
+	{ " " pages n.dashify * }
+	{ " " pages * }
       if$
     }
   if$
@@ -691,14 +691,14 @@ FUNCTION {format.pages.nopp}
 FUNCTION {format.volume}
 { volume empty$
     { "" }
-    { "{\bf " volume * "} " * }
+    { " {\bf " volume * "} " * }
   if$
 }
 
 FUNCTION {format.number}
 { number empty$
     { "" }
-    { "no.~" number * "," *}
+    { " no.~" number * "," *}
   if$
 }
 
@@ -706,7 +706,7 @@ FUNCTION {format.chapter.pages}
 { chapter empty$
     'format.pages
     { type empty$
-	{ "ch.~" chapter * }
+	{ " ch.~" chapter * }
 	{ type "l" change.case$ chapter tie.or.space.connect }
       if$
       pages empty$
@@ -853,7 +853,7 @@ FUNCTION {format.incoll.inproc.crossref}
 FUNCTION {format.journal}
 { journal missing$
     { "" }
-    {journal emphasize " " *
+    {journal emphasize
      format.volume *
      format.date.paren *
      month empty$
@@ -1170,6 +1170,23 @@ FUNCTION {phdthesis}
   new.block
   format.url output
   new.block
+  note output
+  new.sentence
+  format.SLACcitation output
+  fin.entry
+}
+
+FUNCTION {preprint}
+{ output.bibitem
+  format.collaboration output
+  format.authors "author" output.check
+  format.title "title" output.check
+  blank.sep
+  format.date.paren "year" output.check
+  format.eprint output
+  new.sentence
+%  format.url output
+%  new.sentence
   note output
   new.sentence
   format.SLACcitation output

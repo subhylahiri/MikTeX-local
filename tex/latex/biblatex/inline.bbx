@@ -1,0 +1,13 @@
+\ProvidesFile{inline.bbx}
+[\abx@bbxid]
+%--------------------------------------------------------------------------------
+\defbibenvironment{bibliography}
+  {\noindent}
+  {\unspace}
+  {\printtext[bold]{\printtext[labelnumberwidth]{%
+    \printfield{labelpre}%
+    \printfield{labelnumber}}}
+    \addspace}
+\renewbibmacro*{finentry}{\finentry\quad}
+%--------------------------------------------------------------------------------
+\endinput

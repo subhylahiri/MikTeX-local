@@ -608,8 +608,8 @@ FUNCTION {format.bvolume}
     { "" }
     { " vol.~" volume *
       series empty$
-	'skip$
-	{ " of " * series emphasize * }
+    	'skip$
+    	{ " of " * series emphasize * }
       if$
       "volume and number" number either.or.check
     }

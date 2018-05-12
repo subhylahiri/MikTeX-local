@@ -1,0 +1,234 @@
+\ProvidesFile{links.bbx}
+[\abx@bbxid]
+%--------------------------------------------------------------------------------
+\RequireBibliographyStyle{numeric}
+\ExecuteBibliographyOptions{isbn=false,url=false,doi=false,eprint,related}
+\DeclareBibliographyOption[boolean]{inline}[true]{\RequireBibliographyStyle{inline}}
+%================================================================================
+\renewcommand{\ppspace}{\addnbthinspace}
+%--------------------------------------------------------------------------------
+\DeclareDelimFormat[bib,biblist]{nametitledelim}{\addcomma\space}
+\DeclareDelimFormat[bib,biblist]{posttitledelim}{\addcomma\space}
+%--------------------------------------------------------------------------------
+\DeclareFieldAlias[preprint]{title}[article]{title}
+%--------------------------------------------------------------------------------
+\DeclareFieldFormat[article,inproceedings]{volume}{\textbf{#1}}
+%--------------------------------------------------------------------------------
+\DeclareFieldFormat{eprint:arxiv}{%
+  \ifhyperref{\href{https://arxiv.org/\abx@arxivpath/#1}}{}%
+  {\texttt{arXiv:#1}%
+   \iffieldundef{eprintclass}
+     {}
+     {\addspace\texttt{\mkbibbrackets{\thefield{eprintclass}}}}}}
+%--------------------------------------------------------------------------------
+\DeclareFieldFormat{eprint:biorxiv}{%
+  \ifhyperref{\href{https://dx.doi.org/10.1101/#1}}{}%
+  {\nolinkurl{bioRxiv:#1}}}
+\DeclareFieldAlias{eprint:bioRxiv}{eprint:biorxiv}
+%--------------------------------------------------------------------------------
+\DeclareFieldFormat{eprint:pubmed}{%
+  \ifhyperref{\href{http://www.ncbi.nlm.nih.gov/pubmed/#1}}{}%
+  {\nolinkurl{PMID:#1}}}
+%--------------------------------------------------------------------------------
+\DeclareFieldFormat{eprint:pmc}{%
+  \ifhyperref{\href{http://www.ncbi.nlm.nih.gov/pmc/articles/#1}}{}%
+  {\nolinkurl{PMC:#1}}}
+\DeclareFieldAlias{eprint:PMC}{eprint:pmc}
+%================================================================================
+\DeclareBibliographyDriver{article}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \usebibmacro{bytranslator+others}%
+  \newunit\newblock
+  \printfield{version}%
+  \setunit{\printdelim{posttitledelim}}\newblock
+%  \usebibmacro{in:}%
+  \usebibmacro{link+doi/url}{%
+      \usebibmacro{journal+date}}
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{issn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{note+addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+%--------------------------------------------------------------------------------
+\DeclareBibliographyDriver{incollection}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \setunit{\printdelim{posttitledelim}}\newblock
+  \usebibmacro{in:}%
+  \usebibmacro{link+doi/url}{%
+    \usebibmacro{book+date+pages}} %
+  \newunit\newblock
+  \usebibmacro{byeditor+others}%
+  \newunit\newblock
+  \printfield{edition}%
+  \newunit
+  \printfield{volumes}%
+  \newunit\newblock
+  \usebibmacro{series+number}%
+  \newunit\newblock
+  \printfield{note}%
+  \newunit\newblock
+  \usebibmacro{publisher+location+date}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{isbn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+%--------------------------------------------------------------------------------
+\DeclareBibliographyDriver{inproceedings}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \setunit{\printdelim{posttitledelim}}\newblock
+  \usebibmacro{in:}%
+  \usebibmacro{link+doi/url}{%
+    \usebibmacro{book+date+pages}} %
+  \newunit\newblock
+  \usebibmacro{event+venue+date}%
+  \newunit\newblock
+  \usebibmacro{byeditor+others}%
+  \newunit\newblock
+  \printfield{volumes}%
+  \newunit\newblock
+  \usebibmacro{series+number}%
+  \newunit\newblock
+  \printfield{note}%
+  \newunit\newblock
+  \printlist{organization}%
+  \newunit
+  \usebibmacro{publisher+location}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{isbn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+%--------------------------------------------------------------------------------
+\DeclareBibliographyDriver{preprint}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \newunit\newblock
+  \usebibmacro{bytranslator+others}%
+  \newunit\newblock
+  \printfield{version}%
+  \newunit\newblock
+%  \usebibmacro{in:}%
+  \usebibmacro{date}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{note+addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+%================================================================================
+\newbibmacro*{link+doi/url}[1]{%
+  \printtext{\relax}\ifhyperref%
+  {\iffieldundef{doi}
+    {\iffieldundef{url}
+      {}
+      {\href{\thefield{url}}}}
+    {\href{http://dx.doi.org/\thefield{doi}}}}
+    {}{#1}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{journal+date}{%
+  \usebibmacro{journal+issuetitle}
+  \newunit
+  \usebibmacro{byeditor+others}%
+  \setunit{\bibpagespunct}%
+  \printfield{pages}%
+  \newunit}
+%--------------------------------------------------------------------------------
+\newbibmacro*{note+addendum+pubstate}{%
+  \printfield{note}
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{book+date+pages}{%
+  \usebibmacro{maintitle+booktitle}%
+  \setunit{\addcomma\space}
+  \iffieldundef{maintitle}
+    {\printfield{volume}%
+     \printfield{part}%
+     \setunit{\addcomma\space}}
+    {}
+  \usebibmacro{date}%
+  \newunit\newblock
+  \usebibmacro{chapter+pages}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{publisher+location}{%
+  \printlist{location}%
+  \iflistundef{publisher}
+    {\setunit*{\addcomma\space}}
+    {\setunit*{\addcolon\space}}%
+  \printlist{publisher}%
+  \newunit}
+%================================================================================
+
+\endinput

@@ -1,13 +1,21 @@
+%
+% This style is not meant to be used alne. It should be called by another style.
+%
+% It puts references into a single paaragraph.
+%================================================================================
 \ProvidesFile{inline.bbx}
-[\abx@bbxid]
+[2018/5/13 bibliographies in a single paragraph (SL)]
+%--------------------------------------------------------------------------------
+\RequireBibliographyStyle{standard}
 %--------------------------------------------------------------------------------
 \defbibenvironment{bibliography}
   {\noindent}
   {\unspace}
   {\printtext[bold]{\printtext[labelnumberwidth]{%
-    \printfield{labelpre}%
+    \printfield{labelprefix}%
     \printfield{labelnumber}}}
     \addspace}
-\renewbibmacro*{finentry}{\finentry\quad}
 %--------------------------------------------------------------------------------
+\renewbibmacro*{finentry}{\finentry\quad}
+%================================================================================
 \endinput

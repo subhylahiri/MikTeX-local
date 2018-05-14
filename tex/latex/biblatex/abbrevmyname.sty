@@ -19,8 +19,9 @@
 \providecommand{\highlightname}{}
 \providecommand{\myname}[1]{\renewcommand{\highlightname}{#1}}
 \providebibmacro{ifhighlightname}[3]{\IfSubStr{#1}{\highlightname}{#2}{#3}}%
-\xpretonameformat{labelname}{\bgroup}%
-   {}{\PackageWarning{abbrevmyname}{Failed to patch bib name format labelname!}}
+%--------------------------------------------------------------------------------
+%\xpretonameformat{labelname}{\bgroup}%
+%   {}{\PackageWarning{abbrevmyname}{Failed to patch bib name format labelname!}}
 %\xpatchnameformat{labelname}{\usebibmacro{name:andothers}}{\egroup\usebibmacro{name:andothers}}%
 %   {}{\PackageWarning{abbrevmyname}{Failed to patch bib name format labelname!}}
 %\xpretonameformat{labelname}%
@@ -31,6 +32,7 @@
 %        {\namepartprefixi}%
 %        {\namepartsuffixi}}}%
 %  {}{\PackageWarning{abbrevmyname}{Failed to patch bib name format labelname!}}
+%--------------------------------------------------------------------------------
 \DeclareNameFormat{labelname}{%
   \usebibmacro{ifhighlightname}{\namepartgiven\namepartprefix\namepartfamily\namepartsuffix}%
     {\usebibmacro{name:family}%

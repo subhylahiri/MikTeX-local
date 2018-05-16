@@ -16,6 +16,7 @@
 \DeclareDelimFormat[bib,biblist]{posttitledelim}{\addcomma\space}
 %--------------------------------------------------------------------------------
 \DeclareFieldAlias[preprint]{title}[article]{title}
+\DeclareFieldAlias[presentation]{title}[article]{title}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat[article,inproceedings]{volume}{\textbf{#1}}
 %--------------------------------------------------------------------------------
@@ -184,6 +185,51 @@
   \usebibmacro{doi+eprint+url}%
   \newunit\newblock
   \usebibmacro{note+addendum+pubstate}%
+  \setunit{\bibpagerefpunct}\newblock
+  \usebibmacro{pageref}%
+  \newunit\newblock
+  \iftoggle{bbx:related}
+    {\usebibmacro{related:init}%
+     \usebibmacro{related}}
+    {}%
+  \usebibmacro{finentry}}
+%--------------------------------------------------------------------------------
+\DeclareBibliographyDriver{presentation}{%
+  \usebibmacro{bibindex}%
+  \usebibmacro{begentry}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \newunit\newblock
+  \usebibmacro{byauthor}%
+  \setunit{\printdelim{posttitledelim}}\newblock
+  \usebibmacro{in:}%
+  \usebibmacro{link+doi/url}{%
+    \usebibmacro{book+date+pages}} %
+  \newunit\newblock
+  \printlist{organization}%
+  \newunit
+  \usebibmacro{publisher+location}%
+  \newunit
+  \usebibmacro{event+venue+date}%
+  \newunit\newblock
+  \usebibmacro{byeditor+others}%
+  \newunit\newblock
+  \printfield{volumes}%
+  \newunit\newblock
+  \usebibmacro{series+number}%
+  \newunit\newblock
+  \printfield{note}%
+  \newunit\newblock
+  \iftoggle{bbx:isbn}
+    {\printfield{isbn}}
+    {}%
+  \newunit\newblock
+  \usebibmacro{doi+eprint+url}%
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}%
   \setunit{\bibpagerefpunct}\newblock
   \usebibmacro{pageref}%
   \newunit\newblock

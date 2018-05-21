@@ -6,7 +6,14 @@
 \ProvidesFile{links.bbx}
 [2018/5/13 bibliographies with journal hyperlinks (SL)]
 %--------------------------------------------------------------------------------
+\newtoggle{bbx:eventfirst}
+%--------------------------------------------------------------------------------
 \RequireBibliographyStyle{standard}
+\DeclareBibliographyOption[boolean]{eventfirst}[true]{%
+  \settoggle{bbx:eventfirst}{#1}
+  \iftoggle{bbx:eventfirst}
+    {\ExecuteBibliographyOptions[presentation]{useauthor=false}}
+    {}}
 \ExecuteBibliographyOptions{isbn=false,url=false,doi=false,eprint,related}
 \DeclareBibliographyOption[boolean]{inline}[true]{\RequireBibliographyStyle{inline}}
 %================================================================================
@@ -14,11 +21,17 @@
 %--------------------------------------------------------------------------------
 \DeclareDelimFormat[bib,biblist]{nametitledelim}{\addcomma\space}
 \DeclareDelimFormat[bib,biblist]{posttitledelim}{\addcomma\space}
+\DeclareDelimFormat[bib,biblist]{posteventdelim}{\addperiod\newline}
 %--------------------------------------------------------------------------------
 \DeclareFieldAlias[preprint]{title}[article]{title}
 \DeclareFieldAlias[presentation]{title}[article]{title}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat[article,inproceedings]{volume}{\textbf{#1}}
+%--------------------------------------------------------------------------------
+\DeclareFieldFormat[presentation]{format}{%
+ \iftoggle{bbx:eventfirst}
+   {\MakeSentenceCase*{#1}\intitlepunct}
+   {#1\addspace}}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat{eprint:arxiv}{%
   \ifhyperref{\href{https://arxiv.org/\abx@arxivpath/#1}}{}%
@@ -40,6 +53,80 @@
   \ifhyperref{\href{http://www.ncbi.nlm.nih.gov/pmc/articles/#1}}{}%
   {\nolinkurl{PMC:#1}}}
 \DeclareFieldAlias{eprint:PMC}{eprint:pmc}
+%================================================================================
+\newbibmacro*{at:}{%
+  \printtext{%
+    \ifbibstring{at}%
+      {\bibstring{at}}%
+      {at}%
+    \intitlepunct}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{link+doi/url}[1]{%
+  \printtext{\relax}\ifhyperref%
+  {\iffieldundef{doi}
+    {\iffieldundef{url}
+      {}
+      {\href{\thefield{url}}}}
+    {\href{http://dx.doi.org/\thefield{doi}}}}
+    {}{#1}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{journal+date}{%
+  \usebibmacro{journal+issuetitle}
+  \newunit
+  \usebibmacro{byeditor+others}%
+  \setunit{\bibpagespunct}%
+  \printfield{pages}%
+  \newunit}
+%--------------------------------------------------------------------------------
+\newbibmacro*{note+addendum+pubstate}{%
+  \printfield{note}
+  \newunit\newblock
+  \usebibmacro{addendum+pubstate}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{book+date+pages}{%
+  \usebibmacro{maintitle+booktitle}%
+  \setunit{\addcomma\space}
+  \iffieldundef{maintitle}
+    {\printfield{volume}%
+     \printfield{part}%
+     \setunit{\addcomma\space}}
+    {}
+  \usebibmacro{date}%
+  \newunit\newblock
+  \usebibmacro{chapter+pages}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{publisher+location}{%
+  \printlist{location}%
+  \iflistundef{publisher}
+    {\setunit*{\addcomma\space}}
+    {\setunit*{\addcolon\space}}%
+  \printlist{publisher}%
+  \newunit}
+%--------------------------------------------------------------------------------
+\newbibmacro*{organization+event}{%
+  \printfield{eventtitle}%
+  \newunit
+  \printfield{eventtitleaddon}%
+  \ifboolexpr{
+    test {\iffieldundef{organization}}
+    and
+    test {\iffieldundef{venue}}
+    and
+    test {\iffieldundef{location}}
+    and
+    test {\iffieldundef{eventyear}}
+  }
+    {}
+    {\setunit{\addspace}%
+     \printtext[parens]{%
+       \printlist{organization}%
+       \setunit*{\addcomma\space}%
+       \printfield{venue}%
+       \setunit*{\addcomma\space}%
+       \printlist{location}%
+       \setunit*{\addcomma\space}%
+       \printeventdate}}%
+  \newunit}
 %================================================================================
 \DeclareBibliographyDriver{article}{%
   \usebibmacro{bibindex}%
@@ -197,6 +284,25 @@
 \DeclareBibliographyDriver{presentation}{%
   \usebibmacro{bibindex}%
   \usebibmacro{begentry}%
+%--------------------------------------------------------------------------------
+\iftoggle{bbx:eventfirst}{
+%--------------------------------------------------------------------------------
+%bbx:eventfirst true
+  \usebibmacro{link+doi/url}{%
+    \usebibmacro{organization+event}}%
+  \setunit{\printdelim{posteventdelim}}\newblock
+  \printfield{format}%
+  \usebibmacro{author/translator+others}%
+  \setunit{\printdelim{nametitledelim}}\newblock
+  \usebibmacro{title}%
+  \newunit
+  \printlist{language}%
+  \setunit{\printdelim{posttitletdelim}}\newblock
+  \usebibmacro{byauthor}%
+  \setunit{\printdelim{posttitledelim}}\newblock
+}{%
+%--------------------------------------------------------------------------------
+%bbx:eventfirst false
   \usebibmacro{author/translator+others}%
   \setunit{\printdelim{nametitledelim}}\newblock
   \usebibmacro{title}%
@@ -205,21 +311,18 @@
   \newunit\newblock
   \usebibmacro{byauthor}%
   \setunit{\printdelim{posttitledelim}}\newblock
-  \usebibmacro{in:}%
+  \printfield{format}%
+  \usebibmacro{at:}%
   \usebibmacro{link+doi/url}{%
-    \usebibmacro{book+date+pages}} %
+    \usebibmacro{organization+event}}%
   \newunit\newblock
-  \printlist{organization}%
-  \newunit
-  \usebibmacro{publisher+location}%
-  \newunit
-  \usebibmacro{event+venue+date}%
-  \newunit\newblock
-  \usebibmacro{byeditor+others}%
-  \newunit\newblock
+}
+%--------------------------------------------------------------------------------
   \printfield{volumes}%
   \newunit\newblock
   \usebibmacro{series+number}%
+  \newunit\newblock
+  \usebibmacro{byeditor+others}%
   \newunit\newblock
   \printfield{note}%
   \newunit\newblock
@@ -238,48 +341,6 @@
      \usebibmacro{related}}
     {}%
   \usebibmacro{finentry}}
-%================================================================================
-\newbibmacro*{link+doi/url}[1]{%
-  \printtext{\relax}\ifhyperref%
-  {\iffieldundef{doi}
-    {\iffieldundef{url}
-      {}
-      {\href{\thefield{url}}}}
-    {\href{http://dx.doi.org/\thefield{doi}}}}
-    {}{#1}}
-%--------------------------------------------------------------------------------
-\newbibmacro*{journal+date}{%
-  \usebibmacro{journal+issuetitle}
-  \newunit
-  \usebibmacro{byeditor+others}%
-  \setunit{\bibpagespunct}%
-  \printfield{pages}%
-  \newunit}
-%--------------------------------------------------------------------------------
-\newbibmacro*{note+addendum+pubstate}{%
-  \printfield{note}
-  \newunit\newblock
-  \usebibmacro{addendum+pubstate}}
-%--------------------------------------------------------------------------------
-\newbibmacro*{book+date+pages}{%
-  \usebibmacro{maintitle+booktitle}%
-  \setunit{\addcomma\space}
-  \iffieldundef{maintitle}
-    {\printfield{volume}%
-     \printfield{part}%
-     \setunit{\addcomma\space}}
-    {}
-  \usebibmacro{date}%
-  \newunit\newblock
-  \usebibmacro{chapter+pages}}
-%--------------------------------------------------------------------------------
-\newbibmacro*{publisher+location}{%
-  \printlist{location}%
-  \iflistundef{publisher}
-    {\setunit*{\addcomma\space}}
-    {\setunit*{\addcolon\space}}%
-  \printlist{publisher}%
-  \newunit}
 %================================================================================
 
 \endinput

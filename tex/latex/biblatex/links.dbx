@@ -1,0 +1,23 @@
+\ProvidesFile{links.dbx}[2018/5/20 custom data types (SL)]
+%================================================================================
+\DeclareDatamodelEntrytypes{presentation}
+\DeclareDatamodelFields[type=field,datatype=literal]{format}
+\DeclareDatamodelEntryfields[presentation]{
+  author,
+  byauthor,
+  eventyear,
+  eventmonth,
+  eventday,
+  eventhour,
+  eventminute,
+  eventendyear,
+  eventendmonth,
+  eventendday,
+  eventendhour,
+  eventendminute,
+  eventtitle,
+  location,
+  format,
+  organization,
+  title,
+  venue}

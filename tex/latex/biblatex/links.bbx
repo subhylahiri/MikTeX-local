@@ -22,6 +22,8 @@
 \DeclareDelimFormat[bib,biblist]{nametitledelim}{\addcomma\space}
 \DeclareDelimFormat[bib,biblist]{posttitledelim}{\addcomma\space}
 \DeclareDelimFormat[bib,biblist]{posteventdelim}{\addperiod\newline}
+\newcommand{\relateddelimpresentation}{\printdelim{posteventdelim}}
+\newcommand{\begrelateddelimpresentation}{\printdelim{posteventdelim}}
 %--------------------------------------------------------------------------------
 \DeclareFieldAlias[preprint]{title}[article]{title}
 \DeclareFieldAlias[presentation]{title}[article]{title}
@@ -127,6 +129,10 @@
        \setunit*{\addcomma\space}%
        \printeventdate}}%
   \newunit}
+%--------------------------------------------------------------------------------
+\newbibmacro*{related:presentation}[1]{%
+  \entrydata*{#1}{%
+  \usedriver{\renewbibmacro*{link+doi/url}[1]{}}{presentation}}}
 %================================================================================
 \DeclareBibliographyDriver{article}{%
   \usebibmacro{bibindex}%
@@ -134,7 +140,7 @@
   \usebibmacro{author/translator+others}%
   \setunit{\printdelim{nametitledelim}}\newblock
   \usebibmacro{title}%
-  \newunit
+  \setunit{\printdelim{posttitledelim}}
   \printlist{language}%
   \newunit\newblock
   \usebibmacro{byauthor}%
@@ -257,7 +263,7 @@
   \usebibmacro{author/translator+others}%
   \setunit{\printdelim{nametitledelim}}\newblock
   \usebibmacro{title}%
-  \newunit
+  \printunit{\printdelim{posttitledelim}}
   \printlist{language}%
   \newunit\newblock
   \usebibmacro{byauthor}%
@@ -297,7 +303,7 @@
   \usebibmacro{title}%
   \newunit
   \printlist{language}%
-  \setunit{\printdelim{posttitletdelim}}\newblock
+  \setunit{\printdelim{posttitledelim}}\newblock
   \usebibmacro{byauthor}%
   \setunit{\printdelim{posttitledelim}}\newblock
 }{%
@@ -308,7 +314,7 @@
   \usebibmacro{title}%
   \newunit
   \printlist{language}%
-  \newunit\newblock
+  \setunit{\printdelim{posttitledelim}}\newblock
   \usebibmacro{byauthor}%
   \setunit{\printdelim{posttitledelim}}\newblock
   \printfield{format}%

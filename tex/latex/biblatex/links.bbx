@@ -28,7 +28,7 @@
 \DeclareFieldAlias[preprint]{title}[article]{title}
 \DeclareFieldAlias[presentation]{title}[article]{title}
 %--------------------------------------------------------------------------------
-\DeclareFieldFormat[article,inproceedings]{volume}{\textbf{#1}}
+\DeclareFieldFormat[article,inproceedings]{volume}{\printtext[bold]{#1}}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat[presentation]{format}{%
  \iftoggle{bbx:eventfirst}

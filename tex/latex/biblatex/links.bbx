@@ -93,7 +93,8 @@
      \printfield{part}%
      \setunit{\addcomma\space}}
     {}
-  \usebibmacro{date}%
+  \printtext[parens]{%
+    \usebibmacro{date}}%
   \newunit\newblock
   \usebibmacro{chapter+pages}}
 %--------------------------------------------------------------------------------
@@ -273,7 +274,8 @@
   \printfield{version}%
   \newunit\newblock
 %  \usebibmacro{in:}%
-  \usebibmacro{date}%
+  \printtext[parens]{%
+    \usebibmacro{date}}%
   \newunit\newblock
   \usebibmacro{doi+eprint+url}%
   \newunit\newblock

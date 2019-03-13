@@ -29,6 +29,7 @@
 \newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
 \newcommand{\citerr}[1]{\hfill {\footnotesize{\color{darkgrey}\cite{#1}}}}
 \newcommand{\citerp}[1]{\hfill {\footnotesize{\color{darkgrey}\citep{#1}}}}
+%-----------Lists---------------------------------------------------------
 %\newcommand\paraitem{%
 % \makebox[0.5\labelwidth][r]{%
 % \makelabel{%
@@ -37,17 +38,17 @@
 %  \usebeamercolor[fg]{itemize item}
 %  \usebeamertemplate{itemize item}}
 
-\newenvironment{inlineitemize}{%
- \let\par\relax%
- \def\item{\usebeamertemplate{itemize item}\hspace{1mm}}
- \leavevmode%
-}{}
+%\newenvironment{inlineitemize}{%
+% \let\par\relax%
+% \def\item{\usebeamertemplate{itemize item}\hspace{1mm}}
+% \leavevmode%
+%}{}
 
-\newenvironment{inlineenumerate}{%
- \let\par\relax%
- \setcounter{enumi}{1}%
- \def\item{\usebeamertemplate{enumerate  item} \stepcounter{enumi}}%
- \leavevmode%
-}{%
- \setcounter{enumi}{0}%
-}
+%\newenvironment{inlineenumerate}{%
+% \let\par\relax%
+% \setcounter{enumi}{1}%
+% \def\item{\usebeamertemplate{enumerate  item} \stepcounter{enumi}}%
+% \leavevmode%
+%}{%
+% \setcounter{enumi}{0}%
+%}

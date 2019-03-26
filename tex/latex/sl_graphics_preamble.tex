@@ -9,8 +9,12 @@
 \epstopdfsetup{update,suffix=-generated}
 %
 %\newcommand{\inkscapedir}{C:/Program Files/Inkscape/}
-\IfFileExists{"C:/Program Files/Inkscape/inkscape.exe"}{\newcommand{\inkscapedir}{C:/Progra\string~1/Inkscape/}}{}
-\IfFileExists{"/Applications/Inkscape.app/Contents/Resources/bin/inkscape"}{\newcommand{\inkscapedir}{/Applications/Inkscape.app/Contents/Resources/bin/}}{}
+\IfFileExists{"C:/Program Files/Inkscape/inkscape.exe"}
+  {\newcommand{\inkscapedir}{C:/Progra\string~1/Inkscape/}}
+  {}
+\IfFileExists{"/Applications/Inkscape.app/Contents/Resources/bin/inkscape"}
+  {\newcommand{\inkscapedir}{/Applications/Inkscape.app/Contents/Resources/bin/}}
+  {}
 \providecommand{\inkscapedir}{}
 %
 \ifpdf

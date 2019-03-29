@@ -1,4 +1,4 @@
-% this style was created by Subhaneil Lahiri, 2012
+% this style was created by Subhaneil Lahiri, 2019
 % based on Dreuw by: Philippe Dreuw and Thomas Deselaers
 % and Madrid by: % Copyright 2007 by Till Tantau
 \ProvidesPackage{beamerthemeSpartan}
@@ -45,25 +45,21 @@
 
 
 %\setbeamercolor*{normal text}{fg=tachameleon, bg=ta3gray}
-%\setbeamercolor*{block body}{bg=ta3aluminium,fg=black}
 \setbeamercolor{block body}{use=structure,bg=white,fg=black}
 \setbeamercolor{block title}{use=structure,bg=white,fg=structure.fg!50!black}
 \setbeamerfont{block title}{size=\large,series=\bfseries}
 \setbeamercolor{upper separation line head}{fg=white}
 
 %\setbeamercolor*{example body}{fg=ta3aluminium,bg=black}
+%\setbeamercolor{example text}{fg=taorange}
 %\setbeamercolor*{example text}{fg=ta3aluminium,bg=black}
 %\setbeamercolor*{example title}{bg=taorange,fg=ta2gray}
 
 %\setbeamercolor{alerted text}{fg=gray}
 
-%\setbeamercolor{example text}{fg=taorange}
 %\setbeamercolor{structure}{fg=structure.fg!75!black}
 
-%\setbeamercolor{section title}{parent=block title}
-%\setbeamercolor{section title}{parent=block body}
 \setbeamercolor{section title}{use=struture,fg=white,bg=structure.fg!75!black}
-%\setbeamercolor{section title}{bg=bg!75!black}
 \setbeamerfont{section title}{size=\large,series=\bfseries,family=\sffamily}
 %\setbeamercolor{section title border}{use=struture,bg=structure.fg!75!black}
 
@@ -123,20 +119,7 @@
   \end{beamercolorbox}
 }
 
-%  \setbeamertemplate{headline}{
-%    \leavevmode
-%    \begin{beamercolorbox}[sep=0.5cm,wd=.8\paperwidth]{headline}
-%      \usebeamercolor{title in headline}{\raggedleft\color{fg}\textbf{\LARGE{\inserttitle}}\\[1ex]}
-%      \usebeamercolor{author in headline}{\raggedleft\color{fg}\large{\insertauthor}\\[1ex]}
-%      \usebeamercolor{institute in headline}{\raggedleft\color{fg}\large{\insertinstitute}\\[1ex]}
-%    \end{beamercolorbox}%
-%    \begin{beamercolorbox}[wd=.2\paperwidth]{logo in headline}
-%      \centering
-%      \LARGE{LOGO}
-%    \end{beamercolorbox}
 
-
-%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\setbeamertemplate{footline}{
@@ -169,20 +152,13 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setbeamertemplate{section title block}{
    \vskip.75ex
-% \fcolorbox{section title.fg}{section title.bg}{%
-% \begin{tcolorbox}[colframe=section title.fg]
-% \begin{beamercolorbox}[]{section title border}
   \begin{beamercolorbox}[rounded=true,shadow=false,leftskip=1cm,colsep*=.05ex]{section title}%
-%  \begin{beamercolorbox}[rounded=true,shadow=true,leftskip=0cm,colsep*=0ex]{section title}%
-    \centering
+%    \centering
 %  \begin{tcolorbox}[colback=section title.bg,colframe=section title.fg,colupper=section title.fg,width=\linewidth,boxrule=0.2ex]
     \centering
     \usebeamerfont{section title}\insertsection
 %  \end{tcolorbox}
   \end{beamercolorbox}
-% \end{beamercolorbox}
-%  \end{tcolorbox}
-% }
 }
 
 

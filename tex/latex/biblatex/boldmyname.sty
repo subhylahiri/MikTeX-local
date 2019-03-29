@@ -10,6 +10,7 @@
 %================================================================================
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{boldmyname}[2018/5/13 highlight a specific name (SL)]
+\makeatletter
 %--------------------------------------------------------------------------------
 \@ifpackageloaded{biblatex}{}{\PackageWarning{boldmyname}{This package requires biblatex}}
 %================================================================================
@@ -22,12 +23,15 @@
 \xapptobibmacro{name:hook}{\usebibmacro{ifhighlightname}{#1}{\bfseries}{}}
   {}{\PackageWarning{boldmyname}{Failed to patch bibmacro name:hook!}}
 %--------------------------------------------------------------------------------
-\xpretobibmacro{name:family}{\begingroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro!}}
-\xpretobibmacro{name:given-family}{\begingroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro!}}
-\xpretobibmacro{name:family-given}{\begingroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro!}}
+\newcommand{\@boldmyname@patchname}[1]{%
+\xpretobibmacro{#1}{\begingroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro #1!}}
+\xapptobibmacro{#1}{\endgroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro #1!}}
+}
 %--------------------------------------------------------------------------------
-\xapptobibmacro{name:family}{\endgroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro!}}
-\xapptobibmacro{name:given-family}{\endgroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro!}}
-\xapptobibmacro{name:family-given}{\endgroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro!}}
+\@boldmyname@patchname{name:family}
+\@boldmyname@patchname{name:given-family}
+\@boldmyname@patchname{name:family-given}
+%--------------------------------------------------------------------------------
 %================================================================================
+\makeatother
 \endinput

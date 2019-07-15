@@ -1,0 +1,166 @@
+%%  My standard preamble.
+%%
+%% Requires packages: amsmath, amssymb, amsthm, mathtools, appendix, natbib,
+%%                    xcolor, ifpdf, hyperref, cleveref, etoolbox, caption,
+%%                    graphicx, epstopdf, sl-panels, sl-defs
+%%
+%% This package must be declared **after** biblatex, if it is used.
+%%
+%%
+%% History: 2018/03/17 v1.0      (SL) copied from sl_preamble.tex
+%--------------------------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-preamble}[2018/3/17 v1.0 standard preamble (SL)]
+%--------------------------------------------------------------------------------
+\makeatletter
+%--------------------------------------------------------------------------------
+\RequirePackage{etoolbox}
+\newtoggle{sl@draft}
+\newtoggle{sl@graphics}
+\newtoggle{sl@theorem}
+\newtoggle{sl@svg}
+\newtoggle{sl@def}
+\newtoggle{sl@hlink}
+\newtoggle{sl@clink}
+\newtoggle{sl@inlink}
+%--------------------------------------------------------------------------------
+\DeclareOption{final}{\togglefalse{sl@draft}}
+\DeclareOption{draft}{\toggletrue{sl@draft}}
+\DeclareOption{notheorem}{\togglefalse{sl@theorem}}
+\DeclareOption{theorem}{\toggletrue{sl@theorem}}
+\DeclareOption{nodefs}{\togglefalse{sl@def}}
+\DeclareOption{defs}{\toggletrue{sl@def}}
+\DeclareOption{hidelinks}{\toggletrue{sl@hlink}}
+\DeclareOption{borderlinks}{\togglefalse{sl@clink}\togglefalse{sl@hlink}}
+\DeclareOption{colorlinks}{\toggletrue{sl@clink}\togglefalse{sl@hlink}}
+\DeclareOption{xr}{\RequirePackage{xr-hyper}}
+\DeclareOption{nographics}{\togglefalse{sl@graphics}}
+\DeclareOption{graphics}{\toggletrue{sl@graphics}}
+\DeclareOption{nosvg}{\togglefalse{sl@svg}}
+\DeclareOption{svg}{\toggletrue{sl@svg}}
+\DeclareOption{nonameinlink}{\togglefalse{sl@inlink}}
+\DeclareOption{nameinlink}{\toggletrue{sl@inlink}}
+
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{sl-defs}}
+
+\ExecuteOptions{final,defs,borderlinks,nographics,svg,nonameinlink}
+\ProcessOptions
+%--------------------------------------------------------------------------------
+
+%% Preamble:
+%\usepackage{a4wide}
+%\usepackage{ams} for finding documentation only
+\RequirePackage{amsmath,amssymb}
+\iftoggle{sl@theorem}{\RequirePackage{amsthm}}{}
+\iftoggle{sl@def}{\RequirePackage{sl-defs}}{}
+\RequirePackage{mathtools}
+\@ifpackageloaded{biblatex}{}{\RequirePackage[sort&compress,numbers]{natbib}}
+\RequirePackage[toc,page,title,titletoc]{appendix}
+\AtBeginEnvironment{appendices}{\phantomsection}
+\RequirePackage{xcolor}
+\RequirePackage{ifpdf}
+%
+\ifpdf
+    \RequirePackage[pdftex,pdfstartview=FitH]{hyperref}
+    \hypersetup{bookmarksopen,bookmarksnumbered}
+\else
+    \RequirePackage[hypertex]{hyperref}
+\fi
+\iftoggle{sl@hlink}{%
+    \hypersetup{hidelinks}%
+}{%
+    \iftoggle{sl@clink}{%
+        \hypersetup{colorlinks=true,%
+                 linkcolor=blue!50!black,%
+                 citecolor=green!50!black,%
+                 filecolor=blue!70!black,%
+                 urlcolor=blue!70!black%
+    }}{%
+        \hypersetup{linkbordercolor=red!20!white,%
+                 citebordercolor=green!20!white,%
+                 filebordercolor=cyan!20!white,%
+                 urlbordercolor=cyan!20!white,%
+                 runbordercolor=teal!20!white%
+}}}
+%
+\RequirePackage{array}
+\RequirePackage{multirow}
+\iftoggle{sl@graphics}{%
+    \RequirePackage[hypcap]{caption}%links to figures
+    \RequirePackage{graphicx}
+    %\RequirePackage{graphics} for finding documentation only
+    %\RequirePackage{pgf}
+    %
+    \pdfsuppresswarningpagegroup=1
+    \RequirePackage{epstopdf}
+    \epstopdfsetup{update,suffix=-generated}
+    %
+    \iftoggle{sl@svg}{%
+        \IfFileExists{"C:/Program Files/Inkscape/inkscape.exe"}{%
+            \newcommand{\inkscapedir}{C:/Progra\string~1/Inkscape/}%
+        }{}
+        \IfFileExists{"/Applications/Inkscape.app/Contents/Resources/bin/inkscape"}{%
+            \newcommand{\inkscapedir}{/Applications/Inkscape.app/Contents/Resources/bin/}%
+        }{}
+        \providecommand{\inkscapedir}{}
+        %
+        \ifpdf
+            \epstopdfDeclareGraphicsRule{.svg}{pdf}{.pdf}{%
+                "\inkscapedir inkscape" -f #1 -C -A \OutputFile}
+        \fi
+    }{}
+    %
+    \ifpdf
+    \else
+        \DeclareGraphicsRule{.png}{eps}{.bb}{}
+    \fi
+    %\RequirePackage{sl-panels}
+}{}
+\iftoggle{sl@draft}{\RequirePackage[notref,notcite,color]{showkeys}}{}
+% ----------------------------------------------------------------
+\iftoggle{sl@inlink}{\RequirePackage[nameinlink]{cleveref}}{\RequirePackage{cleveref}}
+\RequirePackage{eqcref}
+\AtBeginEnvironment{appendices}{%
+    \crefalias{section}{appendix}
+    \crefalias{subsection}{subappendix}
+    \crefalias{subsubsection}{subsubappendix}
+}
+% ----------------------------------------------------------------
+\iftoggle{sl@theorem}{%
+\newtheoremstyle{sldefinition}%
+  {3pt}%space above
+  {3pt}%space below
+  {}%body font
+  {}%indent amount
+  {\bfseries}%theorem head font
+  {}%theorem head punctuation
+  {\newline}%space after head
+  {\thmname{#1}\thmnumber{ #2}:{\bfseries\thmnote{ #3}}}%head spec
+\newtheoremstyle{slplain}%
+  {3pt}%space above
+  {3pt}%space below
+  {}%body font
+  {}%indent amount
+  {\bfseries}%theorem head font
+  {}%theorem head punctuation
+  {\newline}%space after head
+  {\thmname{#1}\thmnumber{ #2}{\bfseries\thmnote{ (#3)}}: }%head spec
+%
+\theoremstyle{slplain}
+\newtheorem{thm}{Theorem}
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+%
+\theoremstyle{sldefinition}
+\newtheorem{defn}{Definition}
+%
+\theoremstyle{remark}
+\newtheorem*{notn}{Notation}
+\newtheorem*{rem}{Remark}
+}{}
+%\iftoggle{sl@draft}{}{\RequirePackage{autonum}}
+% ----------------------------------------------------------------
+\vfuzz2pt % Don't report over-full v-boxes if over-edge is small
+\hfuzz2pt % Don't report over-full h-boxes if over-edge is small
+% ----------------------------------------------------------------
+\makeatother

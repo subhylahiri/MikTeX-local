@@ -1,0 +1,26 @@
+%
+% If you want the first author in the form "J. Smith" rather than "Smith, J.",
+%   add \DeclareNameAlias{author}{default} to the preamble.
+% If you want all names in the form "Smith, J.",
+%   use \DeclareNameAlias{author}{family-given} instead.
+% Use option "inline" to put references into a single paragraph.
+% In inline mode: to change the bullet at the start of each entry,
+%   in your preamble, modify: \DeclareFieldFormat{labelnumber}{$\bullet$}
+%
+%================================================================================
+\ProvidesFile{sl-cv.bbx}
+[2018/5/13 bibliographies with all authors, compressed names, journal hyperlinks (SL)]
+%================================================================================
+\RequireBibliographyStyle{authortitle-links}
+%================================================================================
+\DeclareUniquenameTemplate{
+  \namepart[use=true, base=true]{prefix}
+  \namepart[base=true]{family}
+  \namepart[disambiguation=init]{given}
+}
+%================================================================================
+\ExecuteBibliographyOptions{maxbibnames=99,eventfirst,sorting=none}
+\ExecuteBibliographyOptions{giveninits=true,terseinits}
+\DeclareNameAlias{author}{default}
+\setlength{\bibitemsep}{\parsep}
+\defbibnote{equal}{\noindent * Equal contribution.}

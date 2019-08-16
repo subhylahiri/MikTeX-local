@@ -1,0 +1,54 @@
+%% Display contact information, with a different version for the web
+%%
+%% Requires packages: etoolbox, xstring, xparse
+%%
+%% Commands defined:-
+%%   Email:  \email{addr}, \emaiweb{addr}, \emails{link}{text}
+%%   Phone:  \tel{num}, \telweb{num}
+%%   Choice: \webY, \webN, \ifweb{true}{false}, \onweb{true}, \noweb{false}
+%%   Format: \formatemail{addr}, \prefixemail, \formattel{num}, \prefixtel
+%%   Internal: \obscurifyemail{addr}, \obscurifyat{addr}, \obscurifydot{addr}
+%================================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{contact-info}[2019/08/09 v1.0 Display contact information (SL)]
+%--------------------------------------------------------------------------------
+\makeatletter
+\RequirePackage{etoolbox}
+\RequirePackage{xstring}
+\RequirePackage{xparse}
+%================================================================================
+\newtoggle{web}
+\newcommand{\webY}{\toggletrue{web}}
+\newcommand{\webN}{\togglefalse{web}}
+\newcommand{\ifweb}[2]{\iftoggle{web}{#1}{#2}}
+\newcommand{\onweb}[1]{\iftoggle{web}{#1}{}}
+\newcommand{\noweb}[1]{\nottoggle{web}{#1}{}}
+%--------------------------------------------------------------------------------
+\NewDocumentCommand {\obscurifydot} { m O{} }
+  {\StrSubstitute{#1}{.}{ dot }[#2]}
+\makeatother
+\NewDocumentCommand {\obscurifyat} { m O{} }
+  {\StrSubstitute{#1}{@}{ at }[#2]}
+\makeatletter
+\newcommand{\obscurify@temp}{}
+\NewDocumentCommand {\obscurifyemail} { m O{} }
+  {\obscurifyat{#1}[\obscurify@temp]%
+    \obscurifydot{\obscurify@temp}[#2]}
+%--------------------------------------------------------------------------------
+\newcommand{\formatemail}[1]{\texttt{#1}}
+\newcommand{\prefixemail}{}
+\newcommand{\formattel}[1]{#1}
+\newcommand{\prefixtel}{TEL: }
+%--------------------------------------------------------------------------------
+\newcommand{\emails}[2]{ \href{mailto:#1}{\formatemail{\prefixemail{}#2}} }
+\newcommand{\email}[1]{ \emails{#1}{#1} }
+\newcommand{\emailweb}[1]{%
+ \ifweb{ \emails{#1.delete.this}{\obscurifyemail{#1}} }
+       { \email{#1} }
+}
+\newcommand{\tel}[1]{ \href{tel:#1}{\formattel{\prefixtel{}#1}}}
+%\newcommand{\tel}[1]{ \formattel{\prefixtel{}#1}}
+\newcommand{\telweb}[1]{ \noweb{ \tel{#1} } }
+%================================================================================
+\makeatother
+\endinput

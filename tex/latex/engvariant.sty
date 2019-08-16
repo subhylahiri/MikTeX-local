@@ -1,0 +1,81 @@
+%%  Defining UK/US english alternatives for macros.
+%%
+%% Requires packages: etoolbox
+%%
+%% Defines 2 document commands: \langver, \Fall
+%% Defines 6 preamble commands: \newengvariant, \engvarUK, \engvarUS, \engvarClear,
+%%                              \renewengvariant, \provideengvariant
+%% DEfines 4 switching commands: \ifUK, \ifUS, \ifUKUS, \ifUSUK
+%% Defines 1 package command: \def@lang@variant
+%%
+%% \langver
+%%      Expands to `british' / `american' if \engvarUK / \engvarUS was called.
+%% \Fall
+%%      Expands to `Autumn' / `Fall' if \engvarUK / \engvarUS was called.
+%%
+%% \engvariant{<macro>}{UK version}{US version}
+%%   Define a macro which expands to either version, depending on the next two
+%%   macros. It does not perform the actual definition itself, it adds the
+%%   definition to a hook. The document commands above were created by:
+%%     \newengvariant{\langver}{british}{american}
+%%     \newengvariant{\Fall}{Autumn}{Fall}
+%% \engvarUK, \engvarUS
+%%   Choose the UK/US version. This also executes the hook, performing the
+%%   definition of all \engvariant macros, so it should be called between the
+%%   \engvariant call and the use of the \engvariant macros.
+%% \engvarClear
+%%   Clear the hook of \engvariant definitions. Does not undefine any macros
+%%   that were defined by a previous \engvarUK / \engvarUS call - it prevents
+%%   them from being redefined by any future \engvarUK / \engvarUS call.
+%%
+%% \def@lang@variant{label}{<definer>}{<chooser 1>}{<chooser 2>}{<clearer>}
+%%   Create a set of preamble commands as described above. The label is for
+%%   internal use only, but must be unique. The other 4 arguments are the
+%%   commands to be defined. The preamble commands above were created by:
+%%     \def@lang@variant{ukus}{engvariant}{\engvarUK}{\engvarUS}{\engvarClear}
+%================================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{engvariant}[2019/08/09 v1.0 Defining UK/US english alternatives (SL)]
+%--------------------------------------------------------------------------------
+\makeatletter
+\RequirePackage{etoolbox}
+%\RequirePackage{babel}
+\RequirePackage{iflang}
+%\IfLanguageName {⟨lang⟩} {⟨then⟩} {⟨else⟩}
+%================================================================================
+\newcommand{\engvar@variant@creator}[2]{%{label}{def function}
+  \csdef{#2#1variant}##1##2##3{\csappto{engvar@#1@hook}{%
+    \iftoggle{engvar@#1@toggle}%if
+      {\csuse{#2command}{##1}{##2}}%then
+      {\csuse{#2command}{##1}{##3}}%else
+  }}
+}
+%--------------------------------------------------------------------------------
+\newcommand{\def@lang@variant}[3]{
+  %-------------------------------------------------------------
+  \newtoggle{engvar@#1@toggle}
+  \csdef{engvar@#1@hook}{}
+  %-------------------------------------------------------------
+  \engvar@variant@creator{#1}{new}
+  \engvar@variant@creator{#1}{renew}
+  \engvar@variant@creator{#1}{provide}
+  %-------------------------------------------------------------
+  \csdef{#1var#2}{\toggletrue{engvar@#1@toggle}\csuse{engvar@#1@hook}}
+  \csdef{#1var#3}{\togglefalse{engvar@#1@toggle}\csuse{engvar@#1@hook}}
+  \csdef{#1varClear}{\csdef{engvar@#1@hook}{}}
+  %-------------------------------------------------------------
+  \csdef{if#2}##1{\iftoggle{engvar@#1@toggle}{##1}{}}
+  \csdef{if#3}##1{\iftoggle{engvar@#1@toggle}{}{##1}}
+  \csdef{if#2#3}##1##2{\iftoggle{engvar@#1@toggle}{##1}{##2}}
+  \csdef{if#3#2}##1##2{\iftoggle{engvar@#1@toggle}{##2}{##1}}
+  %-------------------------------------------------------------
+}
+%================================================================================
+\def@lang@variant{eng}{UK}{US}
+%\def@lang@variant{ukus}{engvariant}{\engvarUK}{\engvarUS}{\engvarClear}
+%--------------------------------------------------------------------------------
+\newengvariant{\langver}{british}{american}
+\newengvariant{\Fall}{Autumn}{Fall}
+%================================================================================
+\makeatother
+\endinput

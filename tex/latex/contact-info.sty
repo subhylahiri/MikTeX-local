@@ -13,6 +13,8 @@
 \ProvidesPackage{contact-info}[2019/08/19 v1.1 Display contact information (SL)]
 %--------------------------------------------------------------------------------
 \RequirePackage{expl3}
+%\RequirePackage{interface3}
+\RequirePackage{l3keys2e}
 \RequirePackage{xparse}
 \RequirePackage{hyperref}
 %===============================================================================
@@ -32,7 +34,16 @@
       { \prg_return_true: }
       { \prg_return_false: }
   }
-%--------------------------------------------------------------------------------
+%================================================================================
+\keys_define:nn { cctinfo }
+  {
+    web .bool_gset:N = \g__cctinfo_web_bool,
+    web .default:n = true,
+    noweb .bool_gset_inverse:N = \g__cctinfo_web_bool,
+    noweb .default:n = true,
+  }
+\ProcessKeysPackageOptions { cctinfo }
+%================================================================================
 %% Basic obscurifiers: local assign result to tl-var #1
 %%  \__cctinfo_obscurify<ver>:Nn <local-tl-var> {<addr>}
 %% <ver> = at, dot

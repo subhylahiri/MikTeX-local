@@ -33,6 +33,7 @@
 \ProvidesPackage{engvariant}[2019/08/19 v1.1 Defining UK/US english alternatives (SL)]
 %--------------------------------------------------------------------------------
 \RequirePackage{expl3}
+%\RequirePackage{interface3}
 \RequirePackage{l3keys2e}
 \RequirePackage{xparse}
 %\RequirePackage{babel}
@@ -81,7 +82,9 @@
   {
     % Do we define set the language etc?
     english .bool_gset:N = \g__engvar_def_bool,
-    english .default:n = true
+    english .default:n = true,
+    base .bool_gset_inverse:N = \g__engvar_def_bool,
+    base .default:n = true,
   }
 
 \ProcessKeysPackageOptions { engvar }

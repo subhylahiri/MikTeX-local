@@ -19,150 +19,136 @@
 \makeatother
 \ExplSyntaxOn
 %================================================================================
-% Conditionals for if web
-% \__cctinfo_ifweb:TF {<true>} {<false>}
-% \__cctinfo_ifweb:T {<true>}
-% \__cctinfo_ifweb:F {<false>}
+%% Conditionals for if web
+%% \__cctinfo_ifweb:TF {<true>} {<false>}
+%% \__cctinfo_ifweb:T {<true>}
+%% \__cctinfo_ifweb:F {<false>}
 
-  \bool_new:N \g__cctinfo_web_bool
+\bool_new:N \g__cctinfo_web_bool
 
-  \prg_new_conditional:Nnn \__cctinfo_ifweb: { T, F, TF }
-    {
-      \bool_if:nTF { \g__cctinfo_web_bool }
-        { \prg_return_true: }
-        { \prg_return_false: }
-    }
+\prg_new_conditional:Nnn \__cctinfo_ifweb: { T, F, TF }
+  {
+    \bool_if:nTF { \g__cctinfo_web_bool }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
 %--------------------------------------------------------------------------------
-% Basic obscurifiers: local assign result to tl-var #1
-%  \__cctinfo_obscurify<ver>:Nn <local tl var> {<tl addr>}
-% <ver> = at, dot
+%% Basic obscurifiers: local assign result to tl-var #1
+%%  \__cctinfo_obscurify<ver>:Nn <local-tl-var> {<addr>}
+%% <ver> = at, dot
 
 %% @ -> ~at~
-  \cs_new:Nn \__cctinfo_obscurifyat:Nn
-    {
-      \tl_set:Nn #1 {#2}
-      \tl_replace_all:Nnn #1 {@} { ~at~ }
-    }
+\cs_new:Nn \__cctinfo_obscurifyat:Nn
+  {
+    \tl_set:Nn #1 {#2}
+    \tl_replace_all:Nnn #1 {@} { ~at~ }
+  }
 
 %% . -> ~dot~
-  \cs_new:Nn \__cctinfo_obscurifydot:Nn
-    {
-      \tl_set:Nn #1 {#2}
-      \tl_replace_all:Nnn #1 {.} { ~dot~ }
-    }
+\cs_new:Nn \__cctinfo_obscurifydot:Nn
+  {
+    \tl_set:Nn #1 {#2}
+    \tl_replace_all:Nnn #1 {.} { ~dot~ }
+  }
 
-% Expanding versions
-%  \__cctinfo_obscurify<ver>:NV <local tl var> <tl var addr>
-% <ver> = dot
-
-  %\cs_generate_variant:Nn \__cctinfo_obscurifyat:Nn { NV }
-  \cs_generate_variant:Nn \__cctinfo_obscurifydot:Nn { NV }
-
-% Combination
-%  \__cctinfo_obscurify<ver>:Nn <local tl var> {<tl addr>}
-%  \__cctinfo_obscurify<ver>:NV <local tl var> <tl var addr>
-% <ver> = email
-  \cs_new:Nn \__cctinfo_obscurifyemail:Nn
-    {
-        \__cctinfo_obscurifyat:Nn \l_tmpb_tl {#2}
-        \__cctinfo_obscurifydot:NV #1 \l_tmpb_tl
-    }
-  %\cs_generate_variant:Nn \__cctinfo_obscurifyemail:Nn { NV }
-
-% Writing to output stream
-%  \__cctinfo_obscurify<ver>:n {<tl addr>}
-
-  \cs_new:Nn \__cctinfo_obscurifyat:n
-    {
-      \group_begin:
-        \__cctinfo_obscurifyat:Nn \l_tmpa_tl {#1}
-        \use:n \l_tmpa_tl
-      \group_end:
-    }
-
-  \cs_new:Nn \__cctinfo_obscurifydot:n
-    {
-      \group_begin:
-        \__cctinfo_obscurifydot:Nn \l_tmpa_tl {#1}
-        \use:n \l_tmpa_tl
-      \group_end:
-    }
-
-  \cs_new:Nn \__cctinfo_obscurifyemail:n
-    {
-      \group_begin:
-        \__cctinfo_obscurifyemail:Nn \l_tmpa_tl {#1}
-        \use:n \l_tmpa_tl
-      \group_end:
-    }
 %--------------------------------------------------------------------------------
-% Enclose locals in a group, global assign result to #2
-% \__cctinfo_scope:NNn <function> <global tl var> {<arg>}
+%% Expanding versions
+%%  \__cctinfo_obscurify<ver>:NV <local-tl-var> <tl-var-addr>
+%% <ver> = dot
 
-  \cs_new:Nn \__cctinfo_scope:NNn
-    {
-      \group_begin:
-        #1 \l_tmpa_tl {#3}
-        \cs_gset_eq:NN #2 \l_tmpa_tl
-      \group_end:
-    }
+%\cs_generate_variant:Nn \__cctinfo_obscurifyat:Nn { NV }
+\cs_generate_variant:Nn \__cctinfo_obscurifydot:Nn { NV }
+
+%--------------------------------------------------------------------------------
+%% Combination
+%%  \__cctinfo_obscurify<ver>:Nn <local-tl-var> {<addr>}
+%% <ver> = email
+
+\cs_new:Nn \__cctinfo_obscurifyemail:Nn
+  {
+      \__cctinfo_obscurifyat:Nn \l_tmpb_tl {#2}
+      \__cctinfo_obscurifydot:NV #1 \l_tmpb_tl
+  }
+%\cs_generate_variant:Nn \__cctinfo_obscurifyemail:Nn { NV }
+
+%--------------------------------------------------------------------------------
+%% Decorators:
+
+%% Enclose locals in a group, global assign result to #2
+%% \__cctinfo_obscurify_scope:NNn <function> <global-tl-var> {<addr>}
+
+\cs_new:Nn \__cctinfo_obscurify_scope:NNn
+  {
+    \group_begin:
+      #1 \l_tmpa_tl {#3}
+      \cs_gset_eq:NN #2 \l_tmpa_tl
+    \group_end:
+  }
+
+%% Enclose locals in a group, write to output stream
+%% \__cctinfo_obscurify_out:NNn <function> {<addr>}
+
+\cs_new:Nn \__cctinfo_obscurify_output:Nn
+  {
+    \group_begin:
+      #1 \l_tmpa_tl {#2}
+      \use:n \l_tmpa_tl
+    \group_end:
+  }
+
+%% Enclose locals in a group, global assign to #2/write to output stream
+%% \__cctinfo_obscurify_wrapper:Nnn <function> {<tl-var/-No-Value->} {<addr>}
+
+\cs_new:Nn \__cctinfo_obscurify_wrapper:Nnn
+  {
+    \IfValueTF {#2}
+      { \__cctinfo_obscurify_scope:NNn #1 #2 {#3} }
+      { \__cctinfo_obscurify_output:Nn #1 {#3} }
+  }
+
 %================================================================================
-  \NewDocumentCommand \webY {}
-    { \bool_gset_true:N \g__cctinfo_web_bool }
-  \NewDocumentCommand \webN {}
-    { \bool_gset_false:N \g__cctinfo_web_bool }
-  \NewDocumentCommand \ifweb { +m +m }
-    { \__cctinfo_ifweb:TF {#1} {#2} }
-  \NewDocumentCommand \onweb { +m }
-    { \__cctinfo_ifweb:T {#1} }
-  \NewDocumentCommand \noweb { +m }
-    { \__cctinfo_ifweb:F {#1} }
+\NewDocumentCommand \webY {}
+  { \bool_gset_true:N \g__cctinfo_web_bool }
+\NewDocumentCommand \webN {}
+  { \bool_gset_false:N \g__cctinfo_web_bool }
+\NewDocumentCommand \ifweb { +m +m }
+  { \__cctinfo_ifweb:TF {#1} {#2} }
+\NewDocumentCommand \onweb { +m }
+  { \__cctinfo_ifweb:T {#1} }
+\NewDocumentCommand \noweb { +m }
+  { \__cctinfo_ifweb:F {#1} }
 %--------------------------------------------------------------------------------
-  \NewDocumentCommand \obscurifydot { o m }
-    {
-      \IfValueTF {#1}
-        { \__cctinfo_scope:NNn \__cctinfo_obscurifydot:Nn #1 {#2} }
-        { \__cctinfo_obscurifydot:n {#2} }
-    }
-
-  \NewDocumentCommand \obscurifyat { o m }
-    {
-      \IfValueTF {#1}
-        { \__cctinfo_scope:NNn \__cctinfo_obscurifyat:Nn #1 {#2} }
-        { \__cctinfo_obscurifyat:n {#2} }
-    }
-
-  \NewDocumentCommand \obscurifyemail { o m }
-    {
-      \IfValueTF {#1}
-        { \__cctinfo_scope:NNn \__cctinfo_obscurifyemail:Nn #1 {#2} }
-        { \__cctinfo_obscurifyemail:n {#2} }
-     }
+\NewDocumentCommand \obscurifydot { o m }
+  { \__cctinfo_obscurify_wrapper:Nnn \__cctinfo_obscurifydot:Nn {#1} {#2} }
+\NewDocumentCommand \obscurifyat { o m }
+  { \__cctinfo_obscurify_wrapper:Nnn \__cctinfo_obscurifyat:Nn {#1} {#2} }
+\NewDocumentCommand \obscurifyemail { o m }
+  { \__cctinfo_obscurify_wrapper:Nnn \__cctinfo_obscurifyemail:Nn {#1} {#2} }
 %================================================================================
-  \NewDocumentCommand \formatemail { m } {\texttt{#1}}
-  \NewDocumentCommand \prefixemail {} {}
-  \NewDocumentCommand \formattel { m } {#1}
-  \NewDocumentCommand \prefixtel {} {TEL: }
+\NewDocumentCommand \formatemail { m } {\texttt{#1}}
+\NewDocumentCommand \prefixemail {} {}
+\NewDocumentCommand \formattel { m } {#1}
+\NewDocumentCommand \prefixtel {} {TEL:~ }
 %--------------------------------------------------------------------------------
-  \NewDocumentCommand \email { o m }
-    {
-      \IfValueTF {#1}
-        { \href{mailto:#1}{\formatemail{\prefixemail{}#2}} }
-        { \href{mailto:#2}{\formatemail{\prefixemail{}#2}} }
-    }
+\NewDocumentCommand \email { o m }
+  {
+    \IfValueTF {#1}
+      { \href{mailto:#1}{\formatemail{\prefixemail{}#2}} }
+      { \href{mailto:#2}{\formatemail{\prefixemail{}#2}} }
+  }
 
-  \NewDocumentCommand \emailweb { m }
-    {
-      \ifweb
-        { \email[#1.delete.this]{\obscurifyemail{#1}} }
-        { \email{#1} }
-    }
+\NewDocumentCommand \emailweb { m }
+  {
+    \ifweb
+      { \email[#1.delete.this]{\obscurifyemail{#1}} }
+      { \email{#1} }
+  }
 
-  \NewDocumentCommand \tel { m }
-    { \href{tel:#1}{\formattel{\prefixtel{}#1}} }
+\NewDocumentCommand \tel { m }
+  { \href{tel:#1}{\formattel{\prefixtel{}#1}} }
 
-  \NewDocumentCommand \telweb { m }
-    { \noweb{ \tel{#1} } }
+\NewDocumentCommand \telweb { m }
+  { \noweb{ \tel{#1} } }
 %================================================================================
 \ExplSyntaxOff
 \endinput

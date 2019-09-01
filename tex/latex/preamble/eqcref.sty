@@ -81,12 +81,12 @@
 }
 %--------------------------------------------------------------------------------
 \@ifpackagewith{cleveref}{nameinlink}{%
-  \eqcref@namein{c}{\cref@equation@name~}{\cref@equation@name@plural~}
-  \eqcref@namein{C}{\Cref@equation@name~}{\Cref@equation@name@plural~}
+  \eqcref@namein{c}{\cref@equation@name}{\cref@equation@name@plural}
+  \eqcref@namein{C}{\Cref@equation@name}{\Cref@equation@name@plural}
   \eqcref@namein{labelc}{}{}
 }{%
-  \eqcref@nameout{c}{\cref@equation@name~}{\cref@equation@name@plural~}
-  \eqcref@nameout{C}{\Cref@equation@name~}{\Cref@equation@name@plural~}
+  \eqcref@nameout{c}{\cref@equation@name}{\cref@equation@name@plural}
+  \eqcref@nameout{C}{\Cref@equation@name}{\Cref@equation@name@plural}
   \eqcref@nameout{labelc}{}{}
 }
 %--------------------------------------------------------------------------------

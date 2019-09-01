@@ -38,6 +38,8 @@
 
 \RequirePackage{delim}
 \RequirePackage{etoolbox}
+\RequirePackage{MnSymbol}
+
 
 \makeatletter
 \newcommand{\dlm@opt}[1]{\ifblank{#1}{\:\cdot\:}{#1}}
@@ -50,21 +52,21 @@
 \delimdef\abs#1{\dleft\lvert \dlm@opt{#1} \dright\rvert}
 \delimdef\nrm#1{\dleft\lVert \dlm@opt{#1} \dright\rVert}
 \delimdef\av#1{\dleft\langle \dlm@opt{#1} \dright\rangle}
-\delimdef\avc#1#2{\dleft\langle \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright\rangle}
+\delimdef\avc#1#2{\dleft\langle \dlm@opt{#1} \dmiddle\mvert\mathopen{} \dlm@opt{#2} \dright\rangle}
 \delimdef\ceil#1{\dleft\lceil \dlm@opt{#1} \dright\rceil}
 \delimdef\floor#1{\dleft\lfloor \dlm@opt{#1} \dright\rfloor}
 %\newenvironment{cases}{\dleft\{\begin{aligned}}{\end{aligned}\dright.}
 %
 % Sets
-\delimdef\set#1#2{\dleft\{ \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright\}}
-\delimdef\cond#1#2{\!\dleft( \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright)}
-\delimdef\condb#1#2{\!\dleft[ \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dright]}
+\delimdef\set#1#2{\dleft\{ \dlm@opt{#1} \dmiddle\mvert\mathopen{} \dlm@opt{#2} \dright\}}
+\delimdef\cond#1#2{\!\dleft( \dlm@opt{#1} \dmiddle\mvert\mathopen{} \dlm@opt{#2} \dright)}
+\delimdef\condb#1#2{\!\dleft[ \dlm@opt{#1} \dmiddle\mvert\mathopen{} \dlm@opt{#2} \dright]}
 %
 % QM Dirac notation
 \delimdef\bra#1{\dleft\langle \dlm@opt{#1} \dright\rvert}
 \delimdef\ket#1{\dleft\lvert \dlm@opt{#1} \dright\rangle}
-\delimdef\braket#1#2{\dleft\langle \dlm@opt{#1} \midddle\vert\mathopen{} \dlm@opt{#2} \dright\rangle}
-\delimdef\brackets#1#2#3{\dleft\langle \dlm@opt{#1} \dmiddle\vert\mathopen{} \dlm@opt{#2} \dmiddle\vert\mathopen{} \dlm@opt{#3} \dright\rangle}
+\delimdef\braket#1#2{\dleft\langle \dlm@opt{#1} \midddle\mvert\mathopen{} \dlm@opt{#2} \dright\rangle}
+\delimdef\brackets#1#2#3{\dleft\langle \dlm@opt{#1} \dmiddle\mvert\mathopen{} \dlm@opt{#2} \dmiddle\mvert\mathopen{} \dlm@opt{#3} \dright\rangle}
 %
 % Bracketed fractions
 \newcommand{\prnfrac}[2]{\prn{\frac{#1}{#2}}}

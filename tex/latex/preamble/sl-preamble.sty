@@ -20,9 +20,7 @@
 \newtoggle{sl@theorem}
 \newtoggle{sl@svg}
 \newtoggle{sl@def}
-\newtoggle{sl@hlink}
-\newtoggle{sl@clink}
-\newtoggle{sl@inlink}
+\newtoggle{sl@eqcref}
 %--------------------------------------------------------------------------------
 \DeclareOption{final}{\togglefalse{sl@draft}}
 \DeclareOption{draft}{\toggletrue{sl@draft}}
@@ -30,20 +28,34 @@
 \DeclareOption{theorem}{\toggletrue{sl@theorem}}
 \DeclareOption{nodefs}{\togglefalse{sl@def}}
 \DeclareOption{defs}{\toggletrue{sl@def}}
-\DeclareOption{hidelinks}{\toggletrue{sl@hlink}}
-\DeclareOption{borderlinks}{\togglefalse{sl@clink}\togglefalse{sl@hlink}}
-\DeclareOption{colorlinks}{\toggletrue{sl@clink}\togglefalse{sl@hlink}}
 \DeclareOption{xr}{\RequirePackage{xr-hyper}}
 \DeclareOption{nographics}{\togglefalse{sl@graphics}}
 \DeclareOption{graphics}{\toggletrue{sl@graphics}}
 \DeclareOption{nosvg}{\togglefalse{sl@svg}}
 \DeclareOption{svg}{\toggletrue{sl@svg}}
-\DeclareOption{nonameinlink}{\togglefalse{sl@inlink}}
-\DeclareOption{nameinlink}{\toggletrue{sl@inlink}}
+\DeclareOption{noeqcref}{\togglefalse{sl@eqcref}}
+\DeclareOption{eqcref}{\toggletrue{sl@eqcref}}
+\DeclareOption{nonameinlink}{}
+\DeclareOption{capitalise}{\PassOptionsToPackage{capitalise}{cleveref}}
+\DeclareOption{nameinlink}{\PassOptionsToPackage{nameinlink}{cleveref}}
+\DeclareOption{noabbrev}{\PassOptionsToPackage{noabbrev}{cleveref}}
+\DeclareOption{hidelinks}{\PassOptionsToPackage{hidelinks}{hyperref}}
+\DeclareOption{borderlinks}{\PassOptionsToPackage{%
+                                linkbordercolor=red!20!white,%
+                                citebordercolor=green!20!white,%
+                                filebordercolor=cyan!20!white,%
+                                urlbordercolor=cyan!20!white,%
+                                runbordercolor=teal!20!white}{hyperref}}
+\DeclareOption{colorlinks}{\PassOptionsToPackage{%
+                                colorlinks=true,%
+                                linkcolor=red!30!black,%
+                                citecolor=green!50!black,%
+                                filecolor=blue!70!black,%
+                                urlcolor=blue!70!black}{hyperref}}
 
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{sl-defs}}
 
-\ExecuteOptions{final,defs,borderlinks,nographics,svg,nonameinlink}
+\ExecuteOptions{final,defs,borderlinks,nographics,svg,eqcref}
 \ProcessOptions
 %--------------------------------------------------------------------------------
 
@@ -66,22 +78,6 @@
 \else
     \RequirePackage[hypertex]{hyperref}
 \fi
-\iftoggle{sl@hlink}{%
-    \hypersetup{hidelinks}%
-}{%
-    \iftoggle{sl@clink}{%
-        \hypersetup{colorlinks=true,%
-                 linkcolor=blue!50!black,%
-                 citecolor=green!50!black,%
-                 filecolor=blue!70!black,%
-                 urlcolor=blue!70!black%
-    }}{%
-        \hypersetup{linkbordercolor=red!20!white,%
-                 citebordercolor=green!20!white,%
-                 filebordercolor=cyan!20!white,%
-                 urlbordercolor=cyan!20!white,%
-                 runbordercolor=teal!20!white%
-}}}
 %
 \RequirePackage{array}
 \RequirePackage{multirow}
@@ -118,8 +114,8 @@
 }{}
 \iftoggle{sl@draft}{\RequirePackage[notref,notcite,color]{showkeys}}{}
 % ----------------------------------------------------------------
-\iftoggle{sl@inlink}{\RequirePackage[nameinlink]{cleveref}}{\RequirePackage{cleveref}}
-\RequirePackage{eqcref}
+\RequirePackage{cleveref}
+\iftoggle{sl@eqcref}{\RequirePackage{eqcref}}{}
 \AtBeginEnvironment{appendices}{%
     \crefalias{section}{appendix}
     \crefalias{subsection}{subappendix}

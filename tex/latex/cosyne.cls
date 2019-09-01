@@ -41,6 +41,7 @@
 \postauthor{\end{center}}
 \predate{}
 \postdate{}
+\setlength{\droptitle}{-60pt}
 
 \RequirePackage{titlesec}
 \titleformat*{\section}{\bfseries}

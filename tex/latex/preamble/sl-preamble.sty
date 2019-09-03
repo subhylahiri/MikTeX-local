@@ -73,8 +73,8 @@
 \RequirePackage{ifpdf}
 %
 \ifpdf
-    \RequirePackage[pdftex,pdfstartview=FitH]{hyperref}
-    \hypersetup{bookmarksopen,bookmarksnumbered}
+    \RequirePackage[pdftex]{hyperref}
+    \hypersetup{bookmarksopen,bookmarksnumbered,pdfstartview=FitH}
 \else
     \RequirePackage[hypertex]{hyperref}
 \fi

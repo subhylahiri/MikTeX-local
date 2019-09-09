@@ -16,8 +16,9 @@
 %--------------------------------------------------------------------------------
 \RequirePackage{etoolbox}
 \newtoggle{sl@draft}
-\newtoggle{sl@graphics}
+\newtoggle{sl@tables}
 \newtoggle{sl@theorem}
+\newtoggle{sl@graphics}
 \newtoggle{sl@svg}
 \newtoggle{sl@def}
 \newtoggle{sl@eqcref}
@@ -29,6 +30,8 @@
 \DeclareOption{nodefs}{\togglefalse{sl@def}}
 \DeclareOption{defs}{\toggletrue{sl@def}}
 \DeclareOption{xr}{\RequirePackage{xr-hyper}}
+\DeclareOption{notables}{\togglefalse{sl@tables}}
+\DeclareOption{tables}{\toggletrue{sl@tables}}
 \DeclareOption{nographics}{\togglefalse{sl@graphics}}
 \DeclareOption{graphics}{\toggletrue{sl@graphics}}
 \DeclareOption{nosvg}{\togglefalse{sl@svg}}
@@ -55,7 +58,7 @@
 
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{sl-defs}}
 
-\ExecuteOptions{final,defs,borderlinks,nographics,svg,eqcref}
+\ExecuteOptions{final,defs,borderlinks,notables,nographics,svg,eqcref}
 \ProcessOptions
 %--------------------------------------------------------------------------------
 
@@ -79,8 +82,18 @@
     \RequirePackage[hypertex]{hyperref}
 \fi
 %
-\RequirePackage{array}
-\RequirePackage{multirow}
+\iftoggle{sl@tables}{%
+    \RequirePackage{array}
+    \RequirePackage{multirow}
+    \RequirePackage{booktabs}
+    \newcolumntype{C}{>{$}c<{$}}
+    \newcolumntype{L}{>{$}l<{$}}
+    \newcolumntype{R}{>{$}r<{$}}
+    \newcolumntype{A}{R@{\,}L}
+    \newcommand{\colhead}[1]{\multicolumn{2}{l}{#1}}
+    \newcommand{\colheadc}[1]{\multicolumn{2}{c}{#1}}
+    \newcommand{\colheadr}[1]{\multicolumn{2}{r}{#1}}
+}{}
 \iftoggle{sl@graphics}{%
     \RequirePackage[hypcap]{caption}%links to figures
     \RequirePackage{graphicx}

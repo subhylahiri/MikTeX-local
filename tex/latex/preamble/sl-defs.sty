@@ -13,7 +13,7 @@
 \newtoggle{sl@symb}
 %\usepackage{ams} for finding documentation only
 %\usepackage{amsmath} for finding documentation only
-%\usepackage{amsaymb} for finding documentation only
+%\usepackage{amssymb} for finding documentation only
 \RequirePackage{amsmath,amssymb}
 %--------------------------------------------------------------------------------
 \DeclareOption{nodelims}{\togglefalse{sl@del}}
@@ -86,14 +86,15 @@
 \newcommand{\I}{\mathbf{I}}
 %
 % The default \Im and \Re look crap
-\renewcommand{\Im}{\operatorname{\mathfrak{Im}}}
-\renewcommand{\Re}{\operatorname{\mathfrak{Re}}}
+\renewcommand{\Im}{\operatorname{\mathbbm{Im}}}
+\renewcommand{\Re}{\operatorname{\mathbbm{Re}}}
 %
 % logic
 \newcommand{\means}{\Longleftrightarrow}
 \newcommand{\requires}{\Longleftarrow}
 %--------------------------------------------------------------------------------
 \iftoggle{sl@symb}{%
+  \RequirePackage{bbm}
   %
   \newcommand{\R}{\mathbb{R}}
   \newcommand{\C}{\mathbb{C}}

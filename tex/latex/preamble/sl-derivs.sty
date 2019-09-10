@@ -1,6 +1,6 @@
 %%  This defines custom derivative notation.
 %%
-%% Requires packages: etoolbox
+%% Requires packages: expl3, xparse
 %%
 %% e.g.
 %%    \begin{equation}
@@ -20,92 +20,263 @@
 %%    \bp[\mu]
 %%    \pdg[\mu]
 %%    \intd[_0^\infty]{t} f(t)
-%%    \integ[_0^\infty]{f(x)}{x}
+%%    \integ[_0^\infty][f(x)]{x}
 %%
 %% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
+%%          2019/09/10 v2.0      (SL) using expl3
 
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{sl-derivs}[2018/3/17 v1.0 derivative notation (SL)]
-
-\RequirePackage{etoolbox}
-
-\makeatletter
+\ProvidesPackage{sl-derivs}[2019/09/10 v2.0 derivative notation (SL)]
 %--------------------------------------------------------------------------------
-% Helper functions
+%\RequirePackage{interface3}
+\RequirePackage{expl3}
+\RequirePackage{xparse}
+\ExplSyntaxOn
+%================================================================================
+
+\tl_new:N \l__slderivs_numer_tl
+\tl_new:N \l__slderivs_denom_tl
+\int_new:N \l__slderivs_order_int
+\regex_const:Nn \c__slderivs_number_regex { \d+ }
+
+% Test if tl is a number
+% #1: tl to test
+% #2: code to execute if it is a number
+% #2: code to execute if it is not a number
 %
-% for defining higher order derivatives:
-%    \drv@ndef{<command>}{<diff op>}
-%    ==> <command>[<order>]{<dep var>}{<indep var>}
-%        ==> \frac{<diff op>^<order><dep var>}{<diff op><indep var>^<order>}
-\newcommand{\drv@ord}[1]{\notblank{#1}{^{#1}}{}}
+\prg_new_conditional:Nnn \__slderivs_if_num:n { TF }
+  {
+    \regex_match:NnTF \c__slderivs_number_regex {#1}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+
+% Test if tl-var is a number
+% #1: tl-var to test
+% #2: code to execute if it is a number
+% #2: code to execute if it is not a number
 %
-\newcommand{\drv@ndef}[2]{%
-  \newcommand{#1}[3][]{%
-    \begingroup%
-      \def\drv@op{#2}%
-      \frac{\drv@op\drv@ord{##1} ##2}%
-           {\drv@op{##3}\drv@ord{##1}}%
-    \endgroup%
-}}
+\cs_generate_variant:Nn \__slderivs_if_num:nTF { V }
+
+%--------------------------------------------------------------------------------
+% Append string to order of derivative
+% #1: derivative order tl-var to append to
+% #2: to be added to order, tl
 %
-%
-% for defining derivatives with multiple independent variables:
-%    \drv@mdef{<command>}{<diff>}
-%    ==> <command>{<dep>}{<ind1>,<ind2>,...,<indN>}
-%        ==> \frac{<diff>^N<dep>}{<diff><ind1><diff><ind2>...<diff><indN>}
-\newcommand{\drv@count}[1]{%
-  \numdef\drv@num{0}%
-  \def\drv@denom{}%
-  \renewcommand*{\do}[1]{%
-    \numdef\drv@num{\drv@num+1}%
-    \appto\drv@denom{\drv@op ##1}}%
-  \docsvlist{#1}%
+\cs_new:Nn \__slderivs_append_to_order:Nn
+{
+  \tl_if_blank:VTF #1
+    {}
+    { \tl_put_right:Nn #1 {+} }
+  \tl_put_right:Nn #1 {#2}
 }
-%
-\newcommand{\drv@mdef}[2]{%
-  \newcommand{#1}[2]{%
-    \begingroup%
-      \def\drv@op{#2}%
-      \drv@count{##2}%
-      \frac{\drv@op^{\drv@num}##1}%
-           {\drv@denom}%
-    \endgroup%
-}}
-%--------------------------------------------------------------------------------
 
+% Append string to order of derivative
+% #1: derivative order tl-var to append to
+% #2: to be added to order, tl-var
+%
+\cs_generate_variant:Nn \__slderivs_append_to_order:Nn { NV }
+
+%--------------------------------------------------------------------------------
+%Raise indep var in denominator to exponent
+% #1: tl-var ending with indep var
+% #2: exponent, tl
+%
+\cs_new:Nn \__slderivs_raise:Nn
+  { \tl_put_right:Nn #1 { ^{#2} } }
+
+%Raise indep var in denominator to exponent
+% #1: tl-var ending with indep var
+% #2: exponent, tl-var
+%
+\cs_generate_variant:Nn \__slderivs_raise:Nn { NV }
+
+%--------------------------------------------------------------------------------
+% #1: denominator tl-var to append to
+% #2: stores order of derivative, actual numbers int-var
+% #3: stores order of derivative, variables tl-var
+% #4: one entry for denominator, tl=varname or clist={varname, order}
+% #5: differential operator, e.g. `d', tl
+%
+\cs_new:Nn \__slderivs_one_indep:NNNnn
+{
+  \seq_set_from_clist:Nn \l_tmpb_seq {#4}
+%  \seq_set_split:Nnn \l_tmpb_seq {;} {#4}
+%
+  \tl_put_right:Nn #1 {#5}
+  \int_compare:nNnTF { \seq_count:N \l_tmpb_seq } = {1}
+    {
+      \int_incr:N #2
+      \tl_put_right:Nn #1 {#4}
+    }
+    {
+      \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
+      \tl_put_right:NV #1 \l_tmpa_tl
+      \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
+      \__slderivs_if_num:VTF \l_tmpa_tl
+        {
+          \int_compare:nNnTF { \l_tmpa_tl } > {1}
+            { \__slderivs_raise:NV #1 \l_tmpa_tl }
+            {}
+          \exp_args:NNV
+            \int_add:Nn #2 \l_tmpa_tl
+        }
+        {
+          \__slderivs_raise:NV #1 \l_tmpa_tl
+          \__slderivs_append_to_order:NV #3 \l_tmpa_tl
+        }
+    }
+}
+
+% Process semicolon-separated list of indep ars in denominator
+% #1: denominator tl-var to append to
+% #2: stores order of derivative as a string tl-var
+% #3: semicolon-separated list of entries for denominator,
+%       each tl=varname or clist={varname, order}
+% #4: differential operator, e.g. `d', tl
+%
+\cs_new:Nn \__slderivs_process_denom:NNnn
+{
+%  \seq_set_from_clist:Nn \l_tmpa_seq {#3}
+  \seq_set_split:Nnn \l_tmpa_seq {;} {#3}
+%
+  \seq_map_inline:Nn \l_tmpa_seq
+    {
+      \__slderivs_one_indep:NNNnn #1 \l__slderivs_order_int #2
+        {##1}
+        {#4}
+    }
+%
+  \bool_if:nTF {
+                 (! \tl_if_blank_p:V #2) ||
+                 \int_compare_p:nNn { \l__slderivs_order_int } > {1}
+               }
+    { \__slderivs_append_to_order:NV #2 \l__slderivs_order_int }
+    {}
+}
+
+%--------------------------------------------------------------------------------
+% Make the derivative symbols
+% #1: numerator, tl
+% #2: denominator(s)-  semicolon-separated list of entries for denominator,
+%       each tl=varname or clist={varname, order}
+% #3: differential operator, e.g. `d', tl
+%
+\cs_new:Nn \__slderivs_make_deriv:nnn
+{
+  \group_begin:
+%
+  \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
+    {#2}
+    {{#3}}
+  \tl_put_right:Nn \l__slderivs_numer_tl {{#3}}
+  \tl_if_blank:VTF \l_tmpb_tl
+    {}
+    { \__slderivs_raise:NV \l__slderivs_numer_tl \l_tmpb_tl }
+  \tl_put_right:Nn \l__slderivs_numer_tl {{#1}}
+%
+  \exp_args:NVV
+    \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
+  \group_end:
+}
+
+% Make the derivative symbols, overriding the order
+% #1: numerator, tl
+% #2: denominator(s)-  semicolon-separated list of entries for denominator,
+%       each tl=varname or clist={varname, order}
+% #3: differential operator, e.g. `d', tl
+% #4: order of derivative (numerator only)
+\cs_new:Nn \__slderivs_make_deriv:nnnn
+{
+  \group_begin:
+%
+  \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
+    {#2}
+    {{#3}}
+  \tl_put_right:Nn \l__slderivs_numer_tl {#3}
+  \tl_if_blank:nTF {#4}
+    {}
+    { \__slderivs_raise:Nn \l__slderivs_numer_tl {#4} }
+  \tl_put_right:Nn \l__slderivs_numer_tl {#1}
+%
+  \exp_args:NVV
+    \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
+  \group_end:
+}
+%================================================================================
+\NewDocumentCommand \NewDerivUni { m m } {
+  \NewDocumentCommand #1 { o m m } {
+    \IfNoValueTF {##1}
+      { \__slderivs_make_deriv:nnn  {##2} {##3} {#2} }
+      { \__slderivs_make_deriv:nnnn {##2} {##3,##1} {#2} {##1} }
+  }
+}
+
+\NewDocumentCommand \NewDerivMulti { m m } {
+  \NewDocumentCommand #1 { o m m } {
+    \IfNoValueTF {##1}
+      { \__slderivs_make_deriv:nnn  {##2} {##3} {#2} }
+      { \__slderivs_make_deriv:nnnn {##2} {##3} {#2} {##1} }
+  }
+}
+
+\NewDocumentCommand \NewDerivInline { m m } {
+  \NewDocumentCommand #1 { o } {
+    \IfNoValueTF {##1}
+      { #2 }
+      { {#2}_{##1} }
+  }
+}
+%================================================================================
+\ExplSyntaxOff
+%================================================================================
 % Derivatives, etc. First argument is optional.
 % ordinary derivative
-\drv@ndef{\diff}{\mathrm{d}}
+\NewDerivUni \diff { \mathrm{d} }
 % partial derivatives (higher order/constant independent variables)
-\drv@ndef{\pdiff}{\partial}
-\newcommand{\pdiffc}[3][]{\left(\pdiff{#2}{#3}\right)_{\!\!#1}}
+\NewDerivMulti \pdiff { \partial }
+\NewDocumentCommand \pdiffc { o o m m } {
+  \IfNoValueTF {#1}
+    { \left(\pdiff[#2]{#3}{#4}\right) }
+    { \left(\pdiff[#2]{#3}{#4}\right)_{\!\!#1} }
+}
 % functional derivative
-\drv@ndef{\fdf}{\delta}
+\NewDerivMulti \fdf { \delta }
+
 %multiple independent variables
-\drv@mdef{\pdiffm}{\partial}
-\drv@mdef{\fdfm}{\delta}
+\NewDerivMulti \pdiffm { \partial }
+\NewDerivMulti \fdfm { \delta }
 %
-\newcommand{\pdl}[1][]{\overleftarrow{\partial}_{#1}}
-\newcommand{\pdr}[1][]{\overrightarrow{\partial}_{#1}}
-\newcommand{\pdlr}[1][]{\overleftrightarrow{\partial_{#1}}}
-\newcommand{\bp}[1][]{\bar{\partial}_{#1}}
-\newcommand{\pdg}[1][]{\partial^\dag_{#1}}
+\NewDerivInline \pdlr { \overleftrightarrow{\partial} }
+\NewDerivInline \pdl { \overleftarrow{\partial} }
+\NewDerivInline \pdr { \overrightarrow{\partial} }
+\NewDerivInline \bpd { \bar{\partial} }
+\NewDerivInline \pdg { \partial^\dag }
 %
 %
-\newcommand{\dt}{\mathrm{d}t}
-\newcommand{\dx}{\mathrm{d}x}
-\newcommand{\dy}{\mathrm{d}y}
-\newcommand{\dz}{\mathrm{d}z}
-\newcommand{\dzb}{\mathrm{d}\bar{z}}
+\NewDocumentCommand \dt {} {\mathrm{d}t}
+\NewDocumentCommand \dx {} {\mathrm{d}x}
+\NewDocumentCommand \dy {} {\mathrm{d}y}
+\NewDocumentCommand \dz {} {\mathrm{d}z}
+\NewDocumentCommand \dzb {} {\mathrm{d}\bar{z}}
 %
-\newcommand{\intd}[2][]{\int%
-  \ifblank{#1}{}{#1\!\!}%
-  \!\mathrm{d}#2\,\mathopen{}}
-\newcommand{\integ}[3][]{\int%
-  \ifblank{#1}{}{#1\!\!}\mathopen{}%
-  \ifblank{#2}{\cdots\;}{\! #2\,}%
-  \mathrm{d}#3}
+\NewDocumentCommand \intd { o m } {
+  \int
+  \IfNoValueTF {#1}
+    {}
+    { #1 \!\! }
+  \! \mathrm{d}#2 \, \mathopen{}
+}
+\NewDocumentCommand \integ { o o m } {
+  \int
+  \IfNoValueTF {#1}
+    {}
+    { #1 \!\! }
+  \IfNoValueTF {#2}
+    { \cdots \; }
+    { \! #2 \, }
+  \mathrm{d}#3
+}
 %
-%--------------------------------------------------------------------------------
-\makeatother
+%================================================================================
 \endinput

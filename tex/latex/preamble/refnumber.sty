@@ -1,128 +1,202 @@
 %%  Get numbers from labels.
 %%
-%% Requires packages: etoolbox, xstring, xparse
+%% Requires packages: expl3, xparse, hyperref
 %%
 %%
+%% History: 2018/03/31 v1.0       get numbers from labels (SL)
+%%          2019/09/10 v2.0       using expl3 (SL)
 %--------------------------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{refnumber}[2018/3/31 v1.0 get numbers from labels (SL)]
+\ProvidesPackage{refnumber}[2019/9/10 v2.0 get numbers from labels (SL)]
 %--------------------------------------------------------------------------------
 \makeatletter
 %--------------------------------------------------------------------------------
 
 %\RequirePackage{refcount} % we're replacing this!
-\RequirePackage{etoolbox}
-\RequirePackage{xstring}
-\RequirePackage[log-declarations=false]{xparse}
+%\RequirePackage{interface3} % for docs
+\RequirePackage{expl3}
+\RequirePackage{xparse}
+\RequirePackage{hyperref}
 
-\@ifpackageloaded{hyperref}{}{\PackageWarning{refnumber}{%
-Load hyperref before refnumber.
-I'm loading it now, so you can't choose your options.}
-\RequirePackage{hyperref}}
+%--------------------------------------------------------------------------------
+\ExplSyntaxOn
+%================================================================================
+
+
+% Get hyperdest info from hyperref label as a sequence
+% #1: seq-variable to store result
+% #2: tok_list containing label
+%
+\cs_new:Nn \__refnum_get_seq:Nn
+{
+  \group_begin:
+    \tl_set:Nx \l_tmpa_tl { \tl_item:cn {r@#2} {4} }
+    \seq_gset_split:NnV #1 {.} \l_tmpa_tl
+  \group_end:
+}
 
 %--------------------------------------------------------------------------------
 
-%get hyperdest info from hyperref label as string
-\newcommand{\refnum@text}[2]{%
-\begingroup%
-\edef\refnum@text@all{\csname r@#2\endcsname}%         get second argument of \newlabel
-\StrChar{\refnum@text@all}{4}[\refnum@text@temp]%      get 4th element: the hyperdest
-\StrRemoveBraces{\refnum@text@temp}[\refnum@text@out]% remove braces to get string
-\xdef#1{\refnum@text@out}%                             assign string to output macro
-\endgroup%
+% Get counter name from hyperref label
+% #1: tok_list-variable to store result
+% #2: tok_list containing label
+%
+\cs_new:Nn \__refnum_get_name:Nn
+{
+  \group_begin:
+    \__refnum_get_seq:Nn \l_tmpa_seq {#2}
+    \tl_gset:Nx #1 {\seq_item:Nn \l_tmpa_seq {1}}
+  \group_end:
 }
 
+
+% Get counter value from hyperref label
+% #1: tok_list-variable to store result
+% #2: How many generations up? int
+% #3: tok_list containing label
+%
+\cs_new:Nn \__refnum_get_counter:Nnn
+{
+  \group_begin:
+    \__refnum_get_seq:Nn \l_tmpa_seq {#3}
+    \tl_gset:Nx #1 {\seq_item:Nn \l_tmpa_seq {-1 - #2}}
+  \group_end:
+}
+
+%--------------------------------------------------------------------------------
+
+% Set counter value from hyperref label
+% #1: target counter, tok_list
+% #2: How many generations up? int
+% #3: tok_list containing label
+%
+\cs_new:Nn \__refnum_to_counter:nnn
+{
+  \cs_if_exist:cTF{r@#3}
+    {
+      \group_begin:
+        \__refnum_get_counter:Nnn \l_tmpb_tl {#2} {#3}
+        \setcounter {#1} { \l_tmpb_tl }
+      \group_end:
+    }
+    {} %no such label
+}
+% Set counter value from hyperref label
+% #1: target counter name, tok_list-variable
+% #2: How many generations up? int
+% #3: tok_list containing label
+%
+\cs_generate_variant:Nn \__refnum_to_counter:nnn { V }
+
+
+% Set counter value from hyperref label
+% #1: tok_list-variable to store result
+% #2: counter to display as, tok_list
+% #3: How many generations up? int
+% #4: tok_list containing label
+%
+\cs_new:Nn \__refnum_as_counter:Nnnn
+{
+  \cs_if_exist:cTF{r@#4}
+    {
+      \group_begin:
+        \tl_set:Nx \l_tmpb_tl { \arabic{#2} }
+        \__refnum_to_counter:nnn {#2} {#3} {#4}
+        \tl_gset:Nv #1 {the#2}
+        \tl_gset:Nx #1 { #1 }
+        \setcounter {#2} { \l_tmpb_tl }
+      \group_end:
+    }
+    { \tl_clear_new:N #1 }  %no such label
+%        \tl_show:N #1
+}
+% Set counter value from hyperref label
+% #1: tok_list-variable to store result
+% #2: counter to display as, tok_list-variable
+% #3: How many generations up? int
+% #4: tok_list containing label
+%
+\cs_generate_variant:Nn \__refnum_as_counter:Nnnn { NV }
+
+%--------------------------------------------------------------------------------
+
+% Print or assign resultt of one of the above
+% #1: temporary macro holding result, tok_list-variable
+% #2: macro (to store result) or -NoValue- (to print out)
+%
+\cs_new:Nn \__refnum_output:Nn
+{
+  \IfNoValueTF{#2}%        Have we been given a macro to assign to?
+    {\use:n #1}%           No. Print out.
+    {\tl_gset_eq:NN #2 #1}% Yes. Assign.
+  \tl_clear:N #1%          Clear out temporary output storage.
+}
+
+%--------------------------------------------------------------------------------
+
 %get counter name
-\newcommand{\refnum@name}[2]{%
-\begingroup%
-\refnum@text{\refnum@name@temp}{#2}%
-\StrPosition[1]{\refnum@name@temp}{.}[\firstdot]%
-\StrMid{\refnum@name@temp}{1}{\numexpr\firstdot-1}[\refnum@name@out]%
-\xdef#1{\refnum@name@out}%
-\endgroup%
+% Mandatory argument: label to ref.
+% Last optional argument assigned to.
+%
+\NewDocumentCommand \refcountname { m o }
+{
+  \__refnum_get_name:Nn \g_tmpa_tl {#1}
+  \__refnum_output:Nn \g_tmpa_tl {#2}
 }
 
 %get counter / parent counter value as string
-\newcommand{\refnum@count}[3]{%
-\begingroup%
-\refnum@text{\refnum@count@temp}{#3}%
-\StrCount{\refnum@count@temp}{.}[\refnum@numdot]%
-\ifnumless{#2}{1}%
- {\StrLen{\refnum@count@temp}[\numchar]\edef\refnum@lastdot{\numexpr\numchar+1}}%
- {\StrPosition[\numexpr\refnum@numdot-#2+1]{\refnum@count@temp}{.}[\refnum@lastdot]}%
-\StrPosition[\numexpr\refnum@numdot-#2]{\refnum@count@temp}{.}[\refnum@firstdot]%
-\StrMid{\refnum@count@temp}{\numexpr\refnum@firstdot+1}{\numexpr\refnum@lastdot-1}[\refnum@count@out]%
-\xdef#1{\refnum@count@out}%
-\endgroup%
+% #1 Optional: How many generations up parent counters do we go?
+% #2 Mandatory: label to ref.
+% #3 Optional: assigned to.
+%
+\NewDocumentCommand \refnum { O{0} m o }
+{
+  \__refnum_get_counter:Nnn \g_tmpa_tl {#1} {#2}
+  \__refnum_output:Nn \g_tmpa_tl {#3}
 }
 
 %assign ref counter to other counter
-\newcommand{\refnum@tocounter}[3]{%
-\ifcsvoid{r@#3}{}{%
-\begingroup%
- \refnum@count{\refnum@val}{#2}{#3}%
- \setcounter{#1}{\refnum@val}%
-\endgroup}}
-
-%temp assign ref counter to other counter & display
-\newcommand{\refnum@ascounter}[4]{%
-\ifcsvoid{r@#4}{\def#2{}}{%
-\begingroup%
- \refnum@count{\refnum@as@val}{#3}{#4}%
- \defcounter{#1}{\refnum@as@val}%
- \xdef#2{\csname the#1\endcsname}%
-\endgroup}}
-
-%--------------------------------------------------------------------------------
-
-%output the counter info.
-\newcommand{\refnum@out}[2]{% #1: macro or -NoValue-, #2: temporary macro holding output.
-  \IfNoValueTF{#1}% Have we been given a macro to assign to?
-    {#2}%           No. Print out.
-    {\edef#1{#2}}%  Yes. Assign.
-  \undef#2%         Clear out temporary output storage.
+% #1 Optional: How many generations up parent counters do we go?
+% #3 Optional: Counter type to change
+% #3 Mandatory: label to ref.
+%
+\NewDocumentCommand \reftocounter { O{0} d<> m }
+{
+  % If we haven't been given a counter name, get it from ref
+  \IfNoValueTF{#2}
+    { \__refnum_get_name:Nn \g_tmpb_tl {#3} }
+    { \tl_set:Nn \g_tmpb_tl {#2} }
+  % assign to counter
+  \__refnum_to_counter:Vnn \g_tmpb_tl {#1} {#3}
 }
-
-%--------------------------------------------------------------------------------
-
-%get counter name
-% Mandatory argument: label to ref.
-% Last optional argument assigned to.
-\NewDocumentCommand \refcountname {m o}
-  {\refnum@name{\refnum@temp}{#1}%
-  \refnum@out{#2}{\refnum@temp}}
-
-%get counter / parent counter value as string
-% Mandatory argument: label to ref.
-% Last optional argument assigned to.
-\NewDocumentCommand \refnum {O{0} m o}
-  {\refnum@count{\refnum@temp}{#1}{#2}%
-  \refnum@out{#3}{\refnum@temp}}
 
 %temporarily assign ref counter to other counter & display
-% Mandatory argument: label to ref.
-% Last optional argument assigned to.
-\NewDocumentCommand \asref {s O{0} d<> m o}
-  {% If we haven't been given a counter name, get it from ref
-   \IfNoValueTF{#3}%
-     {\refnum@name{\refnum@@temp}{#4}}%
-     {\def\refnum@@temp{#3}}%
-   \refnum@ascounter{\refnum@@temp}{\refnum@temp}{#2}{#4}%
-   \IfBooleanTF{#1}%
-     {}%
-     {\let\refnum@@temp\refnum@temp%
-      \def\refnum@temp{\hyperref[#4]{\refnum@@temp}}}
-   \refnum@out{#5}{\refnum@temp}}
+% #1 Starred: Suppress hyperlink?
+% #2 Optional: How many generations up parent counters do we go?
+% #3 Optional: Counter type to display as
+% #4 Mandatory: label to ref.
+% #5 Optional: assigned to.
+%
+\NewDocumentCommand \asref { s O{0} d<> m o }
+{
+  % If we haven't been given a counter name, get it from ref
+  \IfNoValueTF{#3}
+    { \__refnum_get_name:Nn \g_tmpb_tl {#4} }
+    { \tl_set:Nn \g_tmpb_tl {#3} }
+  \__refnum_as_counter:NVnn \g_tmpa_tl \g_tmpb_tl {#2} {#4}
+%
+  \IfBooleanTF{#1}
+    {}
+    {
+      \tl_set_eq:NN \g_tmpb_tl \g_tmpa_tl
+      \tl_set:Nx \g_tmpa_tl { { \g_tmpb_tl } }
+      \tl_put_left:Nn \g_tmpa_tl { \hyperref[#4] }
+    }
+  \__refnum_output:Nn \g_tmpa_tl {#5}
+}
 
-%assign ref counter to other counter
-% Mandatory argument: label to ref.
-\NewDocumentCommand \reftocounter {O{0} d<> m}
-  {% If we haven't been given a counter name, get it from ref
-   \IfNoValueTF{#2}%
-     {\refnum@name{\refnum@temp}{#3}}%
-     {\def\refnum@temp{#2}}%
-   \refnum@tocounter{\refnum@temp}{#1}{#3}}
-
+%================================================================================
+\ExplSyntaxOff
 %--------------------------------------------------------------------------------
 \makeatother
 \endinput

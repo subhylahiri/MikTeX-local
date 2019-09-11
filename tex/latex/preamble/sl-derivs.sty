@@ -51,8 +51,8 @@
       { \prg_return_false: }
   }
 
-% Test if tl-var is a number
-% #1: tl-var to test
+% Test if tok_list-variable is a number
+% #1: tok_list-variable to test
 % #2: code to execute if it is a number
 % #2: code to execute if it is not a number
 %
@@ -60,8 +60,8 @@
 
 %--------------------------------------------------------------------------------
 % Append string to order of derivative
-% #1: derivative order tl-var to append to
-% #2: to be added to order, tl
+% #1: derivative order tok_list-variable to append to
+% #2: to be added to order, tok_list
 %
 \cs_new:Nn \__slderivs_append_to_order:Nn
 {
@@ -72,31 +72,31 @@
 }
 
 % Append string to order of derivative
-% #1: derivative order tl-var to append to
-% #2: to be added to order, tl-var
+% #1: derivative order tok_list-variable to append to
+% #2: to be added to order, tok_list-variable
 %
 \cs_generate_variant:Nn \__slderivs_append_to_order:Nn { NV }
 
 %--------------------------------------------------------------------------------
 %Raise indep var in denominator to exponent
-% #1: tl-var ending with indep var
-% #2: exponent, tl
+% #1: tok_list-variable ending with independent variable name
+% #2: exponent, tok_list
 %
 \cs_new:Nn \__slderivs_raise:Nn
   { \tl_put_right:Nn #1 { ^{#2} } }
 
 %Raise indep var in denominator to exponent
-% #1: tl-var ending with indep var
-% #2: exponent, tl-var
+% #1: tok_list-variable ending with indep var
+% #2: exponent, tok_list-variable
 %
 \cs_generate_variant:Nn \__slderivs_raise:Nn { NV }
 
 %--------------------------------------------------------------------------------
-% #1: denominator tl-var to append to
-% #2: stores order of derivative, actual numbers int-var
-% #3: stores order of derivative, variables tl-var
-% #4: one entry for denominator, tl=varname or clist={varname, order}
-% #5: differential operator, e.g. `d', tl
+% #1: denominator tok_list-variable to append to
+% #2: stores order of derivative as actual numbers, int-variable
+% #3: stores order of derivative as variable names, tok_list-variable
+% #4: one entry for denominator, tok_list=varname or clist={varname, order}
+% #5: differential operator, e.g. `d', tok_list
 %
 \cs_new:Nn \__slderivs_one_indep:NNNnn
 {
@@ -128,11 +128,11 @@
     }
 }
 
-% Process semicolon-separated list of indep ars in denominator
-% #1: denominator tl-var to append to
-% #2: stores order of derivative as a string tl-var
+% Process semicolon-separated list of indep variables in denominator
+% #1: denominator tok_list-variable to append to
+% #2: stores order of derivative as a string, tok_list-variable
 % #3: semicolon-separated list of entries for denominator,
-%       each tl=varname or clist={varname, order}
+%       each tok_list=varname or clist={varname, order}
 % #4: differential operator, e.g. `d', tl
 %
 \cs_new:Nn \__slderivs_process_denom:NNnn
@@ -157,53 +157,59 @@
 
 %--------------------------------------------------------------------------------
 % Make the derivative symbols
-% #1: numerator, tl
+% #1: numerator, tok_list
 % #2: denominator(s)-  semicolon-separated list of entries for denominator,
-%       each tl=varname or clist={varname, order}
-% #3: differential operator, e.g. `d', tl
+%       each tok_list=varname or clist={varname, order}
+% #3: differential operator, e.g. `d', tok_list
 %
 \cs_new:Nn \__slderivs_make_deriv:nnn
 {
   \group_begin:
 %
-  \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
-    {#2}
-    {{#3}}
-  \tl_put_right:Nn \l__slderivs_numer_tl {{#3}}
-  \tl_if_blank:VTF \l_tmpb_tl
-    {}
-    { \__slderivs_raise:NV \l__slderivs_numer_tl \l_tmpb_tl }
-  \tl_put_right:Nn \l__slderivs_numer_tl {{#1}}
+    \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
+      {#2}
+      {{#3}}
+    \tl_put_right:Nn \l__slderivs_numer_tl {{#3}}
+    \tl_if_blank:VTF \l_tmpb_tl
+      {}
+      { \__slderivs_raise:NV \l__slderivs_numer_tl \l_tmpb_tl }
+    \tl_put_right:Nn \l__slderivs_numer_tl {{#1}}
 %
-  \exp_args:NVV
-    \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
+    \exp_args:NVV
+      \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
+%
   \group_end:
 }
 
 % Make the derivative symbols, overriding the order
-% #1: numerator, tl
+% #1: numerator, tok_list
 % #2: denominator(s)-  semicolon-separated list of entries for denominator,
-%       each tl=varname or clist={varname, order}
-% #3: differential operator, e.g. `d', tl
-% #4: order of derivative (numerator only)
+%       each tok_list=varname or clist={varname, order}
+% #3: differential operator, e.g. `d', tok_list
+% #4: order of derivative (numerator only), tok_list
 \cs_new:Nn \__slderivs_make_deriv:nnnn
 {
   \group_begin:
 %
-  \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
-    {#2}
-    {{#3}}
-  \tl_put_right:Nn \l__slderivs_numer_tl {#3}
-  \tl_if_blank:nTF {#4}
-    {}
-    { \__slderivs_raise:Nn \l__slderivs_numer_tl {#4} }
-  \tl_put_right:Nn \l__slderivs_numer_tl {#1}
+    \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
+      {#2}
+      {{#3}}
+    \tl_put_right:Nn \l__slderivs_numer_tl {#3}
+    \tl_if_blank:nTF {#4}
+      {}
+      { \__slderivs_raise:Nn \l__slderivs_numer_tl {#4} }
+    \tl_put_right:Nn \l__slderivs_numer_tl {#1}
 %
-  \exp_args:NVV
-    \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
+    \exp_args:NVV
+      \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
+%
   \group_end:
 }
 %================================================================================
+% Define command for univariate derivative
+% #1: command to define
+% #2: differential operator, e.g. `d'
+%
 \NewDocumentCommand \NewDerivUni { m m } {
   \NewDocumentCommand #1 { o m m } {
     \IfNoValueTF {##1}
@@ -212,6 +218,10 @@
   }
 }
 
+% Define command for multivariate derivative
+% #1: command to define
+% #2: differential operator, e.g. `\partial'
+%
 \NewDocumentCommand \NewDerivMulti { m m } {
   \NewDocumentCommand #1 { o m m } {
     \IfNoValueTF {##1}
@@ -220,6 +230,10 @@
   }
 }
 
+% Define command for inline derivative
+% #1: command to define
+% #2: differential operator, e.g. `\partial'
+%
 \NewDocumentCommand \NewDerivInline { m m } {
   \NewDocumentCommand #1 { o } {
     \IfNoValueTF {##1}

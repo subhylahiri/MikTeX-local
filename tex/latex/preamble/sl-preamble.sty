@@ -125,7 +125,12 @@
     \fi
     %\RequirePackage{sl-panels}
 }{}
-\iftoggle{sl@draft}{\RequirePackage[notref,notcite,color]{showkeys}}{}
+\iftoggle{sl@draft}{
+  \RequirePackage[notref,notcite,color]{showkeys}
+%  \iftoggle{sl@graphics}{
+%    \let\SK@fpanel\SK@equationtrue
+%  }{}
+}{}
 % ----------------------------------------------------------------
 \RequirePackage{cleveref}
 \iftoggle{sl@eqcref}{\RequirePackage{eqcref}}{}

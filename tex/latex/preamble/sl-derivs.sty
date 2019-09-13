@@ -31,32 +31,14 @@
 %\RequirePackage{interface3}
 \RequirePackage{expl3}
 \RequirePackage{xparse}
+\RequirePackage{sltools}
 \ExplSyntaxOn
 %================================================================================
 
 \tl_new:N \l__slderivs_numer_tl
 \tl_new:N \l__slderivs_denom_tl
 \int_new:N \l__slderivs_order_int
-\regex_const:Nn \c__slderivs_number_regex { \d+ }
-
-% Test if tl is a number
-% #1: tl to test
-% #2: code to execute if it is a number
-% #2: code to execute if it is not a number
-%
-\prg_new_conditional:Nnn \__slderivs_if_num:n { TF }
-  {
-    \regex_match:NnTF \c__slderivs_number_regex {#1}
-      { \prg_return_true: }
-      { \prg_return_false: }
-  }
-
-% Test if tok_list-variable is a number
-% #1: tok_list-variable to test
-% #2: code to execute if it is a number
-% #2: code to execute if it is not a number
-%
-\cs_generate_variant:Nn \__slderivs_if_num:nTF { V }
+\tl_new:N \g_slderivs_sep_tl
 
 %--------------------------------------------------------------------------------
 % Append string to order of derivative
@@ -113,17 +95,19 @@
       \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
       \tl_put_right:NV #1 \l_tmpa_tl
       \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
-      \__slderivs_if_num:VTF \l_tmpa_tl
+      \sltools_tl_if_num:VTF \l_tmpa_tl
         {
           \int_compare:nNnTF { \l_tmpa_tl } > {1}
             { \__slderivs_raise:NV #1 \l_tmpa_tl }
             {}
+          \tl_put_right:NV #1 \g_slderivs_sep_tl
           \exp_args:NNV
             \int_add:Nn #2 \l_tmpa_tl
         }
         {
           \__slderivs_raise:NV #1 \l_tmpa_tl
           \__slderivs_append_to_order:NV #3 \l_tmpa_tl
+          \tl_put_right:NV #1 \g_slderivs_sep_tl
         }
     }
 }

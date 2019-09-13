@@ -1,0 +1,263 @@
+%%  Some tools for working with expl3
+%%
+%%
+\ProvidesExplPackage {sltools}{2019/09/11}{v1.0}{Some tools for working with expl3 (SL)}
+%================================================================================
+\regex_const:Nn \c__sltools_number_regex { \d+ }
+% Test if token list is a number
+% #1: tl to test
+% #2: code to execute if it is a number
+% #3: code to execute if it is not a number
+%
+\prg_new_conditional:Nnn \sltools_tl_if_num:n { TF, T, F, p }
+  {
+    \regex_match:NnTF \c__sltools_number_regex {#1}
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+% Test if tok_list-variable is a number
+% #1: tok_list-variable to test
+% #2: code to execute if it is a number
+% #3: code to execute if it is not a number
+%
+\cs_generate_variant:Nn \sltools_tl_if_num:nTF { V }
+\cs_generate_variant:Nn \sltools_tl_if_num:nT { V }
+\cs_generate_variant:Nn \sltools_tl_if_num:nF { V }
+\cs_generate_variant:Nn \sltools_tl_if_num_p:n { V }
+%================================================================================
+% insert token list after current group
+%
+\cs_new:Nn \sltools_tl_insert_after:n
+  {
+    \tl_if_single_token:nTF {#1}
+      { \group_insert_after:N #1 }
+      {
+        \group_insert_after:N {
+        \tl_map_function:nN {#1} \sltools_tl_insert_after:n
+        \group_insert_after:N }
+      }
+  }
+% insert contents of token list variable after current group
+%
+\cs_generate_variant:Nn \sltools_tl_insert_after:n { V }
+
+% Assign a variable after the current group
+% Places the next two tokens and the following token list after current group
+% #1: Assignment command, e.g. \tl_set:Nn
+% #2: Variable to assign to
+% #3: Token list to be assigned
+%
+\cs_new:Nn \sltools_assign_after:NNn
+  {
+    \group_insert_after:N #1
+    \group_insert_after:N #2
+    \sltools_tl_insert_after:n {#3}
+  }
+% Assign a variable after the current group
+% Places the next two tokens and the following token list variable's contents after current group
+% #1: Assignment command, e.g. \tl_set:Nn
+% #2: Variable to assign to
+% #3: Token list variable whose contents are to be assigned
+%
+\cs_generate_variant:Nn \sltools_assign_after:NNn { NNV }
+
+%--------------------------------------------------------------------------------
+% Create a command to assign a variable after the current group
+% Places the next two tokens and the following token list after current group
+% #1: Assignment command, e.g. \tl_set:Nn
+% #2: cname of command to define, without :variable spec
+%
+\cs_new:Nn \sltools_new_assignment_command:Nn
+  {
+    \cs_new:cn { #2:Nn }
+      { \sltools_assign_after:NNn #1 ##1 {##2} }
+    \cs_generate_variant:cn { #2:Nn } { cn, NV, cV, Nv, cv, Nx, cx, Ne, ce, No, co, Nf, cf }
+  }
+% Create a command to assign a variable after the current group
+% Places the next two tokens and the following token list after current group
+% #1: cname of Assignment command, e.g. \tl_set:Nn
+% #2: cname of command to define, without :variable spec
+%
+\cs_generate_variant:Nn \sltools_new_assignment_command:Nn { cn }
+
+% Create a command to assign a variable of standard type after the current group
+% Asssumes that the relevant command has the form \<type>_set:Nn
+% #1: name of variable type / module
+%
+\cs_new:Nn \sltools_std_assignment_command:n
+  {
+    \sltools_new_assignment_command:cn { #1_set:Nn } { sltools_#1_uset }
+  }
+
+% Create a command to assign a variable of standard type after the current group
+% Asssumes that the type can be set as/from a token list
+% #1: name of variable type / module
+%
+\cs_new:Nn \sltools_halfstd_assignment_command:n
+  {
+    \sltools_new_assignment_command:Nn \tl_set:Nn { sltools_#1_uset }
+  }
+
+%================================================================================
+
+% Transfer a variable after the current group
+% Places the next two tokens and the following token list after current group
+% #1: Global copy command, e.g. \seq_gset_eq:NN
+% #2: Local copy command, e.g. \set_set_eq:NN
+% #3: Dummy private-but-global variable
+% #4: Variable to assign to
+% #5: Variable to assign from
+%
+\cs_new:Nn \sltools_transfer_after:NNNNN
+  {
+    #1 #3 #5
+    \group_insert_after:N #2
+    \group_insert_after:N #4
+    \group_insert_after:N #3
+  }
+
+%--------------------------------------------------------------------------------
+% Create a command to transfer a variable after the current group
+% #1: Global copy command, e.g. \seq_gset_eq:NN
+% #2: Local copy command, e.g. \set_set_eq:NN
+% #3: Dummy private-but-global variable
+% #4: cname of command to define, without :variable spec
+%
+\cs_new:Nn \sltools_new_transfer_command:NNNn
+  {
+    \cs_new:cn { #4:NN }
+      {
+        \sltools_transfer_after:NNNNN #1 #2 #3 ##1 ##2
+      }
+    \cs_generate_variant:cn { #4:NN } { Nc, cN, cc }
+  }
+% Create a command to transfer a variable after the current group
+% #1: cname of Global copy command, e.g. \seq_gset_eq:NN
+% #2: cname of Local copy command, e.g. \set_set_eq:NN
+% #3: cname of Dummy private-but-global variable
+% #4: cname of command to define, without :variable spec
+%
+\cs_generate_variant:Nn \sltools_new_transfer_command:NNNn { cccn }
+
+% Create a command to transfer a variable of standard type after the current group
+% Asssumes that the relevant commands have the form \<type>_new:N, \<type>_set_eq:NN, \<type>_gset_eq:NN
+% #1: name of variable type / module
+%
+\cs_new:Nn \sltools_std_transfer_command:n
+  {
+    \use:c {#1_new:c} {g__sltools_transfer_#1}
+    \sltools_new_transfer_command:cccn
+      { #1_gset_eq:NN }
+      { #1_set_eq:NN }
+      { g__sltools_transfer_#1 }
+      { sltools_#1_uset }
+  }
+%================================================================================
+
+% Signature \sltools_<type>_uset:Nn, cn, NV, cV, Nv, cv, No, co, Nf, cf, Ne, ce, Nx, cx
+% Treated as a token list.
+% Can be used multiple times in one scope.
+% Has a tendency to strip braces & spaces
+
+%\sltools_new_assignment_command:Nn \tl_set:Nn { sltools_tl_uset }
+\sltools_std_assignment_command:n { tl }
+\sltools_std_assignment_command:n { clist }
+\sltools_std_assignment_command:n { int }
+\sltools_halfstd_assignment_command:n { seq }
+\sltools_halfstd_assignment_command:n { prop }
+% #1: Variable to assign to
+% #2: Token list to assign from
+
+%--------------------------------------------------------------------------------
+% Signature \sltools_<type>_uset:NN, Nc, cn, cc
+% Transfered via a dummy internal-global variable
+% Can only be used once each in one scope
+% #1: Variable to assign to
+% #2: Variable whose contents to assign from
+
+%\seq_new:N \g__sltools_transfer_seq
+%\sltools_new_assignment_command:NNNn \seq_gset_eq:NN \seq_set_eq:NN \g__sltools_transfer_seq { sltools_seq_uset }
+\sltools_std_transfer_command:n { tl }
+\sltools_std_transfer_command:n { clist }
+\sltools_std_transfer_command:n { int }
+\sltools_std_transfer_command:n { seq }
+\sltools_std_transfer_command:n { prop }
+
+% Commands:
+% \sltools_tl_uset:NN
+% \sltools_clist_uset:NN
+% \sltools_int_uset:NN
+% \sltools_seq_uset:NN
+% \sltools_prop_uset:NN
+%================================================================================
+% Append braced argument to token-list-variable
+% #1: token-list-variable to append to
+% #2: contents of argument, token-list
+%
+\cs_new:Nn \__sltools_tl_put_arg_right:Nn
+  {
+    \group_begin:
+      \tl_new:N \l__sltools_putarg_tl
+      \tl_set:Nn \l__sltools_putarg_tl { { #2 } }
+      \tl_put_left:NV \l__sltools_putarg_tl #1
+      % avoid stripping braces by using transfer version
+      \sltools_tl_uset:NN #1 \l__sltools_putarg_tl
+    \group_end:
+ }
+
+% Append bracketed argument to token-list-variable
+% #1: token-list-variable to append to
+% #2: contents of optional, token-list
+%
+\cs_new:Nn \__sltools_tl_put_opt_right:Nn
+  {
+    \group_begin:
+      \tl_new:N \l__sltools_putopt_tl
+      \tl_set:Nn \l__sltools_putopt_tl { [ #2 ] }
+      \tl_put_left:NV \l__sltools_putopt_tl #1
+      % avoid stripping braces by using transfer version
+      \sltools_tl_uset:NN #1 \l__sltools_putopt_tl
+    \group_end:
+ }
+
+% Create token list: {function}{arg1,arg2,...} -> function{arg1}{arg2}...
+% #1: token-list-variable to store result
+% #2: name of function, token-list
+% #3: contents of arguments, comma-list
+%
+\cs_new:Nn \sltools_tl_func_args:Nnn
+  {
+    \group_begin:
+      \tl_new:N \l__sltools_funarg_tl
+      \tl_set:Nn \l__sltools_funarg_tl {#2}
+      \clist_map_inline:nn {#3}
+        { \__sltools_tl_put_arg_right:Nn \l__sltools_funarg_tl {##1} }
+      % avoid stripping braces by using transfer version
+      \sltools_tl_uset:NN #1 \l__sltools_funarg_tl
+    \group_end:
+  }
+\cs_generate_variant:Nn \sltools_tl_func_args:Nnn { NVn, NnV, NVV }
+
+% Create token list: {function}{arg1,arg2,...} -> function{arg1}{arg2}...
+% #1: token-list-variable to store result
+% #2: name of function, token-list
+% #3: contents of optionals, comma-list
+% #3: contents of arguments, comma-list
+%
+\cs_new:Nn \sltools_tl_func_args:Nnnn
+  {
+    \group_begin:
+      \tl_new:N \l__sltools_funarg_tl
+      \tl_set:Nn \l__sltools_funarg_tl {#2}
+      \clist_map_inline:nn {#3}
+        { \__sltools_tl_put_opt_right:Nn \l__sltools_funarg_tl {##1} }
+      \clist_map_inline:nn {#4}
+        { \__sltools_tl_put_arg_right:Nn \l__sltools_funarg_tl {##1} }
+      % avoid stripping braces by using transfer version
+      \sltools_tl_uset:NN #1 \l__sltools_funarg_tl
+    \group_end:
+  }
+\cs_generate_variant:Nn \sltools_tl_func_args:Nnn { NVnn, NnVn, NVVn, NnnV, NVnV, NnVV, NVVV }
+
+%================================================================================
+\endinput

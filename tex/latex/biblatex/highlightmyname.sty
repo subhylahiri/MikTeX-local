@@ -1,0 +1,120 @@
+%%  Machinery to highlight a specific name in citations.
+%%  Useful for CVs, slides etc.
+%%
+%%  Put \myname{Smith} in your preamble.
+%%  \renewbibmacro{highlightname:bib}{...} to customise bibliography entries
+%%    Font switching commands, e.g. \bfseries
+%%  \renewbibmacro{highlightname:cite}{...} to customise citations
+%%    Command to write name, e.g. \usebibmacro{name:family}{\namepartgiveni\namepartfamilyi}{...}{...}...}
+%%
+%% Requires packages: biblatex, expl3, xparse
+%%
+%%
+%% See https://tex.stackexchange.com/a/73246/147422
+%%
+%% History: 2019/09/10 v1.0      tools to highlight a specific name (SL)
+%================================================================================
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{highlightmyname}[2019/9/19 Highlight a specific name (SL)]
+%================================================================================
+\RequirePackage{expl3}
+\RequirePackage{xpatch}
+\RequirePackage{xparse}
+%--------------------------------------------------------------------------------
+\makeatletter
+\ExplSyntaxOn
+%================================================================================
+% Error messages
+\msg_new:nnnn { highlightmyname } { needs-biblatex }
+  { This~package~requires~biblatex! }
+  {
+    This~package~uses biblatex~hooks~to~format~names.\\
+    You~must~load~biblatex~first.
+  }
+\msg_new:nnnn { highlightmyname } { failed-patch }
+  { Failed~to~patch~bibmacro~#1! }
+  {
+    Failed~to~patch~bibmacro~#1!
+  }
+%--------------------------------------------------------------------------------
+\@ifpackageloaded{biblatex}{}{\msg_warning:nn { highlightmyname } { needs-biblatex } }
+%================================================================================
+\tl_new:N \g__highlightmyname_name_tl
+\cs_generate_variant:Nn \tl_if_in:nnTF { xV }
+%--------------------------------------------------------------------------------
+\providebibmacro{highlightname:bib}{}
+\providebibmacro{highlightname:cite}{}
+%--------------------------------------------------------------------------------
+\newbibmacro{ifhighlightname}[3]%
+  {%
+    \tl_if_in:xVTF {#1} \g__highlightmyname_name_tl%
+      {#2}%
+      {#3}%
+  }
+%================================================================================
+\int_new:N \l__highlightmyname_old_uniquename_int
+%
+\newbibmacro{highlightname:setuniquename}
+  {%
+    \int_set:Nn \l__highlightmyname_old_uniquename_int { \value{uniquename} }%
+    \usebibmacro{ifhighlightname}%
+      {\namepartgiven\namepartprefix\namepartfamily\namepartsuffix}%
+      {\setcounter{uniquename}{3}}%
+      {}%
+  }
+%
+\newbibmacro{highlightname:restoreuniquename}
+  {%
+    \setcounter{uniquename}{\l__highlightmyname_old_uniquename_int}
+  }
+%================================================================================
+\ExplSyntaxOff
+%--------------------------------------------------------------------------------
+%see biblatex.def, line 934
+\xpretonameformat{labelname}
+  {\usebibmacro{highlightname:setuniquename}}
+  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro labelname } }
+%
+\xpatchnameformat{labelname} {\fi}
+  {%
+    \or
+      \usebibmacro{highlightname:cite}
+    \fi
+  }
+  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro labelname } }
+%
+\xapptonameformat{labelname}
+  {\usebibmacro{highlightname:restoreuniquename}}
+  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro labelname } }
+%--------------------------------------------------------------------------------
+\xapptobibmacro{name:hook}
+  {%
+    \usebibmacro{ifhighlightname}{#1}%
+      {\usebibmacro{highlightname:bib}}%
+      {}%
+  }%
+  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro name:hook } }
+%--------------------------------------------------------------------------------
+\ExplSyntaxOn
+%================================================================================
+\cs_new:Nn \highlightmyname_patchname:n
+  {
+    \ExplSyntaxOff
+      \xpretobibmacro {#1} { \begingroup }%
+        {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro #1 } }
+      \xapptobibmacro {#1} { \endgroup }%
+        {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro #1 }  }
+    \ExplSyntaxOn
+  }
+%--------------------------------------------------------------------------------
+\highlightmyname_patchname:n {name:family}
+\highlightmyname_patchname:n {name:given-family}
+\highlightmyname_patchname:n {name:family-given}
+%================================================================================
+\NewDocumentCommand \myname { m }
+  { \tl_gset:Nn \g__highlightmyname_name_tl {#1} }
+%================================================================================
+\ExplSyntaxOff
+\makeatother
+%================================================================================
+\endinput

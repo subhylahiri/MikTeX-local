@@ -163,6 +163,7 @@
 \sltools_std_assignment_command:n { tl }
 \sltools_std_assignment_command:n { clist }
 \sltools_std_assignment_command:n { int }
+\sltools_std_assignment_command:n { fp }
 \sltools_halfstd_assignment_command:n { seq }
 \sltools_halfstd_assignment_command:n { prop }
 % #1: Variable to assign to
@@ -180,6 +181,7 @@
 \sltools_std_transfer_command:n { tl }
 \sltools_std_transfer_command:n { clist }
 \sltools_std_transfer_command:n { int }
+\sltools_std_transfer_command:n { fp }
 \sltools_std_transfer_command:n { seq }
 \sltools_std_transfer_command:n { prop }
 
@@ -257,7 +259,7 @@
       \sltools_tl_uset:NN #1 \l__sltools_funarg_tl
     \group_end:
   }
-\cs_generate_variant:Nn \sltools_tl_func_args:Nnn { NVnn, NnVn, NVVn, NnnV, NVnV, NnVV, NVVV }
+\cs_generate_variant:Nn \sltools_tl_func_args:Nnnn { NVnn, NnVn, NVVn, NnnV, NVnV, NnVV, NVVV }
 
 %================================================================================
 \endinput

@@ -36,6 +36,7 @@
   {
     Failed~to~patch~bibmacro~#1!
   }
+\newcommand{\failed@patch}[1]{\PackageWarning{highlightmyname}{Failed to patch bibmacro #1}}
 %--------------------------------------------------------------------------------
 \@ifpackageloaded{biblatex}{}{\msg_warning:nn { highlightmyname } { needs-biblatex } }
 %================================================================================
@@ -73,7 +74,7 @@
 %see biblatex.def, line 934
 \xpretonameformat{labelname}
   {\usebibmacro{highlightname:setuniquename}}
-  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro labelname } }
+  {}{ \failed@patch{labelname} }
 %
 \xpatchnameformat{labelname} {\fi}
   {%
@@ -81,11 +82,11 @@
       \usebibmacro{highlightname:cite}
     \fi
   }
-  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro labelname } }
+  {}{ \failed@patch{labelname} }
 %
 \xapptonameformat{labelname}
   {\usebibmacro{highlightname:restoreuniquename}}
-  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro labelname } }
+  {}{ \failed@patch{labelname} }
 %--------------------------------------------------------------------------------
 \xapptobibmacro{name:hook}
   {%
@@ -93,7 +94,7 @@
       {\usebibmacro{highlightname:bib}}%
       {}%
   }%
-  {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro name:hook } }
+  {}{ \failed@patch{name:hook} }
 %--------------------------------------------------------------------------------
 \ExplSyntaxOn
 %================================================================================
@@ -101,9 +102,9 @@
   {
     \ExplSyntaxOff
       \xpretobibmacro {#1} { \begingroup }%
-        {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro #1 } }
+        {}{ \failed@patch{#1} }
       \xapptobibmacro {#1} { \endgroup }%
-        {}{ \PackageWarning { highlightmyname } { Failed to patch bibmacro #1 }  }
+        {}{ \failed@patch{#1} }
     \ExplSyntaxOn
   }
 %--------------------------------------------------------------------------------

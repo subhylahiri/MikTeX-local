@@ -48,70 +48,91 @@
 %
 \cs_new_protected:Nn \__slderivs_append_to_order:NN
 {
-  \tl_if_blank:VTF #1
-    {}
-    { \tl_put_right:Nn #1 {+} }
-  \tl_put_right:Nn #1 {#2}
+  \tl_if_blank:VF #1 { \tl_put_right:Nn #1 {+} }
+  \tl_put_right:NV #1 #2
 }
 
-% Append string to order of derivative
+% Add number to order of derivative
 % #1: derivative order tok_list-variable to append to
-% #2: to be added to order, tok_list-variable
+% #2: to be added to order, int variable
 %
-\cs_generate_variant:Nn \__slderivs_append_to_order:Nn { NV }
+\cs_new_protected:Nn \__slderivs_add_to_order:NN
+{
+  \bool_if:nT { (! \tl_if_blank_p:V #1 ) || \int_compare_p:nNn {#2} > { 1 } }
+    { \__slderivs_append_to_order:NN #1 #2 }
+}
 
 %--------------------------------------------------------------------------------
 %Raise indep var in denominator to exponent
 % #1: tok_list-variable ending with independent variable name
 % #2: exponent, tok_list
 %
-  { \tl_put_right:Nn #1 { ^{#2} } }
 \cs_new_protected:Nn \__slderivs_raise:Nn
+{
+    \tl_if_blank:nF {#2}
+      {
+        \tl_if_eq:nnF {#2} { 1 }
+          { \tl_put_right:Nn #1 { ^{#2} } }
+      }
+}
 %Raise indep var in denominator to exponent
-% #1: tok_list-variable ending with indep var
-% #2: exponent, tok_list-variable
+% #1: tok_list-variable ending with independent variable name
+% #2: exponent, tok_list variable
 %
 \cs_generate_variant:Nn \__slderivs_raise:Nn { NV }
 
 %--------------------------------------------------------------------------------
+\tl_new:N \l__slderivs_one_denom_tl
+\tl_new:N \l__slderivs_one_order_tl
+\int_new:N \l__slderivs_one_order_int
+% Process one entry in the denominator
 % #1: denominator tok_list-variable to append to
 % #2: stores order of derivative as actual numbers, int-variable
 % #3: stores order of derivative as variable names, tok_list-variable
-% #4: one entry for denominator, tok_list=varname or clist={varname, order}
-% #5: differential operator, e.g. `d', tok_list
+% #4: differential operator, e.g. `d', tok_list-variable
+% #5: one entry for denominator, tok_list=varname or clist={varname, order}
 %
 \cs_new_protected:Nn \__slderivs_one_indep:NNNNn
 {
-  \seq_set_from_clist:Nn \l_tmpb_seq {#4}
-%  \seq_set_split:Nnn \l_tmpb_seq {;} {#4}
+  \group_begin:
+    \seq_set_from_clist:Nn \l_tmpb_seq {#5}
+%    \seq_set_split:Nnn \l_tmpb_seq {;} {#5}
 %
-  \tl_put_right:Nn #1 {#5}
-  \int_compare:nNnTF { \seq_count:N \l_tmpb_seq } = {1}
-    {
-      \int_incr:N #2
-      \tl_put_right:Nn #1 {#4}
-    }
-    {
-      \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
-      \tl_put_right:NV #1 \l_tmpa_tl
-      \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
-      \sltools_tl_if_num:VTF \l_tmpa_tl
-        {
-          \int_compare:nNnTF { \l_tmpa_tl } > {1}
-            { \__slderivs_raise:NV #1 \l_tmpa_tl }
-            {}
-          \tl_put_right:NV #1 \g_slderivs_sep_tl
-          \exp_args:NNV
-            \int_add:Nn #2 \l_tmpa_tl
-        }
-        {
-          \__slderivs_raise:NV #1 \l_tmpa_tl
-          \__slderivs_append_to_order:NV #3 \l_tmpa_tl
-          \tl_put_right:NV #1 \g_slderivs_sep_tl
-        }
-    }
+    \tl_set_eq:NN \l__slderivs_one_denom_tl #1
+    \int_set_eq:NN \l_tmpa_int #2
+    \tl_set_eq:NN \l__slderivs_one_order_tl #3
+%
+    \tl_put_right:NV \l__slderivs_one_denom_tl #4
+%
+    \int_compare:nNnTF { \seq_count:N \l_tmpb_seq } = {1}
+      {
+        \int_incr:N \l_tmpa_int
+        \tl_put_right:Nn \l__slderivs_one_denom_tl {#5}
+      }
+      {
+        \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
+        \tl_put_right:NV \l__slderivs_one_denom_tl \l_tmpa_tl
+        \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
+%
+        \sltools_tl_if_num:VTF \l_tmpa_tl
+          {
+            \__slderivs_raise:NV \l__slderivs_one_denom_tl \l_tmpa_tl
+            \tl_put_right:NV \l__slderivs_one_denom_tl \g_slderivs_sep_tl
+            \int_add:Nn \l_tmpa_int { \l_tmpa_tl }
+          }
+          {
+            \__slderivs_raise:NV \l__slderivs_one_denom_tl \l_tmpa_tl
+            \__slderivs_append_to_order:NN \l__slderivs_one_order_tl \l_tmpa_tl
+            \tl_put_right:NV \l__slderivs_one_denom_tl \g_slderivs_sep_tl
+          }
+      }
+    \sltools_tl_uset:NV #1 \l__slderivs_one_denom_tl
+    \sltools_int_uset:NV #2 \l_tmpa_int
+    \sltools_tl_uset:NV #3 \l__slderivs_one_order_tl
+  \group_end:
 }
 
+\tl_new:N \l__slderivs_proc_op_tl
 % Process semicolon-separated list of indep variables in denominator
 % #1: denominator tok_list-variable to append to
 % #2: stores order of derivative as a string, tok_list-variable
@@ -121,22 +142,39 @@
 %
 \cs_new_protected:Nn \__slderivs_process_denom:NNnn
 {
-%  \seq_set_from_clist:Nn \l_tmpa_seq {#3}
-  \seq_set_split:Nnn \l_tmpa_seq {;} {#3}
+  \group_begin:
+%    \seq_set_from_clist:Nn \l_tmpa_seq {#3}
+    \seq_set_split:Nnn \l_tmpa_seq {;} {#3}
 %
-  \seq_map_inline:Nn \l_tmpa_seq
-    {
-      \__slderivs_one_indep:NNNnn #1 \l__slderivs_order_int #2
-        {##1}
-        {#4}
-    }
+    \tl_set:Nn \l__slderivs_proc_op_tl {#4}
+    \seq_map_inline:Nn \l_tmpa_seq
+      {
+        \__slderivs_one_indep:NNNNn \l_tmpa_tl \l_tmpb_int \l_tmpb_tl
+          \l__slderivs_proc_op_tl {##1}
+      }
+    \__slderivs_add_to_order:NN \l_tmpb_tl \l_tmpb_int
 %
-  \bool_if:nTF {
-                 (! \tl_if_blank_p:V #2) ||
-                 \int_compare_p:nNn { \l__slderivs_order_int } > {1}
-               }
-    { \__slderivs_append_to_order:NV #2 \l__slderivs_order_int }
-    {}
+    \sltools_tl_uset:NV #1 \l_tmpa_tl
+    \sltools_tl_uset:NV #2 \l_tmpb_tl
+  \group_end:
+}
+
+\tl_new:N \l__slderivs_proc_numer_tl
+% Process dependent variable in numerator
+% #1: numerator tok_list-variable to write to
+% #2: numerator function, tok_list
+% #3: order of derivative as a string, tok_list
+% #4: differential operator, e.g. `d', tok_list
+%
+\cs_new_protected:Nn \__slderivs_process_numer:NnNn
+{
+  \group_begin:
+    \tl_put_right:Nn \l__slderivs_proc_numer_tl {#4}
+    \__slderivs_raise:NV \l__slderivs_proc_numer_tl #3
+    \tl_put_right:Nn \l__slderivs_proc_numer_tl {#2}
+%
+    \sltools_tl_uset:NV #1 \l__slderivs_proc_numer_tl
+  \group_end:
 }
 
 %--------------------------------------------------------------------------------
@@ -151,13 +189,9 @@
   \group_begin:
 %
     \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
-      {#2}
-      {{#3}}
-    \tl_put_right:Nn \l__slderivs_numer_tl {{#3}}
-    \tl_if_blank:VTF \l_tmpb_tl
-      {}
-      { \__slderivs_raise:NV \l__slderivs_numer_tl \l_tmpb_tl }
-    \tl_put_right:Nn \l__slderivs_numer_tl {{#1}}
+      {#2} {{#3}}
+    \__slderivs_process_numer:NnNn \l__slderivs_numer_tl
+      {{#1}} \l_tmpb_tl  {{#3}}
 %
     \exp_args:NVV
       \frac \l__slderivs_numer_tl \l__slderivs_denom_tl
@@ -176,13 +210,10 @@
   \group_begin:
 %
     \__slderivs_process_denom:NNnn \l__slderivs_denom_tl \l_tmpb_tl
-      {#2}
-      {{#3}}
-    \tl_put_right:Nn \l__slderivs_numer_tl {#3}
-    \tl_if_blank:nTF {#4}
-      {}
-      { \__slderivs_raise:Nn \l__slderivs_numer_tl {#4} }
-    \tl_put_right:Nn \l__slderivs_numer_tl {#1}
+      {#2} {{#3}}
+    \tl_set:Nn \l_tmpb_tl {#4}
+    \__slderivs_process_numer:NnNn \l__slderivs_numer_tl
+      {{#1}} \l_tmpb_tl {{#3}}
 %
     \exp_args:NVV
       \frac \l__slderivs_numer_tl \l__slderivs_denom_tl

@@ -28,7 +28,7 @@
 % #1: seq-variable to store result
 % #2: tok_list containing label
 %
-\cs_new:Nn \__refnum_get_seq:Nn
+\cs_new_protected:Nn \__refnum_get_seq:Nn
 {
   \group_begin:
     \tl_set:Nx \l_tmpa_tl { \tl_item:cn {r@#2} {4} }
@@ -42,7 +42,7 @@
 % #1: tok_list-variable to store result
 % #2: tok_list containing label
 %
-\cs_new:Nn \__refnum_max_level:Nn
+\cs_new_protected:Nn \__refnum_max_level:Nn
 {
   \group_begin:
     \__refnum_get_seq:Nn \l_tmpb_seq {#2}
@@ -53,14 +53,13 @@
 
 \regex_const:Nn \c__refnum_parent_regex { theH(\w*) }
 % Get parent counter name, as far as hyperref is concerned
-% #1: tok_list-variable to store result
-% #2: tok_list containing counter name
+% #1: tok_list-variable containing counter name and to store result
 % Leaves #1 unchanged if it cant find a parent
 %
-\cs_new:Nn \__refnum_parent_name:Nn
+\cs_new_protected:Nn \__refnum_parent_name:N
 {
   \group_begin:
-    \tl_map_inline:cn {theH#2}
+    \tl_map_inline:cn {theH#1}
       {
         \tl_set:Nx \l_tmpa_tl { \cs_to_str:N ##1 }
         \regex_replace_once:NnNT \c__refnum_parent_regex { \1 } \l_tmpa_tl
@@ -71,20 +70,19 @@
       }
   \group_end:
 }
-\cs_generate_variant:Nn \__refnum_parent_name:Nn { NV }
 
 % Get parent counter name, as far as hyperref is concerned
 % #1: tok_list-variable store counternames of input and result
 % #2: How many generations up? int
 %
-\cs_new:Nn \__refnum_ancestor_name:Nn
+\cs_new_protected:Nn \__refnum_ancestor_name:Nn
 {
   \group_begin:
     \tl_set_eq:NN \l_tmpb_tl #1
     \int_set:Nn \l_tmpa_int {#2}
     \int_while_do:nNnn { \l_tmpa_int } > { 0 }
       {
-        \__refnum_parent_name:NV \l_tmpb_tl \l_tmpb_tl
+        \__refnum_parent_name:N \l_tmpb_tl
         \int_decr:N \l_tmpa_int
       }
     \sltools_tl_uset:NV #1 \l_tmpb_tl
@@ -97,7 +95,7 @@
 % #2: How many generations up? int
 % #3: tok_list containing label
 %
-\cs_new:Nn \__refnum_get_name:Nnn
+\cs_new_protected:Nn \__refnum_get_name:Nnn
 {
   \group_begin:
     \__refnum_get_seq:Nn \l_tmpb_seq {#3}
@@ -113,7 +111,7 @@
 % #2: How many generations up? int
 % #3: tok_list containing label
 %
-\cs_new:Nn \__refnum_get_counter:Nnn
+\cs_new_protected:Nn \__refnum_get_counter:Nnn
 {
   \group_begin:
     \__refnum_get_seq:Nn \l_tmpb_seq {#3}
@@ -125,7 +123,7 @@
 
 % Set counter value from hyperref label
 % #1: target counter, tok_list
-% #2: How many generations up? int
+% #2: How many generations up from label? int
 % #3: tok_list containing label
 %
 \cs_new:Nn \__refnum_to_counter:nnn
@@ -141,7 +139,7 @@
 }
 % Set counter value from hyperref label
 % #1: target counter name, tok_list-variable
-% #2: How many generations up? int
+% #2: How many generations up from label? int
 % #3: tok_list containing label
 %
 \cs_generate_variant:Nn \__refnum_to_counter:nnn { Vnn }
@@ -158,7 +156,6 @@
   \cs_if_exist:cTF{r@#4}
     {
       \group_begin:
-        \tl_new:N \l__refnum_asc_tl
         \tl_set:Nx \l__refnum_asc_tl { \value{#2} }
         \__refnum_to_counter:nnn {#2} {#3} {#4}
         \sltools_tl_uset:Nx #1 { \use:c { the#2 } }

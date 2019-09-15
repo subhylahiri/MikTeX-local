@@ -38,14 +38,15 @@
 \tl_new:N \l__slderivs_numer_tl
 \tl_new:N \l__slderivs_denom_tl
 \int_new:N \l__slderivs_order_int
+% separator for denominator entries in output:
 \tl_new:N \g_slderivs_sep_tl
 
 %--------------------------------------------------------------------------------
 % Append string to order of derivative
 % #1: derivative order tok_list-variable to append to
-% #2: to be added to order, tok_list
+% #2: to be added to order, tok_list variable
 %
-\cs_new:Nn \__slderivs_append_to_order:Nn
+\cs_new_protected:Nn \__slderivs_append_to_order:NN
 {
   \tl_if_blank:VTF #1
     {}
@@ -64,9 +65,8 @@
 % #1: tok_list-variable ending with independent variable name
 % #2: exponent, tok_list
 %
-\cs_new:Nn \__slderivs_raise:Nn
   { \tl_put_right:Nn #1 { ^{#2} } }
-
+\cs_new_protected:Nn \__slderivs_raise:Nn
 %Raise indep var in denominator to exponent
 % #1: tok_list-variable ending with indep var
 % #2: exponent, tok_list-variable
@@ -80,7 +80,7 @@
 % #4: one entry for denominator, tok_list=varname or clist={varname, order}
 % #5: differential operator, e.g. `d', tok_list
 %
-\cs_new:Nn \__slderivs_one_indep:NNNnn
+\cs_new_protected:Nn \__slderivs_one_indep:NNNNn
 {
   \seq_set_from_clist:Nn \l_tmpb_seq {#4}
 %  \seq_set_split:Nnn \l_tmpb_seq {;} {#4}
@@ -119,7 +119,7 @@
 %       each tok_list=varname or clist={varname, order}
 % #4: differential operator, e.g. `d', tl
 %
-\cs_new:Nn \__slderivs_process_denom:NNnn
+\cs_new_protected:Nn \__slderivs_process_denom:NNnn
 {
 %  \seq_set_from_clist:Nn \l_tmpa_seq {#3}
   \seq_set_split:Nnn \l_tmpa_seq {;} {#3}
@@ -146,7 +146,7 @@
 %       each tok_list=varname or clist={varname, order}
 % #3: differential operator, e.g. `d', tok_list
 %
-\cs_new:Nn \__slderivs_make_deriv:nnn
+\cs_new_protected:Nn \__slderivs_make_deriv:nnn
 {
   \group_begin:
 %
@@ -165,13 +165,13 @@
   \group_end:
 }
 
-% Make the derivative symbols, overriding the order
+% Make the derivative symbols, overriding the numerator order
 % #1: numerator, tok_list
 % #2: denominator(s)-  semicolon-separated list of entries for denominator,
 %       each tok_list=varname or clist={varname, order}
 % #3: differential operator, e.g. `d', tok_list
 % #4: order of derivative (numerator only), tok_list
-\cs_new:Nn \__slderivs_make_deriv:nnnn
+\cs_new_protected:Nn \__slderivs_make_deriv:nnnn
 {
   \group_begin:
 %
@@ -241,7 +241,7 @@
 % functional derivative
 \NewDerivMulti \fdf { \delta }
 
-%multiple independent variables
+%backwards compatibility
 \NewDerivMulti \pdiffm { \partial }
 \NewDerivMulti \fdfm { \delta }
 %

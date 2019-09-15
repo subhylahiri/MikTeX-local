@@ -89,6 +89,15 @@
   }
 
 % Create a command to assign a variable of standard type after the current group
+% Asssumes that the relevant command has the form \<type>_set:Nn
+% #1: name of variable type / module
+%
+\cs_new_protected:Nn \sltools_std_assignment_command:nn
+  {
+    \sltools_new_assignment_command:cn { #1_#2:Nn } { sltools_#1_u#2 }
+  }
+
+% Create a command to assign a variable of standard type after the current group
 % Asssumes that the type can be set as/from a token list
 % #1: name of variable type / module
 %
@@ -168,6 +177,9 @@
 % #1: Variable to assign to
 % #2: Token list to assign from
 
+\sltools_std_assignment_command:nn { tl } { put_left }
+\sltools_std_assignment_command:nn { tl } { put_right }
+
 %--------------------------------------------------------------------------------
 % Signature \sltools_<type>_uset:NN, Nc, cn, cc
 % Transfered via a dummy internal-global variable
@@ -190,6 +202,9 @@
 % \sltools_int_uset:NN
 % \sltools_seq_uset:NN
 % \sltools_prop_uset:NN
+%
+% \sltools_tl_uput_left:Nn
+% \sltools_tl_uput_right:Nn
 %================================================================================
 \tl_new:N \l__sltools_putarg_tl
 % Append braced argument to token-list-variable

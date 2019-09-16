@@ -5,20 +5,25 @@
 %% This package gets the language name from babel/polyglossia
 %%
 %% Defines 1 document command: \Fall
-%% Defines 3 preamble commands: \newengvariant, \renewengvariant, \provideengvariant
-%% DEfines 2 switching commands: \ifUK, \ifUS
+%% Defines 4 preamble commands: \newengvariant, \renewengvariant,
+%%                              \provideengvariant, \declareengvariant
+%% Defines 2 switching commands: \ifUK, \ifUS
 %% Defines 1 package command: \engvar_variant:nn
 %%
 %% \Fall
-%%      Expands to `Autumn' / `Fall' if \engvarUK / \engvarUS was called.
+%%      Expands to `Autumn' / `Fall' if babel is in UK / US mode.
 %%
 %% \newengvariant{<macro>}{UK=<UK version>, US=<US version>}
 %%   Define a macro which expands to either version.
 %%   The document command above was created by:
+%%
 %%     \newengvariant{\Fall}{UK=Autumn, US=Fall}
 %%
 %% \ifUK{<UK version>}, \ifUS{<US version>}
 %%   Expands to version if the language was chosen, otherwwise does nothing.
+%%   The definition of \Fall above is equivalent to:
+%%
+%%      \newcommand{\Fall}{\ifUK{Autumn}\ifUS{Fall}}
 %%
 %% \engvar_variant:nn{label}{langid={langname, ...}, ...}
 %%   Create a set of preamble commands as described above. The label is used
@@ -27,7 +32,9 @@
 %%   id={name1, name2, ...}. The id is used in the switching command \if<id> and
 %%   as the keys for \new<label>variant etc. The names are those used in babel.
 %%   The preamble commands above were created with
+%%
 %%     \engvar_variant:nn{eng}{UK={british, UKenglish}, US={american, USenglish}}
+%%
 %================================================================================
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{engvariant}[2019/08/19 v1.1 Defining UK/US english alternatives (SL)]
@@ -44,35 +51,15 @@
 %================================================================================
 % Variables
 
-% Has the language been chosen internally?
-\bool_new:N \g__engvar_lang_bool
+% prop list: {lang id} { seq on names }
+\prop_new:N \g_engvar_languages_prop
 
-% Do we define set the language etc?
+% Has the language been chosen internally?
+\bool_new:N \l__engvar_lang_bool
+
+% Do we define the languages etc?
 \bool_new:N \g__engvar_def_bool
 
-%--------------------------------------------------------------------------------
-% Error message for \new<label>variant
-\msg_new:nnnn { engvar } { command-already-defined }
-  { Command~'#1'~already~defined! }
-  {
-    You~have~used~#2~with~a~command~that~already~has~a~definition.
-     \\ \\ The~existing~definition~of~'#1'~will~not~be~altered.
-  }
-% Error message for \renew<label>variant
-\msg_new:nnnn { engvar } { command-not-yet-defined }
-  { Command ~'#1'~not~yet~defined! }
-  {
-    You~have~used~#2~with~a~command~that~was~never~defined.
-    \\ \\ LaTeX~will~ignore~this~entire~definition.
-  }
-% Error message for \renew<label>variant
-\msg_new:nnnn { engvar } { unknown-lang-id }
-  { Unknown~language~identifier~'#1'! }
-  {
-    You~have~used~the~identifier~#1~
-    which~was~not~in~the~list~of~languages~definitions.
-    \\ \\ LaTeX~will~ignore~this~entire~definition.
-  }
 %================================================================================
 % Package options
 
@@ -89,127 +76,131 @@
 
 \ProcessKeysPackageOptions { engvar }
 %================================================================================
+% Error messages
+
+% Error message for \new<label>variant
+\msg_new:nnnn { engvar } { command-already-defined }
+  { Command~'\tl_trim_spaces:o{\token_to_str:N #1}'~already~defined! }
+  {
+    You~have~used~'\token_to_str:N \new#2variant'~
+    with~a~command~that~already~has~a~definition.
+    \\ LaTeX~will~not~alter~the~existing~definition.
+  }
+% Error message for \renew<label>variant
+\msg_new:nnnn { engvar } { command-not-yet-defined }
+  { Command~'\tl_trim_spaces:o{\token_to_str:N #1}'~not~yet~defined! }
+  {
+    You~have~used~'\token_to_str:N \renew#2variant'~
+    with~a~command~that~was~never~defined.
+    \\ LaTeX~will~ignore~this~entire~definition.
+  }
+% Error message for incorrect key
+\msg_new:nnnn { engvar } { unknown-lang-id }
+  { Unknown~language~identifier~'#1'! }
+  {
+    When~defining~'#2'~you~have~used~the~identifier~'#1'
+    \\ which~was~not~in~the~list~of~language~definitions.
+    \\ LaTeX~will~ignore~this~entire~definition.
+  }
+%================================================================================
 % Creating Interface For Defining Variants:
 
-% create keys for \new<label>variant function & friends
-% #1: macro being defined
-% #2: label
-\cs_new:Nn \__engvar_variant_creator_aux:Nn
+\tl_new:N \l__engvar_validate_tl
+% Validate language ids
+%
+\keys_define:nn { engvar / validate }
   {
-    \keys_define:nn { engvar / #2 }
+    __engvar_validate .code:n =
+      { \tl_set:Nx \l__engvar_validate_tl { \token_to_str:N #1 } },
+%
+    unknown .code:n =
       {
-        unknown .code:n =
-          {
-            \cs_if_exist:cTF {if\l_keys_key_tl}
-              {
-                \use:c {if\l_keys_key_tl}
-                  { \tl_gset_eq:NN #1 \l_keys_value_tl }
-              }
-              {
-                \msg_error:nnxx { engvar } { unknown-lang-id }
-                  { \use:nnn \token_to_str:N \l_keys_key_tl { } }
-              }
+        \prop_if_in:NVF \g_engvar_languages_prop \l_keys_key_tl
+          { \msg_error:nnxx { engvar } { unknown-lang-id }
+            { \l_keys_key_tl } { \l__engvar_validate_tl }
           }
       }
   }
 
-% create \new<label>variant function & friends
+% Create \new<label>variant function & friends
 % #1: label
 \cs_new_protected:Nn \__engvar_variant_creator:n
   {
+%   ------------------------------------------------------------
+    \keys_define:nn { engvar / #1 }
+      {
+        unknown .code:n =
+          { \use:c {if\l_keys_key_tl} { \tl_use:N \l_keys_value_tl } }
+      }
+%   ------------------------------------------------------------
     \exp_args:Nc \NewDocumentCommand {declare#1variant} { m m }
       {
-        \__engvar_variant_creator_aux:Nn ##1 {#1}
-        \keys_set:nn { engvar / #1 } {##2}
+        \keys_set:nn { engvar / validate } { __engvar_validate=##1, ##2 }
+        \DeclareDocumentCommand ##1 { }
+          { \keys_set:nn { engvar / #1 } {##2} }
       }
-
+%   ------------------------------------------------------------
     \exp_args:Nc \NewDocumentCommand {new#1variant} { m m }
       {
-        \tl_if_exist:NTF ##1
-          {
-            \msg_error:nnxx { engvar } { command-already-defined }
-              { \use:nnn \token_to_str:N ##1 { } }
-              { \use:nnn \token_to_str:c {new#1variant} { } }
-          }
+        \cs_if_exist:NTF ##1
+          { \msg_error:nnnn { engvar } { command-already-defined } {##1} {#1} }
           { \use:c {declare#1variant} {##1} {##2} }
       }
-
+%   ------------------------------------------------------------
     \exp_args:Nc \NewDocumentCommand {renew#1variant} { m m }
       {
-        \tl_if_exist:NTF ##1
+        \cs_if_exist:NTF ##1
           { \use:c {declare#1variant} {##1} {##2} }
-          {
-            \msg_error:nnxx { engvar } { command-not-yet-defined }
-              { \use:nnn \token_to_str:N ##1 { } }
-              { \use:nnn \token_to_str:c {renew#1variant} { } }
-          }
+          { \msg_error:nnnn { engvar } { command-not-yet-defined } {##1} {#1} }
       }
-
+%   ------------------------------------------------------------
     \exp_args:Nc \NewDocumentCommand {provide#1variant} { m m }
-      {
-        \tl_if_exist:NTF ##1
-          {}
-          { \use:c {declare#1variant} {##1} {##2} }
-      }
+      { \cs_if_exist:NF ##1 { \use:c {declare#1variant} {##1} {##2} } }
   }
 
 %================================================================================
-% Defining languages
+% Testing languages
 
-% use iflang package as expl3 conditional
-% #1: language name
-% #2: true code
-\prg_new_conditional:Nnn \__engvar_check_langname:n { T }
+% run through list of names for a language, checking for match
+% #1: language id, token list
+\prg_new_protected_conditional:Nnn \__engvar_if_lang_id:n { T }
   {
-    \IfLanguageName{#1}
+    \prop_get:NnN \g_engvar_languages_prop {#1} \l_tmpa_seq
+    \bool_set_false:N \l__engvar_lang_bool
+    \seq_map_inline:Nn \l_tmpa_seq
+      {
+         \IfLanguageName {##1}
+           { \seq_map_break:n { \bool_set_true:N \l__engvar_lang_bool } }
+      }
+    \bool_if:NTF \l__engvar_lang_bool
       { \prg_return_true: }
       { \prg_return_false: }
   }
-
-% run through list of names for a language, checking for match
-% #1: clist of language names
-\cs_new:Nn \__engvar_check_langname_clist:n
-  {
-    \seq_set_from_clist:Nn \l_tmpa_seq {#1}
-    \seq_map_inline:Nn \l_tmpa_seq
-      {
-        \__engvar_check_langname:nT {##1}
-          {
-            \bool_gset_true:N \g__engvar_lang_bool
-            \seq_map_break:
-          }
-      }
-  }
-%--------------------------------------------------------------------------------
+%================================================================================
+% Setup language family
 
 % process id & list of names of a language
-% #1: language id
-% #2: clist of language names
+% #1: language id, token list
+% #2: language names, clist
+%
 \cs_new_protected:Nn \__engvar_run_lang_id_clist:nn
   {
-    \exp_args:Nc \NewDocumentCommand {if#1} { m } { }
-    % have we already chosen a language?
-    \bool_if:NTF \g__engvar_lang_bool
-      {}
-      {
-        \__engvar_check_langname_clist:n {#2}
-        \__engvar_check_langname_match:n {#1}
-      }
+    \seq_set_from_clist:Nn \l_tmpa_seq {#2}
+    \prop_gput:NnV \g_engvar_languages_prop {#1} \l_tmpa_seq
+%
+    \exp_args:Nc \NewDocumentCommand {if#1} { m }
+      { \__engvar_if_lang_id:nT {#1} {##1} }
   }
+% process id & list of names of a language
+% #1: language id, token list variable
+% #2: language names, clist variable
+%
 \cs_generate_variant:Nn \__engvar_run_lang_id_clist:nn { VV }
-
-% check for match & redefine lang conditional \if<id>
-% #1: language id
-\cs_new:Nn \__engvar_check_langname_match:n
-  {
-    \bool_if:NTF \g__engvar_lang_bool
-      { \exp_args:Nc \RenewDocumentCommand {if#1} { m } { ##1 } }
-      {}
-  }
 
 %--------------------------------------------------------------------------------
 
 % create keys for \engvar_variant function
+%
 \keys_define:nn { engvar / deflangs }
   {
     unknown .code:n =
@@ -225,14 +216,14 @@
     \__engvar_variant_creator:n {#1}
   }
 %================================================================================
-\bool_if:NTF \g__engvar_def_bool
+
+\bool_if:NT \g__engvar_def_bool
   {
     % default language choices
     \engvar_variant:nn {eng} { UK={british, UKenglish}, US={american, USenglish} }
     %----------------------------------------------------------------------------
     \newengvariant{\Fall}{UK=Autumn, US=Fall}
   }
-  {}
 %================================================================================
 \ExplSyntaxOff
 %================================================================================

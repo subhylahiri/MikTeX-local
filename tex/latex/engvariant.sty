@@ -115,7 +115,7 @@
 
 % create \new<label>variant function & friends
 % #1: label
-\cs_new:Nn \__engvar_variant_creator:n
+\cs_new_protected:Nn \__engvar_variant_creator:n
   {
     \exp_args:Nc \NewDocumentCommand {declare#1variant} { m m }
       {
@@ -185,7 +185,7 @@
 % process id & list of names of a language
 % #1: language id
 % #2: clist of language names
-\cs_new:Nn \__engvar_run_lang_id_clist:nn
+\cs_new_protected:Nn \__engvar_run_lang_id_clist:nn
   {
     \exp_args:Nc \NewDocumentCommand {if#1} { m } { }
     % have we already chosen a language?
@@ -219,7 +219,7 @@
 % choose language, create \new???variant function
 % #1: label
 % #2: clist of language specs: id={clist of names},...
-\cs_new:Nn \engvar_variant:nn
+\cs_new_protected:Nn \engvar_variant:nn
   {
     \keys_set:nn { engvar / deflangs } {#2}
     \__engvar_variant_creator:n {#1}

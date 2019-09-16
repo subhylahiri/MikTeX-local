@@ -30,7 +30,7 @@
 
 \prg_new_conditional:Nnn \__cctinfo_ifweb: { T, F, TF }
   {
-    \bool_if:nTF { \g__cctinfo_web_bool }
+    \bool_if:NTF \g__cctinfo_web_bool 
       { \prg_return_true: }
       { \prg_return_false: }
   }
@@ -49,14 +49,14 @@
 %% <ver> = at, dot
 
 %% @ -> ~at~
-\cs_new:Nn \__cctinfo_obscurifyat:Nn
+\cs_new_protected:Nn \__cctinfo_obscurifyat:Nn
   {
     \tl_set:Nn #1 {#2}
     \tl_replace_all:Nnn #1 {@} { ~at~ }
   }
 
 %% . -> ~dot~
-\cs_new:Nn \__cctinfo_obscurifydot:Nn
+\cs_new_protected:Nn \__cctinfo_obscurifydot:Nn
   {
     \tl_set:Nn #1 {#2}
     \tl_replace_all:Nnn #1 {.} { ~dot~ }
@@ -75,7 +75,7 @@
 %%  \__cctinfo_obscurify<ver>:Nn <local-tl-var> {<addr>}
 %% <ver> = email
 
-\cs_new:Nn \__cctinfo_obscurifyemail:Nn
+\cs_new_protected:Nn \__cctinfo_obscurifyemail:Nn
   {
       \__cctinfo_obscurifyat:Nn \l_tmpb_tl {#2}
       \__cctinfo_obscurifydot:NV #1 \l_tmpb_tl
@@ -88,7 +88,7 @@
 %% Enclose locals in a group, global assign result to #2
 %% \__cctinfo_obscurify_scope:NNn <function> <global-tl-var> {<addr>}
 
-\cs_new:Nn \__cctinfo_obscurify_scope:NNn
+\cs_new_protected:Nn \__cctinfo_obscurify_scope:NNn
   {
     \group_begin:
       #1 \l_tmpa_tl {#3}
@@ -110,7 +110,7 @@
 %% Enclose locals in a group, global assign to #2/write to output stream
 %% \__cctinfo_obscurify_wrapper:Nnn <function> {<tl-var/-No-Value->} {<addr>}
 
-\cs_new:Nn \__cctinfo_obscurify_wrapper:Nnn
+\cs_new_protected:Nn \__cctinfo_obscurify_wrapper:Nnn
   {
     \IfValueTF {#2}
       { \__cctinfo_obscurify_scope:NNn #1 #2 {#3} }

@@ -44,13 +44,14 @@
 \cs_generate_variant:Nn \tl_if_in:nnTF { xV }
 %--------------------------------------------------------------------------------
 \providebibmacro{highlightname:bib}{}
-\providebibmacro{highlightname:cite}{}
+\providebibmacro{highlightname:cite}{\usebibmacro{highlightname:restoreuniquename}}
 %--------------------------------------------------------------------------------
-\newbibmacro{ifhighlightname}[3]%
+\newbibmacro{ifhighlightname}[1]%
   {%
-    \tl_if_in:xVTF {#1} \g__highlightmyname_name_tl%
-      {#2}%
-      {#3}%
+    \tl_if_in:xVTF {\namepartgiven\namepartprefix\namepartfamily\namepartsuffix}
+      \g__highlightmyname_name_tl%
+        {#1}%
+        {}%
   }
 %================================================================================
 \int_new:N \l__highlightmyname_old_uniquename_int
@@ -59,9 +60,8 @@
   {%
     \int_set:Nn \l__highlightmyname_old_uniquename_int { \value{uniquename} }%
     \usebibmacro{ifhighlightname}%
-      {\namepartgiven\namepartprefix\namepartfamily\namepartsuffix}%
-      {\setcounter{uniquename}{3}}%
-      {}%
+      {\setcounter{uniquename}{3}%
+       \usebibmacro{highlightname:cite}}%
   }
 %
 \newbibmacro{highlightname:restoreuniquename}
@@ -76,23 +76,14 @@
   {\usebibmacro{highlightname:setuniquename}}
   {}{ \failed@patch{labelname} }
 %
-\xpatchnameformat{labelname} {\fi}
-  {%
-    \or
-      \usebibmacro{highlightname:cite}
-    \fi
-  }
-  {}{ \failed@patch{labelname} }
-%
 \xapptonameformat{labelname}
   {\usebibmacro{highlightname:restoreuniquename}}
   {}{ \failed@patch{labelname} }
 %--------------------------------------------------------------------------------
 \xapptobibmacro{name:hook}
   {%
-    \usebibmacro{ifhighlightname}{#1}%
+    \usebibmacro{ifhighlightname}%
       {\usebibmacro{highlightname:bib}}%
-      {}%
   }%
   {}{ \failed@patch{name:hook} }
 %--------------------------------------------------------------------------------

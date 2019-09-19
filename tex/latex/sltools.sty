@@ -25,7 +25,7 @@
 %--------------------------------------------------------------------------------
 \prg_generate_conditional_variant:Nnn \tl_if_eq:nn { nV, Vn, VV } { TF, T, F }
 %================================================================================
-% insert token list after current group
+% insert token list after current group.
 %
 \cs_new_protected:Nn \sltools_tl_insert_after:n
   {
@@ -41,8 +41,8 @@
 %
 \cs_generate_variant:Nn \sltools_tl_insert_after:n { V }
 
-% Assign a variable after the current group
-% Places the next two tokens and the following token list after current group
+% Assign a variable after the current group.
+% Places the next two tokens and the following token list after current group.
 % #1: Assignment command, e.g. \tl_set:Nn
 % #2: Variable to assign to
 % #3: Token list to be assigned
@@ -53,8 +53,8 @@
     \group_insert_after:N #2
     \sltools_tl_insert_after:n {#3}
   }
-% Assign a variable after the current group
-% Places the next two tokens and the following token list variable's contents after current group
+% Assign a variable after the current group.
+% Places the next two tokens and the following token list variable's contents after current group.
 % #1: Assignment command, e.g. \tl_set:Nn
 % #2: Variable to assign to
 % #3: Token list variable whose contents are to be assigned
@@ -62,8 +62,8 @@
 \cs_generate_variant:Nn \sltools_assign_after:NNn { NNV }
 
 %--------------------------------------------------------------------------------
-% Create a command to assign a variable after the current group
-% Places the next two tokens and the following token list after current group
+% Create a command to assign a variable after the current group.
+% Places the next two tokens and the following token list after current group.
 % #1: Assignment command, e.g. \tl_set:Nn
 % #2: cname of command to define, without :variable spec
 %
@@ -73,15 +73,15 @@
       { \sltools_assign_after:NNn #1 ##1 {##2} }
     \cs_generate_variant:cn { #2:Nn } { cn, NV, cV, Nv, cv, Nx, cx, Ne, ce, No, co, Nf, cf }
   }
-% Create a command to assign a variable after the current group
-% Places the next two tokens and the following token list after current group
+% Create a command to assign a variable after the current group.
+% Places the next two tokens and the following token list after current group.
 % #1: cname of Assignment command, e.g. \tl_set:Nn
 % #2: cname of command to define, without :variable spec
 %
 \cs_generate_variant:Nn \sltools_new_assignment_command:Nn { cn }
 
-% Create a command to assign a variable of standard type after the current group
-% Asssumes that the relevant command has the form \<type>_set:Nn
+% Create a command to assign a variable of standard type after the current group.
+% Asssumes that the relevant command has the form \<type>_set:Nn.
 % #1: name of variable type / module
 %
 \cs_new_protected:Nn \sltools_std_assignment_command:n
@@ -89,8 +89,8 @@
     \sltools_new_assignment_command:cn { #1_set:Nn } { sltools_#1_uset }
   }
 
-% Create a command to assign a variable of standard type after the current group
-% Asssumes that the relevant command has the form \<type>_set:Nn
+% Create a command to assign a variable of standard type after the current group.
+% Asssumes that the relevant command has the form \<type>_set:Nn.
 % #1: name of variable type / module
 %
 \cs_new_protected:Nn \sltools_std_assignment_command:nn
@@ -98,8 +98,8 @@
     \sltools_new_assignment_command:cn { #1_#2:Nn } { sltools_#1_u#2 }
   }
 
-% Create a command to assign a variable of standard type after the current group
-% Asssumes that the type can be set as/from a token list
+% Create a command to assign a variable of standard type after the current group.
+% Asssumes that the type can be set as/from a token list.
 % #1: name of variable type / module
 %
 \cs_new_protected:Nn \sltools_halfstd_assignment_command:n
@@ -109,55 +109,76 @@
 
 %================================================================================
 
-% Transfer a variable after the current group
-% Places the next two tokens and the following token list after current group
+% Transfer a variable after the current group.
+% Places the next two tokens and the following token list after current group.
 % #1: Global copy command, e.g. \seq_gset_eq:NN
-% #2: Local copy command, e.g. \set_set_eq:NN
-% #3: Dummy private-but-global variable
-% #4: Variable to assign to
-% #5: Variable to assign from
+% #2: Local copy command, e.g. \seq_set_eq:NN
+% #3: Global reset command, e.g. \seq_gclear:N
+% #4: Dummy private-but-global variable
+% #5: Variable to assign to
+% #6: Variable to assign from
 %
-\cs_new_protected:Nn \sltools_transfer_after:NNNNN
+\cs_new_protected:Nn \sltools_transfer_after:NNNNNN
   {
-    #1 #3 #5
+    #1 #4 #6
     \group_insert_after:N #2
+    \group_insert_after:N #5
     \group_insert_after:N #4
     \group_insert_after:N #3
+    \group_insert_after:N #4
   }
 
 %--------------------------------------------------------------------------------
-% Create a command to transfer a variable after the current group
+% Create a command to transfer a variable after the current group.
 % #1: Global copy command, e.g. \seq_gset_eq:NN
 % #2: Local copy command, e.g. \set_set_eq:NN
-% #3: Dummy private-but-global variable
-% #4: cname of command to define, without :variable spec
+% #3: Global reset command, e.g. \seq_gclear:N
+% #4: Dummy private-but-global variable
+% #5: cname of command to define, without :variable spec
 %
-\cs_new_protected:Nn \sltools_new_transfer_command:NNNn
+\cs_new_protected:Nn \sltools_new_transfer_command:NNNNn
   {
-    \cs_new_protected:cn { #4:NN }
+    \cs_new_protected:cn { #5:NN }
       {
-        \sltools_transfer_after:NNNNN #1 #2 #3 ##1 ##2
+        \sltools_transfer_after:NNNNNN #1 #2 #3 #4 ##1 ##2
       }
-    \cs_generate_variant:cn { #4:NN } { Nc, cN, cc }
+    \cs_generate_variant:cn { #5:NN } { Nc, cN, cc }
   }
 % Create a command to transfer a variable after the current group
 % #1: cname of Global copy command, e.g. \seq_gset_eq:NN
 % #2: cname of Local copy command, e.g. \set_set_eq:NN
-% #3: cname of Dummy private-but-global variable
-% #4: cname of command to define, without :variable spec
+% #3: cname of Global reset command, e.g. \seq_gclear:N
+% #4: cname of Dummy private-but-global variable
+% #5: cname of command to define, without :variable spec
 %
-\cs_generate_variant:Nn \sltools_new_transfer_command:NNNn { cccn }
+\cs_generate_variant:Nn \sltools_new_transfer_command:NNNNn { ccccn }
 
-% Create a command to transfer a variable of standard type after the current group
-% Asssumes that the relevant commands have the form \<type>_new:N, \<type>_set_eq:NN, \<type>_gset_eq:NN
+% Create a command to transfer a variable of standard container type after the current group.
+% Asssumes that the relevant commands have the form \<type>_new:N, \<type>_set_eq:NN, \<type>_gset_eq:NN, \<type>_gclear:N.
 % #1: name of variable type / module
 %
 \cs_new_protected:Nn \sltools_std_transfer_command:n
   {
     \use:c {#1_new:c} {g__sltools_transfer_#1}
-    \sltools_new_transfer_command:cccn
+    \sltools_new_transfer_command:ccccn
       { #1_gset_eq:NN }
       { #1_set_eq:NN }
+      { #1_gclear:N }
+      { g__sltools_transfer_#1 }
+      { sltools_#1_uset }
+  }
+
+% Create a command to transfer a variable of standard numeric type after the current group.
+% Asssumes that the relevant commands have the form \<type>_new:N, \<type>_set_eq:NN, \<type>_gset_eq:NN, \<type>_gzero:N.
+% #1: name of variable type / module
+%
+\cs_new_protected:Nn \sltools_num_transfer_command:n
+  {
+    \use:c {#1_new:c} {g__sltools_transfer_#1}
+    \sltools_new_transfer_command:ccccn
+      { #1_gset_eq:NN }
+      { #1_set_eq:NN }
+      { #1_gzero:N }
       { g__sltools_transfer_#1 }
       { sltools_#1_uset }
   }
@@ -192,8 +213,8 @@
 %\sltools_new_assignment_command:NNNn \seq_gset_eq:NN \seq_set_eq:NN \g__sltools_transfer_seq { sltools_seq_uset }
 \sltools_std_transfer_command:n { tl }
 \sltools_std_transfer_command:n { clist }
-\sltools_std_transfer_command:n { int }
-\sltools_std_transfer_command:n { fp }
+\sltools_num_transfer_command:n { int }
+\sltools_num_transfer_command:n { fp }
 \sltools_std_transfer_command:n { seq }
 \sltools_std_transfer_command:n { prop }
 
@@ -201,6 +222,7 @@
 % \sltools_tl_uset:NN
 % \sltools_clist_uset:NN
 % \sltools_int_uset:NN
+% \sltools_fp_uset:NN
 % \sltools_seq_uset:NN
 % \sltools_prop_uset:NN
 %
@@ -275,5 +297,46 @@
   }
 \cs_generate_variant:Nn \sltools_tl_func_args:Nnnn { NVnn, NnVn, NVVn, NnnV, NVnV, NnVV, NVVV }
 
+%================================================================================
+% Using sequences as property-list values
+
+% Append a sequence to a value in a prop-list, creates item if not present
+% #1: prop-list variable
+% #2: key of item, token list
+% #3: info to append, seq variable
+%
+\cs_new_protected:Nn \sltools_prop_append_seq:NnN
+{
+  \group_begin:
+    \seq_set_eq:NN \l_tmpa_seq #3
+    \prop_gpop:NnNT #1 {#2} \l_tmpb_seq
+      { \seq_concat:NNN \l_tmpa_seq \l_tmpb_seq \l_tmpa_seq }
+    \prop_gput:NnV #1 {#2} \l_tmpa_seq
+  \group_end:
+}
+
+%================================================================================
+% Set a sequence by splitting a token list at spaces (local)
+% #1: sequence variable
+% #2: token list
+%
+\cs_new_protected:Nn \sltools_seq_split_space:Nn
+  { \exp_args:NNV \seq_set_split:NnV #1 \c_space_tl {#2} }
+
+% Set a sequence by splitting a token list at spaces (global)
+% #1: sequence variable
+% #2: token list
+%
+\cs_new_protected:Nn \sltools_seq_gsplit_space:Nn
+  { \exp_args:NNV \seq_gset_split:NnV #1 \c_space_tl {#2} }
+
+%================================================================================
+\@ifpackageloaded{xtemplate}{%
+\cs_new_protected:Nn \sltools_useinstance:nn
+{
+  \UseInstance {#1} {#2}
+}
+\cs_generate_variant:Nn \sltools_useinstance:nn { nV, Vn, VV }
+}
 %================================================================================
 \endinput

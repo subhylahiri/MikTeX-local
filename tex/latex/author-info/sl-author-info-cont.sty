@@ -1,0 +1,228 @@
+% -*- TeX -*- -*- STY -*- -*- LaTeX3 -*-
+%
+% processing contact info
+%
+%================================================================================
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-author-info-cont} {2019/09/18} {v1.0}
+    {titling macros for affiliations etc. (SL)}
+%================================================================================
+%\RequirePackage{interface3}
+\RequirePackage{xparse}
+\RequirePackage{xtemplate}
+\RequirePackage{titling}
+\RequirePackage{process-name}
+%================================================================================
+\makeatletter
+%================================================================================
+% Error messages
+%================================================================================
+%\cs_if_exist:NTF \g__slauth_auth_hook_tl - but its empty for now
+\@ifpackageloaded{sl-author-info}{}{
+\msg_new:nnnn { slauth } { loaded-early }
+  { This~package~should~be~loaded~via~'sl-author-info' }
+  {
+    This~package~should~not~be~loaded~directly.~Load~'sl-author-info'~instead.
+    \\ 'sl-author-info'~will~load~this~sub-package~for~you.
+  }
+\msg_error:nn { slauth } { loaded-early }
+}
+%================================================================================
+% hooks for contact info
+\tl_new:N \g__slauth_affil_hook_tl
+\tl_new:N \g__slauth_email_hook_tl
+\tl_new:N \g__slauth_thanks_hook_tl
+% hooks for preceding formatting
+\tl_new:N \g__slauth_affil_pre_tl
+\tl_new:N \g__slauth_email_pre_tl
+\tl_new:N \g__slauth_thanks_pre_tl
+% hooks for subsequent formatting
+\tl_new:N \g__slauth_affil_post_tl
+\tl_new:N \g__slauth_email_post_tl
+\tl_new:N \g__slauth_thanks_post_tl
+%--------------------------------------------------------------------------------
+\tl_new:N \g_slauth_affil_tl
+\tl_gset:Nn \g_slauth_affil_tl
+  { { \g__slauth_affil_pre_tl \g__slauth_affil_hook_tl \g__slauth_affil_post_tl } }
+\tl_new:N \g_slauth_email_tl
+\tl_gset:Nn \g_slauth_email_tl
+  { { \g__slauth_email_pre_tl \g__slauth_email_hook_tl \g__slauth_email_post_tl } }
+\tl_new:N \g_slauth_thanks_tl
+\tl_gset:Nn \g_slauth_thanks_tl
+  { { \g__slauth_thanks_pre_tl \g__slauth_thanks_hook_tl \g__slauth_thanks_post_tl } }
+%================================================================================
+
+% Place a hook set
+% #1: hook set
+% #2: clist-var - {location prefix, location landmark}
+% 1/0 -> pre/post, 1-4 -> title, author, date, foot
+%
+\cs_new_protected:Nn \__slauth_place_hook:NN
+{
+  \int_case:nn {#2}
+    {
+      {1} { \tl_gput_right:NV \maketitlehooka #1 }
+      {2} { \tl_gput_left:NV \maketitlehookb #1 }
+      {3} { \tl_gput_right:NV \maketitlehookb #1 }
+      {4} { \tl_gput_left:NV \maketitlehookc #1 }
+      {5} { \tl_gput_right:NV \maketitlehookc #1 }
+      {6} { \tl_gput_right:NV \maketitlehookd #1 }
+      {7} { \tl_gput_right:NV \g__slauth_foot_hook_tl #1 }
+    }
+}
+\cs_generate_variant:Nn \__slauth_place_hook:NN { c }
+%--------------------------------------------------------------------------------
+
+% Create counter
+% #1: function to display counter
+% #2: counter name, token-list
+%
+\cs_new_protected:Nn \__slauth_cont_counter:Nn
+{
+  \newcounter {#2}
+  \tl_gclear:c {the#2}
+  \slauth_gexpand_func_arg:cNn {the#2} #1 {#2}
+}
+\cs_generate_variant:Nn \__slauth_cont_counter:Nn { NV }
+%--------------------------------------------------------------------------------
+
+% Create label
+% #1: local tl-var to write to
+% #2: label formatter, function
+% #3: counter name, token-list
+% #4: prelabel, token-list
+% #5: postlabel, token-list
+%
+\cs_new_protected:Nn \__slauth_cont_label:NNnnn
+  {
+    \tl_gclear:N \g_tmpb_tl
+    \group_begin:
+      \tl_set:Nx \l_tmpb_tl { #4 \exp_not:c { the#3 } #5 }
+      \slauth_gexpand_func_arg:NNV \g_tmpb_tl #2 \l_tmpb_tl
+      \tl_gput_left:Nn \g_tmpb_tl { \refstepcounter {#3} }
+    \group_end:
+    \tl_set_eq:NN #1 \g_tmpb_tl
+    \tl_gclear:N \g_tmpb_tl
+  }
+\cs_generate_variant:Nn \__slauth_cont_label:NNnnn { NNVVV }
+%--------------------------------------------------------------------------------
+
+% Insert one piece of contact info
+% #1: local tl-var to append to
+% #2: label, token-list
+% #3: content, token-list
+% #4: counter label, token-list
+% #5: separators, seq-var
+% #6: loop counter, int-var
+%
+\cs_new_protected:Nn \__slauth_cont_one_entry:NnnnNN
+{
+  % stage each item in temp var
+  \tl_clear:N #1
+  \quark_if_no_value:nTF {#2}
+    { \tl_put_right:Nn #1 {#3} }
+    { \tl_put_right:Nn #1 { #4 #3 \label {#2} } }
+  % Add separator/punctuation
+  \tl_put_right:Nx #1 { \procname_sep_choose:NV #5 #6 }
+  \int_decr:N #6
+}
+\cs_generate_variant:Nn \__slauth_cont_one_entry:NnnnNN { NnnV }
+%================================================================================
+% Contact list variables (cont)
+\tl_new:N \l__slauth_cont_sep_tl
+\tl_new:N \l__slauth_cont_sep_pr_tl
+\tl_new:N \l__slauth_cont_sep_ap_tl
+\tl_new:N \l__slauth_cont_sep_pu_tl
+\tl_new:N \l__slauth_cont_sep_ul_tl
+\tl_new:N \l__slauth_cont_style_pre_tl
+\tl_new:N \l__slauth_cont_style_post_tl
+\tl_new:N \l__slauth_cont_tag_pre_tl
+\tl_new:N \l__slauth_cont_tag_post_tl
+\tl_new:N \l__slauth_cont_prefix_tl
+\tl_new:N \l__slauth_cont_type_tl
+\skip_new:N \l__slauth_cont_pr_skip
+\skip_new:N \l__slauth_cont_po_skip
+\int_new:N \l__slauth_cont_locn_int
+\seq_new:N \l__slauth_cont_seq
+\tl_new:N \l__slauth_cont_tl
+%--------------------------------------------------------------------------------
+
+\DeclareTemplateCode { people-info } { contact-list } {1}
+  {
+    type        = \l__slauth_cont_type_tl ,
+    style-pre   = \l__slauth_cont_style_pre_tl ,
+    style-post  = \l__slauth_cont_style_post_tl ,
+    prefix      = \l__slauth_cont_prefix_tl ,
+    numbering   = \__slauth_cont_num:n ,
+    tags        = \__slauth_cont_tag:n ,
+    tags-pre    = \l__slauth_cont_tag_pre_tl ,
+    tags-post   = \l__slauth_cont_tag_post_tl ,
+    before-skip = \l__slauth_cont_pr_skip ,
+    after-skip  = \l__slauth_cont_po_skip ,
+    sep                 = \l__slauth_cont_sep_tl ,
+    sep-pair            = \l__slauth_cont_sep_pr_tl ,
+    sep-antepenultimate = \l__slauth_cont_sep_ap_tl ,
+    sep-penultimate     = \l__slauth_cont_sep_pu_tl ,
+    sep-ultimate        = \l__slauth_cont_sep_ul_tl ,
+    location  = {
+                  pretitle      = \int_set:Nn \l__slauth_cont_locn_int 1 ,
+                  posttitle     = \int_set:Nn \l__slauth_cont_locn_int 2 ,
+                  preauthor     = \int_set:Nn \l__slauth_cont_locn_int 3 ,
+                  postauthor    = \int_set:Nn \l__slauth_cont_locn_int 4 ,
+                  predate       = \int_set:Nn \l__slauth_cont_locn_int 5 ,
+                  postdate      = \int_set:Nn \l__slauth_cont_locn_int 6 ,
+                  foot          = \int_set:Nn \l__slauth_cont_locn_int 7 ,
+                } ,
+  }
+{
+  \group_begin:
+    \AssignTemplateKeys
+
+    % cname of hook container
+    \tl_set:Nx \l_tmpa_tl {g_slauth_\l__slauth_cont_type_tl _tl}
+    \__slauth_place_hook:cN { \l_tmpa_tl } \l__slauth_cont_locn_int
+    % cname of hook
+    \tl_set:Nx \l_tmpa_tl {g__slauth_\l__slauth_cont_type_tl _hook_tl}
+
+    % w/o labels, separate
+    \prop_gpop:NnNF #1 { __nolabel } \l__slauth_cont_seq
+      { \seq_clear:N \l__slauth_cont_seq }
+    % w/ labels, set up counters
+    \prop_if_empty:NF #1
+      {
+        \__slauth_cont_counter:NV \__slauth_cont_num:n \l__slauth_cont_type_tl
+        \__slauth_cont_label:NNVVV \l_tmpb_tl \__slauth_cont_tag:n
+          \l__slauth_cont_type_tl \l__slauth_cont_tag_pre_tl \l__slauth_cont_tag_post_tl
+      }
+
+    % preparation for adding separators/punctuation
+    \int_set:Nn \l_tmpa_int { \prop_count:N #1 + \seq_count:N \l_tmpa_seq }
+    \procname_sep_seq:NVVVVV \l_tmpb_seq \l_tmpa_int
+      \l__slauth_cont_sep_pr_tl \l__slauth_cont_sep_ap_tl
+      \l__slauth_cont_sep_pu_tl \l__slauth_cont_sep_ul_tl
+    % label
+
+    % w/o labels, write to hook
+    \seq_map_inline:Nn \l__slauth_cont_seq
+      {
+        \__slauth_cont_one_entry:NnnnNN \l__slauth_cont_tl {\q_no_value} {##1}
+          {\q_no_value} \l_tmpb_seq \l_tmpa_int
+        \tl_gput_right:cV { \l_tmpa_tl } \l__slauth_cont_tl
+      }
+    % w/ labels, write to hook
+    \prop_map_inline:Nn #1
+      {
+        \__slauth_cont_one_entry:NnnVNN \l__slauth_cont_tl {##1} {##2}
+          \l_tmpb_tl \l_tmpb_seq \l_tmpa_int
+        \tl_gput_right:cV { \l_tmpa_tl } \l__slauth_cont_tl
+%        \tl_show:N \l__slauth_cont_tl
+      }
+
+    \tl_put_right:NV \l__slauth_cont_style_pre_tl \l__slauth_cont_prefix_tl
+    \__slauth_outer_hooks:VVVVV \l__slauth_cont_pr_skip \l__slauth_cont_po_skip
+      \l__slauth_cont_style_pre_tl \l__slauth_cont_style_post_tl \l__slauth_cont_type_tl
+  \group_end:
+}
+
+%================================================================================
+\endinput

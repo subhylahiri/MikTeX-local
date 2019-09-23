@@ -1,0 +1,286 @@
+% -*- TeX -*- -*- STY -*- -*- LaTeX3 -*-
+%--------------------------------------------------------------------------------
+%%  This uses the package ``titling'' to add affiliations for authors
+%%
+%% Requires packages: titling, xkeyval and etoolbox
+%%
+%% If you don't need numbers, add affiliations with:
+%%          \affiliation*{My University}
+%%
+%% Or, to number them, use:
+%%          \affiliation[key]{My University\label{key}}
+%%
+%% You can pair authors with affiliations, emails, other annotations like this:
+%%          \author[affil=key,email=alice@university,thanks=first]{Alice Smith}
+%%          \author[affil={key,key2},thanks=first]{Bob Jones}
+%%
+%% with other annotations defined by:
+%%          \thanks[first]{Equal contribution.}
+%%
+%% You can customise formatting by declaring your own instances of the
+%% various templates below.
+%%
+%% History: 2016/07/27 v0.01beta (SL) manual \label and \ref
+%%          2017/12/28 v1.0      (SL) using xkeyval and lists to automate
+%================================================================================
+%\NeedsTeXFormat{LaTeX2e}
+%\ProvidesPackage{sl-author-info3}
+%         [2017/12/28 v1.0 titling macros for affiliations etc. (SL)]
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-author-info} {2019/09/21} {v2.0}
+    {titling macros for affiliations etc. (SL)}
+%================================================================================
+%\RequirePackage{interface3}
+\RequirePackage{xparse}
+\RequirePackage{xtemplate}
+%\RequirePackage{l3keys2e}
+\RequirePackage{titling}
+\RequirePackage{process-name}
+
+\newcommand{\noop}[1]{#1}
+%================================================================================
+% Interface
+%================================================================================
+
+\DeclareObjectType { people } {1}         % sequence of prop-list
+\DeclareObjectType { person } {2}         % prop-list, sep
+\DeclareObjectType { people-info } {1}    % prop-list of defns used
+\DeclareObjectType { person-info } {2}    % output tl-var, input prop-list
+\DeclareObjectType { people-subinfo } {3} % label, parent, info
+\DeclareObjectType { people-block } {4}   % lists of authors, affiliations, emails, thanks
+%================================================================================
+
+\DeclareTemplateInterface { people } { author-list } {1}
+  {
+    style-pre           : tokenlist = \centering\large ,
+    style-post          : tokenlist = \par ,
+    sep-pair            : tokenlist = {~and~} ,
+    sep-antepenultimate : tokenlist = {,~} ,
+    sep-penultimate     : tokenlist = {,~and~} ,
+    sep-ultimate        : tokenlist = {} ,
+    before-skip         : skip = 5pt ,
+    after-skip          : skip = 5pt ,
+    sorter              : instance { sorter } ,
+    individual          : instance { person } ,
+  }
+
+\DeclareTemplateInterface { person } { author } {2}
+  {
+    tagger      : instance { person-info } ,
+    formatter   : instance { assembler } ,
+  }
+
+% Replaces '&' with the tags
+\DeclareTemplateInterface { person-info } { author-tags } {2}
+  {
+    tags        : function{1} = \textsuperscript{#1} ,
+    affil-tag   : function{1} = \ref{#1} ,
+    email-tag   : function{1} = \ref{#1} ,
+    thanks-tag  : function{1} = \ref{#1} ,
+    tag-sep     : tokenlist   = {} ,
+    pre-tags    : tokenlist   = {} ,
+    post-tags   : tokenlist   = {} ,
+  }
+
+\DeclareTemplateInterface { people-info } { contact-list } {1}
+  {
+    type        : tokenlist   = {} ,
+    style-pre   : tokenlist   = {} ,
+    style-post  : tokenlist   = \par ,
+    prefix      : tokenlist   = {} ,
+    numbering   : function{1} = \arabic{#1} ,
+    tags        : function{1} = \textsuperscript{#1} ,
+    tags-pre    : tokenlist = {} ,
+    tags-post   : tokenlist = {} ,
+    before-skip : skip = 5pt ,
+    after-skip  : skip = 5pt ,
+    sep                 : tokenlist = {,~} ,
+    sep-pair            : tokenlist = \KeyValue { sep } ,
+    sep-antepenultimate : tokenlist = \KeyValue { sep } ,
+    sep-penultimate     : tokenlist = \KeyValue { sep } ,
+    sep-ultimate        : tokenlist = {.} ,
+    location  : choice { pretitle, posttitle, preauthor, postauthor,
+                         predate, postdate, foot } ,
+  }
+
+\DeclareTemplateInterface { people-block } { author-block } {4}
+  {
+    authors         : instance { people } ,
+    affiliations    : instance { people-info } ,
+    emails          : instance { people-info } ,
+    thanks          : instance { people-info } ,
+  }
+
+%================================================================================
+% Implementation in sub-packages
+%--------------------------------------------------------------------------------
+% Holding place for authors, until we've noted all affils etc.
+\seq_new:N \g__slauth_au_wait_seq
+% munged list
+\seq_new:N \g__slauth_author_seq
+% which bits of contact info have been used?
+\prop_new:N \g__slauth_affil_used_prop
+\prop_new:N \g__slauth_email_used_prop
+\prop_new:N \g__slauth_thanks_used_prop
+% Hook for footnote additions
+\tl_new:N \g__slauth_foot_hook_tl
+%--------------------------------------------------------------------------------
+% Process inputs
+\RequirePackage{sl-author-info-munge}
+% Implement templates
+\RequirePackage{sl-author-info-main}
+\RequirePackage{sl-author-info-au}
+\RequirePackage{sl-author-info-cont}
+%================================================================================
+% Design choices
+%================================================================================
+
+% Tagger will replace '&' with the tags
+\DeclareInstance { people } { tagged-authors-ox } { author-list }
+  {
+    sep-pair            = {&~and~} ,
+    sep-antepenultimate = {\rlap{,}&~} ,
+    sep-penultimate     = {\rlap{,}&~and~} ,
+    sep-ultimate        = {&} ,
+    sorter              = no-sort ,
+    individual          = tagged-author-long ,
+  }
+
+\DeclareInstance { people } { tagged-authors-noox } { author-list }
+  {
+    sep-pair            = {&~and~} ,
+    sep-antepenultimate = {\rlap{,}&~} ,
+    sep-penultimate     = {&~and~} ,
+    sep-ultimate        = {&} ,
+    sorter              = no-sort ,
+    individual          = tagged-author-long ,
+  }
+
+\DeclareInstance { person } { tagged-author-long } { author }
+  {
+    tagger      = author-tags-nolink ,
+    formatter   = long ,
+  }
+
+\DeclareInstance { person-info } { author-tags-nolink } { author-tags }
+  {
+    affil-tag   = \ref*{#1} ,
+    email-tag   = \ref*{#1} ,
+    thanks-tag  = \ref*{#1} ,
+  }
+
+\DeclareInstance { people-info } { affiliations } { contact-list }
+  {
+    type        = affil ,
+    style-pre   = \centering\itshape ,
+    tags        = \slauth_left_super:n{#1} ,
+    numbering   = \arabic{#1} ,
+    sep         = \par ,
+    sep-ultimate = {} ,
+    location    = postauthor ,
+    before-skip = 0pt ,
+    after-skip  = 0.1em ,
+  }
+
+\DeclareInstance { people-info } { emails } { contact-list }
+  {
+    type      = email ,
+    style-pre = \centering\ttfamily ,
+    prefix    = \textrm{Email:}\hspace{1em} ,
+    numbering = \alph{#1} ,
+    location  = predate ,
+    before-skip = 0.5em ,
+    after-skip  = 0pt ,
+  }
+
+\DeclareInstance { people-info } { thanks } { contact-list }
+  {
+    type        = thanks ,
+    tags        = \slauth_left_super:n{#1} ,
+    numbering   = \fnsymbol{#1} ,
+    location    = foot ,
+    sep         = \par ,
+    sep-ultimate = {} ,
+    before-skip = 0pt ,
+    after-skip  = 0pt ,
+  }
+
+\DeclareInstance { people-block } { basic-ox } { author-block }
+  {
+    authors         = tagged-authors-ox ,
+    affiliations    = affiliations ,
+    emails          = emails ,
+    thanks          = thanks ,
+  }
+
+\DeclareInstance { people-block } { basic-noox } { author-block }
+  {
+    authors         = tagged-authors-noox ,
+    affiliations    = affiliations ,
+    emails          = emails ,
+    thanks          = thanks ,
+  }
+%================================================================================
+% Package options
+%================================================================================
+
+\tl_new:N \g_slauth_instance_tl
+\tl_gset:Nn \g_slauth_instance_tl { basic-ox }
+
+\DeclareOption{nooxfordcomma}{ \tl_gset:Nn \g_slauth_instance_tl { basic-noox } }
+\DeclareOption{oxfordcomma}{ \tl_gset:Nn \g_slauth_instance_tl { basic-ox } }
+\DeclareOption*{\tl_gset:NV \g_slauth_instance_tl \CurrentOption}
+\ExecuteOptions{oxfordcomma}
+\ProcessOptions
+
+%================================================================================
+% Document interface
+%================================================================================
+\DeclareDocumentCommand \author { o m }
+{
+  \IfNoValueTF {#1}
+    { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {} } }
+    { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {#1} } }
+}
+%--------------------------------------------------------------------------------
+\DeclareDocumentCommand \affiliation { o m }
+{
+  \IfNoValueTF {#1}
+    { \__slauth_affil_new:nn {#2} {} }
+    { \__slauth_affil_new:nn {#2} {#1} }
+}
+%--------------------------------------------------------------------------------
+\DeclareDocumentCommand \email { o m }
+{
+  \IfNoValueTF {#1}
+    { \__slauth_email_new:nn {#2} {} }
+    { \__slauth_email_new:nn {#2} {#1} }
+}
+%--------------------------------------------------------------------------------
+\DeclareDocumentCommand \thanks { o m }
+{
+  \IfNoValueTF {#1}
+    { \__slauth_thanks_new:nn {#2} {} }
+    { \__slauth_thanks_new:nn {#2} {#1} }
+}
+%--------------------------------------------------------------------------------
+\DeclareDocumentCommand \preprint { m }
+{
+  \tl_gput_left:Nn \maketitlehooka
+    {%
+      \begin{flushright}
+        #1
+      \end{flushright}%
+    }
+}
+%================================================================================
+\AtBeginDocument {
+  % Munge authors from holding area -> \g__slauth_author_seq, \g__..._used_list_seq
+  \__slauth_munge_authors:N \g__slauth_au_wait_seq
+  % Build the displayed lists
+  \exp_args:NnV \UseInstance { people-block } \g_slauth_instance_tl
+    { \g__slauth_author_seq } { \g__slauth_affil_used_prop }
+    { \g__slauth_email_used_prop } { \g__slauth_thanks_used_prop  }
+}
+%================================================================================
+\endinput

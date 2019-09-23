@@ -1,0 +1,171 @@
+% -*- TeX -*- -*- LaTeX3 -*-
+%
+% Name munging
+%
+%================================================================================
+\ProvidesExplPackage {process-name-split} {2019/09/16} {v1.0}
+  {process names for author, bib, etc. (SL)}
+%================================================================================
+%\RequirePackage{expl3}
+\RequirePackage{xparse}
+\RequirePackage{xtemplate}
+\RequirePackage{l3keys2e}
+%\RequirePackage{interface3}
+%%================================================================================
+%\DeclareObjectType { assembler } {2}
+%
+%\DeclareTemplateInterface { assembler } { name-parts } {2}
+%  {
+%    order   : choice { given-family, family-given } = given-family ,
+%    given   : choice { full, inits, terseinits, none } = full ,
+%    prefix  : choice { full, inits, terseinits, none } = full ,
+%    family  : choice { full, inits, terseinits, none } = full ,
+%    suffix  : choice { full, inits, terseinits, none } = full ,
+%  }
+%================================================================================
+% Error messages
+%================================================================================
+\@ifpackageloaded{process-name}{}{
+\msg_new:nnnn { procname } { loaded-early }
+  { This~package~should~be~loaded~via~'process-name' }
+  {
+    This~package~should~not~be~loaded~directly.~Load~'process-name'~instead.
+    \\ 'process-name'~will~load~this~sub-package~for~you.
+  }
+\msg_error:nn { procname } { loaded-early }
+}
+%--------------------------------------------------------------------------------
+\msg_new:nnnn { procname } { name-order }
+  { Incorrect~order~for~name~parts:~'#1' }
+  {
+    The~order~of~name~parts~should~be:~'prefix~Family,~suffix,~Given'.\\
+    We~were~given:~'#1'.\\ LaTeX~will~guess~the~name~parts.
+  }
+%================================================================================
+% Utilities
+
+% Lower-case tests
+
+% Test if all letters in token list are lower-case
+% #1: token list to test
+%
+\prg_new_conditional:Nnn \procname_tl_if_lower:n { TF, T, F }
+  {
+    \str_if_eq:eeTF {#1} { \str_lower_case:n {#1} }
+      { \prg_return_true: }
+      { \prg_return_false: }
+  }
+\prg_generate_conditional_variant:Nnn \procname_tl_if_lower:n { x } { TF, T, F }
+
+\tl_new:N \l__procname_dump_tl
+
+% Split sequence at point where words go from lower to title case
+% #1: Output sequence lower case part
+% #2: Input sequence, output sequence title case part
+%
+\cs_new_protected:Nn \__procname_split_case_seq:NN
+{
+  \seq_clear:N #1
+  % find first word starting with upper-case
+  \seq_map_inline:Nn #2
+    {
+      \procname_tl_if_lower:xTF { \tl_head:n {##1} }
+        { \seq_put_right:Nn #1 {##1} }
+        { \seq_map_break: }
+    }
+  % remove elements of seq b from seq a
+  \seq_map_inline:Nn #1 { \seq_pop_left:NN #2 \l__procname_dump_tl }
+  \tl_clear:N \l__procname_dump_tl
+}
+
+%================================================================================
+
+% Get name parts from name entry, a la Bib(La)Tex
+% #1: property-list variable to store results, with keys 'given, family'
+% #2: token list of name entry, in the form 'Given~Family'
+%
+\cs_new_protected:Nn \procname_get_parts_gf:Nn
+{
+  \group_begin:
+    \exp_args:NNV \seq_set_split:Nnn \l_tmpa_seq \c_space_tl {#2}
+    \seq_pop_right:NN \l_tmpa_seq \l_tmpa_tl
+%
+    \prop_gput:Nnx #1 { given } { \seq_use:Nn \l_tmpa_seq { ~ } }
+    \prop_gput:NnV #1 { family } \l_tmpa_tl
+  \group_end:
+}
+
+% Get name parts from name entry, a la Bib(La)Tex
+% #1: property-list variable to store results, with keys 'given, prefix, family, suffix'
+% #2: token list of name entry, in the form 'prefix~Family,~suffix,~Given'
+%
+\cs_new_protected:Nn \procname_get_parts:Nn
+{
+  \group_begin:
+    \seq_set_from_clist:Nn \l_tmpa_seq {#2}
+    \int_set:Nn \l_tmpa_int { \seq_count:N \l_tmpa_seq }
+    \int_compare:nNnTF { \l_tmpa_int } < { 2 }
+      {
+        \msg_warning:nnn { procname } { name-order } {#2}
+        \procname_get_parts_gf:Nn #1 {#2}
+      }
+      {
+        % e.g. \l_tmpa_seq = {de la Vallée Poussin, Jr, Charles-Jean Étienne Gustave Nicolas}
+        \int_compare:nNnT { \l_tmpa_int } > { 2 }
+          {
+            % e.g. suffix = {Jr}
+            \prop_gput:Nnx #1 { suffix } { \seq_item:Nn \l_tmpa_seq { 2 } }
+          }
+        % e.g. given = {Charles-Jean Étienne Gustave Nicolas}
+        \prop_gput:Nnx #1 { given } { \seq_item:Nn \l_tmpa_seq { -1 } }
+%
+        % e.g. \l_tmpa_tl = {de la Vallée Poussin}
+        \tl_set:Nx \l_tmpa_tl { \seq_item:Nn \l_tmpa_seq {1} }
+        % split at spaces
+        % e.g. \l_tmpa_seq = {de, la, Vallée, Poussin}
+        \exp_args:NNV \seq_set_split:NnV \l_tmpa_seq \c_space_tl \l_tmpa_tl
+        % split at first word starting with upper-case
+        % e.g. \l_tmpb_seq = {de, la}, \l_tmpa_seq = {Vallée, Poussin}
+        \__procname_split_case_seq:NN \l_tmpb_seq \l_tmpa_seq
+        \seq_if_empty:NF \l_tmpb_seq
+          {
+            % e.g. prefix = {de la}
+            \prop_gput:Nnx #1 { prefix } { \seq_use:Nn \l_tmpb_seq { ~ } }
+          }
+%
+        % e.g. family = {Vallée Poussin}
+        \prop_gput:Nnx #1 { family } { \seq_use:Nn \l_tmpa_seq { ~ } }
+      }
+  \group_end:
+}
+
+\cs_generate_variant:Nn \procname_get_parts:Nn { cn }
+%================================================================================
+
+% Run a bibtex style name list
+\cs_new_protected:Nn \procname_split_list:Nn
+{
+  \group_begin:
+    \seq_set_split:Nnn \l_tmpa_seq { and } {#2}
+    \seq_map_inline:Nn \l_tmpa_seq
+      {
+        \procname_get_parts:Nn \l_tmpb_prop {##1}
+        \seq_gput_right:NV #1 \l_tmpb_prop
+      }
+  \group_end:
+}
+
+%================================================================================
+
+% Generate and identifier to put in a cname
+%
+\cs_new_protected:Nn \procname_make_identifier:n
+{
+  \group_begin:
+    \__procname_std_str:Nn \l_tmpa_str {#1}
+    \str_use:N \l_tmpa_str
+  \group_end:
+}
+
+%================================================================================
+\endinput

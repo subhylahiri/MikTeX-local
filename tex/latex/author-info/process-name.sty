@@ -1,0 +1,74 @@
+% -*- TeX -*- -*- LaTeX3 -*-
+%================================================================================
+\ProvidesExplPackage {process-name} {2019/09/16} {v1.0}
+  {process names for author, bib, etc. (SL)}
+%================================================================================
+%\RequirePackage{expl3}
+\RequirePackage{xparse}
+\RequirePackage{xtemplate}
+\RequirePackage{l3keys2e}
+%\RequirePackage{interface3}
+%================================================================================
+% Objects:
+
+% In process-name-sort.sty
+%  - two prop-lists to compare, created in process-name-split
+
+\DeclareObjectType { sorter } {2}
+
+% In process-name-assemble.sty
+%  - tl-var to store result,
+%  - prop-list created in process-name-split
+
+\DeclareObjectType { assembler } {2}
+
+% Templates
+
+\DeclareTemplateInterface { sorter } { by-name } {2}
+  {
+    sort1   : choice { family, given, prefix, suffix, none } = none ,
+    sort2   : choice { family, given, prefix, suffix, none } = none ,
+    sort3   : choice { family, given, prefix, suffix, none } = none ,
+    sort4   : choice { family, given, prefix, suffix, none } = none ,
+  }
+
+\DeclareTemplateInterface { assembler } { name-parts } {2}
+  {
+    order   : choice { given-family, family-given } = given-family ,
+    given   : choice { full, inits, terseinits, none } = full ,
+    prefix  : choice { full, inits, terseinits, none } = full ,
+    family  : choice { full, inits, terseinits, none } = full ,
+    suffix  : choice { full, inits, terseinits, none } = full ,
+  }
+
+\RequirePackage{process-name-split}
+\RequirePackage{process-name-sort}
+\RequirePackage{process-name-assemble}
+
+%================================================================================
+
+\DeclareInstance { sorter } { no-sort } { by-name }
+  {}
+
+\DeclareInstance { sorter } { by-family } { by-name }
+  { sort1 = family , }
+
+%--------------------------------------------------------------------------------
+
+\DeclareInstance { assembler } { long } { name-parts }
+  {}
+
+\DeclareInstance { assembler } { short } { name-parts }
+  { given = inits }
+
+\DeclareInstance { assembler } { reverse-long } { name-parts }
+  { order = family-given }
+
+\DeclareInstance { assembler } { reverse-short } { name-parts }
+  {
+    order = family-given ,
+    given = inits ,
+  }
+
+%================================================================================
+\endinput

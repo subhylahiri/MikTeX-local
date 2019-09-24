@@ -3,13 +3,13 @@
 % Sorting name lists
 %
 %================================================================================
-\ProvidesExplPackage {process-name-sort} {2019/09/16} {v1.0}
-  {process names for author, bib, etc. (SL)}
+\ProvidesExplFile {process-name-sort.def} {2019/09/16} {v1.0}
+  {sorting names for process-name.sty (SL)}
 %================================================================================
 %\RequirePackage{expl3}
-\RequirePackage{xparse}
-\RequirePackage{xtemplate}
-\RequirePackage{l3keys2e}
+%\RequirePackage{xparse}
+%\RequirePackage{xtemplate}
+%\RequirePackage{l3keys2e}
 %\RequirePackage{interface3}
 %================================================================================
 %\DeclareObjectType { sorter } {2} % two prop-lists to compare, created in process-name-split
@@ -21,18 +21,6 @@
 %    sort3   : choice { family, given, prefix, suffix, none } = none ,
 %    sort4   : choice { family, given, prefix, suffix, none } = none ,
 %  }
-%================================================================================
-% Error messages
-%================================================================================
-\@ifpackageloaded{process-name}{}{
-\msg_new:nnnn { procname } { loaded-early }
-  { This~package~should~be~loaded~via~'process-name' }
-  {
-    This~package~should~not~be~loaded~directly.~Load~'process-name'~instead.
-    \\ 'process-name'~will~load~this~sub-package~for~you.
-  }
-\msg_error:nn { procname } { loaded-early }
-}
 %================================================================================
 % Sorting comparisons
 
@@ -58,7 +46,7 @@
 % Compare single tokens, ascii order
 % +1 if #1 is earlier
 % -1 if #2 is earlier
-%  0 if #1 == #2
+%  0 if #1 == #2 - assume already excluded by an equality test
 %
 \cs_new:Nn \__procname_compare_tok:nn
   { \__procname_compare_int:nn  { `#1 } { `#2 } }

@@ -3,14 +3,14 @@
 % Processing inputs -> our form
 %
 %================================================================================
-\RequirePackage{expl3}
-\ProvidesExplPackage {sl-author-info-munge} {2017/12/28} {v1.0}
-    {titling macros for affiliations etc. (SL)}
+\ProvidesExplFile {sl-author-info-munge.def} {2017/12/28} {v1.0}
+    {process name inputs, etc. for sl-author-info.sty (SL)}
 %================================================================================
+%\RequirePackage{expl3}
 %\RequirePackage{interface3}
-\RequirePackage{xparse}
-\RequirePackage{xtemplate}
-\RequirePackage{process-name}
+%\RequirePackage{xparse}
+%\RequirePackage{xtemplate}
+%\RequirePackage{process-name}
 %================================================================================
 \makeatletter
 %================================================================================
@@ -22,18 +22,6 @@
 %================================================================================
 % Error messages
 %================================================================================
-%\cs_if_exist:NTF \g__slauth_auth_hook_tl - but its empty for now
-\@ifpackageloaded{sl-author-info}{}{
-\msg_new:nnnn { slauth } { loaded-early }
-  { This~package~should~be~loaded~via~'sl-author-info' }
-  {
-    This~package~should~not~be~loaded~directly.~Load~'sl-author-info'~instead.
-    \\ 'sl-author-info'~will~load~this~sub-package~for~you.
-  }
-\msg_error:nn { slauth } { loaded-early }
-}
-%--------------------------------------------------------------------------------
-% Error messages for this package
 \msg_new:nnnn { slauth } { unknown-prop }
   { Unknown~author~key:~'#1' }
   {
@@ -90,7 +78,7 @@
   unknown .code:n =
     {
       \tl_if_empty:NTF \l_keys_value_tl
-        { \tl_set:NV \g__slauth_contact_label_tl \l_keys_key_tl }
+        { \tl_set_eq:NN \g__slauth_contact_label_tl \l_keys_key_tl }
         { \msg_warning:nnx { slauth } { unknown-prop } { \l_keys_key_tl } }
     } ,
 }

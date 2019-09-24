@@ -3,28 +3,15 @@
 % Combining the parts
 %
 %================================================================================
-\RequirePackage{expl3}
-\ProvidesExplPackage {sl-author-info-main} {2019/09/18} {v1.0}
-    {titling macros for affiliations etc. (SL)}
+\ProvidesExplFile {sl-author-info-util.def} {2019/09/18} {v1.0}
+    {general tools for sl-author-info.sty (SL)}
 %================================================================================
+%\RequirePackage{expl3}
 %\RequirePackage{interface3}
-\RequirePackage{xparse}
-\RequirePackage{xtemplate}
-\RequirePackage{titling}
-\RequirePackage{process-name}
-%================================================================================
-% Error messages
-%================================================================================
-%\cs_if_exist:NTF \g__slauth_auth_hook_tl - but its empty for now
-\@ifpackageloaded{sl-author-info}{}{
-\msg_new:nnnn { slauth } { loaded-early }
-  { This~package~should~be~loaded~via~'sl-author-info' }
-  {
-    This~package~should~not~be~loaded~directly.~Load~'sl-author-info'~instead.
-    \\ 'sl-author-info'~will~load~this~sub-package~for~you.
-  }
-\msg_error:nn { slauth } { loaded-early }
-}
+%\RequirePackage{xparse}
+%\RequirePackage{xtemplate}
+%\RequirePackage{titling}
+%\RequirePackage{process-name}
 %================================================================================
 % Tools.
 %================================================================================
@@ -32,10 +19,17 @@
 % #1: Label
 %
 \cs_new:Nn \slauth_left_super:n
-  { {}\textsuperscript{\llap{#1}} }
+  { {}\textsuperscript { \hbox_overlap_left:n {#1} } }
 %--------------------------------------------------------------------------------
-% Expand function and argument once
-% #1: tl-var for result (prev value wiped)
+\cs_new_protected:Nn \slauth_eat_novalue:Nnn
+{
+  \IfNoValueTF {#3}
+    { #1 {#2} {} }
+    { #1 {#2} {#3} }
+}
+%--------------------------------------------------------------------------------
+% Expand function with argument once
+% #1: tl-var for result (appended)
 % #2: function
 % #3: tl-var holding the argument
 %
@@ -69,20 +63,15 @@
 %
 \cs_new_protected:Nn \__slauth_outer_hooks:nnnnn
 {
-  \group_begin:
-    \tl_set:Nn \l_tmpa_tl {g__slauth_#5_hook_tl}
-    % Don't add spaces if there's nothing in the hook!
-    \tl_if_empty:cF { \l_tmpa_tl }
-      {
-        % cname of pre contact hook
-        \tl_set:Nn \l_tmpa_tl {g__slauth_#5_pre_tl}
-        \tl_gput_right:cn { \l_tmpa_tl } { \skip_vertical:n {#1} #3 }
+  % Don't add spaces if there's nothing in the hook!
+  \tl_if_empty:cF { g__slauth_#5_hook_tl }
+    {
+      % cname of pre contact hook
+      \tl_gput_right:cn { g__slauth_#5_pre_tl } { \skip_vertical:n {#1} #3 }
 
-        % cname of post contact hook
-        \tl_set:Nn \l_tmpa_tl {g__slauth_#5_post_tl}
-        \tl_gput_right:cn { \l_tmpa_tl } { #4 \skip_vertical:n {#2} }
-      }
-  \group_end:
+      % cname of post contact hook
+      \tl_gput_right:cn { g__slauth_#5_post_tl } { #4 \skip_vertical:n {#2} }
+    }
 }
 \cs_generate_variant:Nn \__slauth_outer_hooks:nnnnn {        VVnVn, VVVnn, VVVVn, }
 \cs_generate_variant:Nn \__slauth_outer_hooks:nnnnn { VVnnV, VVnVV, VVVnV, VVVVV, }

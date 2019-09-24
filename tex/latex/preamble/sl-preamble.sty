@@ -1,8 +1,10 @@
 %%  My standard preamble.
 %%
-%% Requires packages: amsmath, amssymb, amsthm, mathtools, appendix, natbib,
-%%                    xcolor, ifpdf, hyperref, cleveref, etoolbox, caption,
-%%                    graphicx, epstopdf, sl-panels, sl-defs
+%% Requires packages: amsmath, amssymb, amsthm*, mathtools, appendix, natbib*,
+%%                    xcolor, ifpdf, hyperref, cleveref, etoolbox, caption*,
+%%                    graphicx*, epstopdf*, xr-hyper*, sl-defs*, sl-author-info*,
+%%                    titling*, array*, multirow*, booktabs*, appendices, showkeys*,
+%%  (* depending on options)
 %%
 %% This package must be declared **after** biblatex, if it is used.
 %%
@@ -30,6 +32,7 @@
 \DeclareOption{nodefs}{\togglefalse{sl@def}}
 \DeclareOption{defs}{\toggletrue{sl@def}}
 \DeclareOption{xr}{\RequirePackage{xr-hyper}}
+\DeclareOption{auth}{\RequirePackage{sl-author-info}}
 \DeclareOption{notables}{\togglefalse{sl@tables}}
 \DeclareOption{tables}{\toggletrue{sl@tables}}
 \DeclareOption{nographics}{\togglefalse{sl@graphics}}
@@ -54,7 +57,8 @@
                                 linkcolor=red!30!black,%
                                 citecolor=green!50!black,%
                                 filecolor=blue!70!black,%
-                                urlcolor=blue!70!black}{hyperref}}
+                                urlcolor=blue!70!black,%
+                                runcolor=teal!50!black}{hyperref}}
 
 \DeclareOption*{\PassOptionsToPackage{\CurrentOption}{sl-defs}}
 

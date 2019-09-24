@@ -3,12 +3,12 @@
 % Assembling name parts
 %
 %================================================================================
-\ProvidesExplPackage {process-name-assemble} {2019/09/16} {v1.0}
-  {process names for author, bib, etc. (SL)}
+\ProvidesExplFile {process-name-assemble.DEF} {2019/09/16} {v1.0}
+  {format & combine name parts for process-name.sty (SL)}
 %================================================================================
 %\RequirePackage{expl3}
-\RequirePackage{xparse}
-\RequirePackage{xtemplate}
+%\RequirePackage{xparse}
+%\RequirePackage{xtemplate}
 %\RequirePackage{l3keys2e}
 %\RequirePackage{interface3}
 %%================================================================================
@@ -22,18 +22,6 @@
 %    family  : choice { full, inits, terseinits, none } = full ,
 %    suffix  : choice { full, inits, terseinits, none } = full ,
 %  }
-%================================================================================
-% Error messages
-%================================================================================
-\@ifpackageloaded{process-name}{}{
-\msg_new:nnnn { procname } { loaded-early }
-  { This~package~should~be~loaded~via~'process-name' }
-  {
-    This~package~should~not~be~loaded~directly.~Load~'process-name'~instead.
-    \\ 'process-name'~will~load~this~sub-package~for~you.
-  }
-\msg_error:nn { procname } { loaded-early }
-}
 %================================================================================
 % Utilities
 %--------------------------------------------------------------------------------

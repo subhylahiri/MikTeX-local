@@ -8,7 +8,7 @@
 %%          \affiliation*{My University}
 %%
 %% Or, to number them, use:
-%%          \affiliation[key]{My University\label{key}}
+%%          \affiliation[key]{My University}
 %%
 %% You can pair authors with affiliations, emails, other annotations like this:
 %%          \author[affil=key,email=alice@university,thanks=first]{Alice Smith}
@@ -18,7 +18,8 @@
 %%          \thanks[first]{Equal contribution.}
 %%
 %% You can customise formatting by declaring your own instances of the
-%% various templates below.
+%% various templates below and using the name of the people-block instance
+%% as an option for this package (before the instance declaration).
 %%
 %% History: 2016/07/27 v0.01beta (SL) manual \label and \ref
 %%          2017/12/28 v1.0      (SL) using xkeyval and lists to automate
@@ -126,11 +127,11 @@
 \tl_new:N \g__slauth_foot_hook_tl
 %--------------------------------------------------------------------------------
 % Process inputs
-\RequirePackage{sl-author-info-munge}
+\input{sl-author-info-munge.def}
 % Implement templates
-\RequirePackage{sl-author-info-main}
-\RequirePackage{sl-author-info-au}
-\RequirePackage{sl-author-info-cont}
+\input{sl-author-info-util.def}
+\input{sl-author-info-au.def}
+\input{sl-author-info-cont.def}
 %================================================================================
 % Design choices
 %================================================================================
@@ -139,8 +140,8 @@
 \DeclareInstance { people } { tagged-authors-ox } { author-list }
   {
     sep-pair            = {&~and~} ,
-    sep-antepenultimate = {\rlap{,}&~} ,
-    sep-penultimate     = {\rlap{,}&~and~} ,
+    sep-antepenultimate = {\hbox_overlap_right:n{,}&~} ,
+    sep-penultimate     = {\hbox_overlap_right:n{,}&~and~} ,
     sep-ultimate        = {&} ,
     sorter              = no-sort ,
     individual          = tagged-author-long ,
@@ -149,7 +150,7 @@
 \DeclareInstance { people } { tagged-authors-noox } { author-list }
   {
     sep-pair            = {&~and~} ,
-    sep-antepenultimate = {\rlap{,}&~} ,
+    sep-antepenultimate = {\hbox_overlap_right:n{,}&~} ,
     sep-penultimate     = {&~and~} ,
     sep-ultimate        = {&} ,
     sorter              = no-sort ,
@@ -229,7 +230,7 @@
 
 \DeclareOption{nooxfordcomma}{ \tl_gset:Nn \g_slauth_instance_tl { basic-noox } }
 \DeclareOption{oxfordcomma}{ \tl_gset:Nn \g_slauth_instance_tl { basic-ox } }
-\DeclareOption*{\tl_gset:NV \g_slauth_instance_tl \CurrentOption}
+\DeclareOption*{\tl_gset_eq:NN \g_slauth_instance_tl \CurrentOption}
 \ExecuteOptions{oxfordcomma}
 \ProcessOptions
 
@@ -244,25 +245,13 @@
 }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \affiliation { o m }
-{
-  \IfNoValueTF {#1}
-    { \__slauth_affil_new:nn {#2} {} }
-    { \__slauth_affil_new:nn {#2} {#1} }
-}
+  { \slauth_eat_novalue:Nnn \__slauth_affil_new:nn  {#2} {#1} }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \email { o m }
-{
-  \IfNoValueTF {#1}
-    { \__slauth_email_new:nn {#2} {} }
-    { \__slauth_email_new:nn {#2} {#1} }
-}
+  { \slauth_eat_novalue:Nnn \__slauth_email_new:nn  {#2} {#1} }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \thanks { o m }
-{
-  \IfNoValueTF {#1}
-    { \__slauth_thanks_new:nn {#2} {} }
-    { \__slauth_thanks_new:nn {#2} {#1} }
-}
+  { \slauth_eat_novalue:Nnn \__slauth_thanks_new:nn  {#2} {#1} }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \preprint { m }
 {

@@ -8,7 +8,6 @@
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}
-%\RequirePackage{xparse}
 %\RequirePackage{xtemplate}
 %\RequirePackage{titling}
 %\RequirePackage{process-name}

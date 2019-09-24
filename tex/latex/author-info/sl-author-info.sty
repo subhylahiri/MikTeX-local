@@ -126,11 +126,14 @@
 % Hook for footnote additions
 \tl_new:N \g__slauth_foot_hook_tl
 %--------------------------------------------------------------------------------
-% Process inputs
-\input{sl-author-info-munge.def}
-% Implement templates
+% General tools
 \input{sl-author-info-util.def}
+% Implement templates:
+% process inputs
+\input{sl-author-info-munge.def}
+% print author list
 \input{sl-author-info-au.def}
+% print contact lists
 \input{sl-author-info-cont.def}
 %================================================================================
 % Design choices
@@ -237,21 +240,17 @@
 %================================================================================
 % Document interface
 %================================================================================
-\DeclareDocumentCommand \author { o m }
-{
-  \IfNoValueTF {#1}
-    { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {} } }
-    { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {#1} } }
-}
+\DeclareDocumentCommand \author { O{} m }
+  { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {#1} } }
 %--------------------------------------------------------------------------------
-\DeclareDocumentCommand \affiliation { o m }
-  { \slauth_eat_novalue:Nnn \__slauth_affil_new:nn  {#2} {#1} }
+\DeclareDocumentCommand \affiliation { O{} m }
+  { \__slauth_affil_new:nn  {#2} {#1} }
 %--------------------------------------------------------------------------------
-\DeclareDocumentCommand \email { o m }
-  { \slauth_eat_novalue:Nnn \__slauth_email_new:nn  {#2} {#1} }
+\DeclareDocumentCommand \email { O{} m }
+  { \__slauth_email_new:nn  {#2} {#1} }
 %--------------------------------------------------------------------------------
-\DeclareDocumentCommand \thanks { o m }
-  { \slauth_eat_novalue:Nnn \__slauth_thanks_new:nn  {#2} {#1} }
+\DeclareDocumentCommand \thanks { O{} m }
+  { \__slauth_thanks_new:nn  {#2} {#1} }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \preprint { m }
 {

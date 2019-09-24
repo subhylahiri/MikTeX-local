@@ -8,10 +8,6 @@
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}
-%\RequirePackage{xparse}
-%\RequirePackage{xtemplate}
-%\RequirePackage{titling}
-%\RequirePackage{process-name}
 %================================================================================
 % Tools.
 %================================================================================
@@ -21,17 +17,12 @@
 \cs_new:Nn \slauth_left_super:n
   { {}\textsuperscript { \hbox_overlap_left:n {#1} } }
 %--------------------------------------------------------------------------------
-\cs_new_protected:Nn \slauth_eat_novalue:Nnn
-{
-  \IfNoValueTF {#3}
-    { #1 {#2} {} }
-    { #1 {#2} {#3} }
-}
-%--------------------------------------------------------------------------------
+% To create a token list { func{arg} }, where func & maybe arg are stored in tl-vars
+
 % Expand function with argument once
 % #1: tl-var for result (appended)
-% #2: function
-% #3: tl-var holding the argument
+% #2: cs-var holding the function
+% #3: tl of the argument
 %
 \cs_new_protected:Nn \slauth_gexpand_func_arg:NNn
 {
@@ -41,6 +32,7 @@
     \tl_gput_right:NV #1 \l_tmpa_tl
   \group_end:
 }
+% local version
 \cs_new_protected:Nn \slauth_expand_func_arg:NNn
 {
   \tl_gclear:N \g_tmpa_tl
@@ -52,7 +44,42 @@
 \cs_generate_variant:Nn \slauth_gexpand_func_arg:NNn { NNV, NcV, cNV, ccV }
 \cs_generate_variant:Nn \slauth_expand_func_arg:NNn {      Ncn, cNn, ccn }
 \cs_generate_variant:Nn \slauth_expand_func_arg:NNn { NNV, NcV, cNV, ccV }
-%--------------------------------------------------------------------------------
+%================================================================================
+% Prop lists with sequence items
+
+% Append a sequence to an item in prop-list, creates item if not present, global
+% #1: prop-list variable
+% #2: name of property, token list
+% #3: info to append, seq variable
+%
+\cs_new_protected:Nn \__slauth_prop_gappend:NnN
+{
+  \group_begin:
+    \prop_gpop:NnNTF #1 {#2} \l_tmpb_seq
+      { \seq_concat:NNN \l_tmpa_seq \l_tmpb_seq #3 }
+      { \seq_set_eq:NN \l_tmpa_seq #3 }
+    \prop_gput:NnV #1 {#2} \l_tmpa_seq
+  \group_end:
+}
+
+% Append a token list to a sequence item in prop-list, creates item if not present, global
+% #1: prop-list variable
+% #2: name of property, token list
+% #3: info to append, seq variable
+%
+\cs_new_protected:Nn \__slauth_prop_gappend_one:Nnn
+{
+  \group_begin:
+    \seq_clear:N \l_tmpa_seq
+    \seq_put_right:Nn \l_tmpa_seq {#3}
+    \__slauth_prop_gappend:NnN #1 {#2} \l_tmpa_seq
+  \group_end:
+}
+\cs_generate_variant:Nn \__slauth_prop_gappend_one:Nnn {      NnV, NVn, NVV }
+\cs_generate_variant:Nn \__slauth_prop_gappend_one:Nnn { cnn, cnV, cVn, cVV }
+
+%================================================================================
+% Hooks
 
 % Write pre/post hooks
 % #1: pre-skip
@@ -66,10 +93,7 @@
   % Don't add spaces if there's nothing in the hook!
   \tl_if_empty:cF { g__slauth_#5_hook_tl }
     {
-      % cname of pre contact hook
       \tl_gput_right:cn { g__slauth_#5_pre_tl } { \skip_vertical:n {#1} #3 }
-
-      % cname of post contact hook
       \tl_gput_right:cn { g__slauth_#5_post_tl } { #4 \skip_vertical:n {#2} }
     }
 }
@@ -89,32 +113,6 @@
       \tl_gput_right:Nn \@thanks
         { \footnotetext[1]{\g__slauth_foot_hook_tl} }
     }
-}
-%================================================================================
-% Template implementation
-
-\DeclareTemplateCode { people-block } { author-block } {4}
-  {
-    authors         = \__slauth_block_au:n ,
-    affiliations    = \__slauth_block_af:n ,
-    emails          = \__slauth_block_em:n ,
-    thanks          = \__slauth_block_th:n ,
-  }
-{
-  \group_begin:
-    \AssignTemplateKeys
-    \__slauth_block_au:n {#1}
-    \__slauth_block_af:n {#2}
-    \__slauth_block_em:n {#3}
-    \__slauth_block_th:n {#4}
-    % create footer, if needed
-    \__slauth_create_foot:
-    % Delete unneeded data
-    \seq_gclear:N #1
-    \prop_gclear:N #2
-    \prop_gclear:N #3
-    \prop_gclear:N #4
-  \group_end:
 }
 %================================================================================
 \endinput

@@ -50,8 +50,8 @@
     sep-antepenultimate = \l__slauth_auls_sep_ap_tl ,
     sep-penultimate     = \l__slauth_auls_sep_pu_tl ,
     sep-ultimate        = \l__slauth_auls_sep_ul_tl ,
-    before-skip         = global \l__slauth_auls_pr_skip ,
-    after-skip          = global \l__slauth_auls_po_skip ,
+    before-skip         = \l__slauth_auls_pr_skip ,
+    after-skip          = \l__slauth_auls_po_skip ,
     sorter              = \__slauth_auls_sorter:nn ,
     individual          = \__slauth_auls_individual:nn ,
   }

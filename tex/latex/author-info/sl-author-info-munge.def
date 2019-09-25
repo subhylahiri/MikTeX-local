@@ -8,7 +8,6 @@
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}
-%\RequirePackage{xparse}
 %\RequirePackage{xtemplate}
 %\RequirePackage{process-name}
 %================================================================================
@@ -16,7 +15,9 @@
 %================================================================================
 \tl_new:N \g__slauth_current_tl
 \tl_new:N \g__slauth_contact_label_tl
-\prop_new:N \g__slauth_affil_def_prop
+\prop_new:N \g__slauth_au_prop
+%
+\prop_new:N \g__slauth_affiliation_def_prop
 \prop_new:N \g__slauth_email_def_prop
 \prop_new:N \g__slauth_thanks_def_prop
 %================================================================================
@@ -52,33 +53,21 @@
 %--------------------------------------------------------------------------------
 
 % Add a new contact
-% #1: prop-list of defined contacts of type #2
-% #2: type of contact, token list
-% #3: contents of contact, token-list
-% #4: key-value clist
+% #1: contents of contact, token-list
+% #2: label, key-value clist
+% #3: type of contact, token list
 %
-\cs_new_protected:Nn \__slauth_contact_new:Nnnn
+\cs_new_protected:Nn \__slauth_contact_new:nnn
 {
   \group_begin:
-    \tl_gset:Nx \g__slauth_current_tl { #2~'#3' }
+    \tl_gset:Nx \g__slauth_current_tl { #3~'#1' }
     \tl_gclear:N \g__slauth_contact_label_tl
-    \keys_set:nn { slauth / contact-new } {#4}
+    \keys_set:nn { slauth / contact-new } {#2}
     \tl_if_blank:VTF \g__slauth_contact_label_tl
-      { \__slauth_prop_gappend_one:Nnn #1 { __nolabel }  {#3} }
-      { \prop_gput:NVn #1 \g__slauth_contact_label_tl {#3} }
+      { \__slauth_prop_gappend_one:cnn { g__slauth_#3_def_prop } { __nolabel }  {#1} }
+      { \prop_gput:cVn { g__slauth_#3_def_prop } \g__slauth_contact_label_tl {#1} }
   \group_end:
 }
-%--------------------------------------------------------------------------------
-
-\cs_new_protected:Nn \__slauth_affil_new:nn
-  { \__slauth_contact_new:Nnnn \g__slauth_affil_def_prop { affiliation } {#1} {#2} }
-
-\cs_new_protected:Nn \__slauth_email_new:nn
-  { \__slauth_contact_new:Nnnn \g__slauth_email_def_prop { email } {#1} {#2} }
-
-\cs_new_protected:Nn \__slauth_thanks_new:nn
-  { \__slauth_contact_new:Nnnn \g__slauth_thanks_def_prop { thanks } {#1} {#2} }
-
 %================================================================================
 % Creating data for authors
 
@@ -87,85 +76,54 @@
 % Note use of a new contact, global
 % #1: label of contact, token-list
 % #2: type of contact, token-list
-% #3: prop-list of definitions
-% #4: prop-list of used
 %
-\cs_new_protected:Nn \__slauth_au_gadd_cont:nnNN
+\cs_new_protected:Nn \__slauth_au_contact_gused:nn
 {
   \group_begin:
-    \prop_if_in:NnTF #3 {#1}
+    \prop_if_in:cnTF { g__slauth_#2_def_prop } {#1}
       {
-        \prop_get:NnN #3 {#1} \l_tmpb_tl
-        \exp_args:NNnV \prop_gput_if_new:Nnn #4 {#1} \l_tmpb_tl
+        \prop_get:cnN { g__slauth_#2_def_prop } {#1} \l_tmpb_tl
+        \exp_args:NcnV
+          \prop_gput_if_new:Nnn { g__slauth_#2_used_prop } {#1} \l_tmpb_tl
       }
       {
         \tl_if_eq:nnTF {#2} { email }
-          { \prop_gput_if_new:Nnn #4 {#1} {#1} }
+          { \prop_gput_if_new:cnn { g__slauth_#2_used_prop } {#1} {#1} }
           { \msg_warning:nnnn { slauth } { unknown-cont } {#1} {#2} }
       }
   \group_end:
 }
+%================================================================================
+% Add contacts for one author
 
-% Note use of a new affiliation, global
-% #1: label of affil
+% #1: labels clist
+% #2: type of contact, token list
 %
-\cs_new_protected:Nn \__slauth_au_gadd_affil:n
+\cs_new_protected:Nn \__slauth_contact_new_gadd:nn
 {
-  \__slauth_au_gadd_cont:nnNN {#1} { affiliation }
-    \g__slauth_affil_def_prop \g__slauth_affil_used_prop
+  \seq_set_from_clist:Nn \l_tmpa_seq {#1}
+  \__slauth_prop_gappend:NnN \g__slauth_au_prop {#2} \l_tmpa_seq
+  \seq_map_inline:Nn \l_tmpa_seq { \__slauth_au_contact_gused:nn {##1} {#2} }
 }
-\cs_generate_variant:Nn \__slauth_au_gadd_affil:n { V }
+\cs_generate_variant:Nn \__slauth_contact_new_gadd:nn { V }
 
-% Note use of a new email, global
-% #1: label/content of email
-%
-\cs_new_protected:Nn \__slauth_au_gadd_email:n
-{
-  \__slauth_au_gadd_cont:nnNN {#1} { email }
-    \g__slauth_email_def_prop \g__slauth_email_used_prop
-}
-
-% Note use of a new thanks, global
-% #1: label of thanks
-%
-\cs_new_protected:Nn \__slauth_au_gadd_thanks:n
-{
-  \__slauth_au_gadd_cont:nnNN {#1} { thanks }
-    \g__slauth_thanks_def_prop \g__slauth_thanks_used_prop
-}
 %--------------------------------------------------------------------------------
-
-\prop_new:N \g__slauth_au_prop
+% Creating data for authors
 
 % Keys for a single author
 %
 \keys_define:nn { slauth / author-new }
 {
-  affil .code:n =
-    {
-      \seq_set_from_clist:Nn \l_tmpa_seq {#1}
-      \__slauth_prop_gappend:NnN \g__slauth_au_prop { affil } \l_tmpa_seq
-      \seq_map_inline:Nn \l_tmpa_seq { \__slauth_au_gadd_affil:n {##1} }
-    } ,
+  affiliation .code:n =
+    { \__slauth_contact_new_gadd:nn {#1} { affiliation } } ,
   email .code:n =
-    {
-      \seq_set_from_clist:Nn \l_tmpa_seq {#1}
-      \__slauth_prop_gappend:NnN \g__slauth_au_prop { email } \l_tmpa_seq
-      \seq_map_inline:Nn \l_tmpa_seq { \__slauth_au_gadd_email:n {##1} }
-    } ,
+    { \__slauth_contact_new_gadd:nn {#1} { email } } ,
   thanks .code:n =
-    {
-      \seq_set_from_clist:Nn \l_tmpa_seq {#1}
-      \__slauth_prop_gappend:NnN \g__slauth_au_prop { thanks } \l_tmpa_seq
-      \seq_map_inline:Nn \l_tmpa_seq { \__slauth_au_gadd_thanks:n {##1} }
-    } ,
+    { \__slauth_contact_new_gadd:nn {#1} { thanks } } ,
   unknown .code:n =
     {
       \tl_if_empty:NTF \l_keys_value_tl
-        {
-          \__slauth_prop_gappend_one:NnV \g__slauth_au_prop { affil } \l_keys_key_tl
-          \__slauth_au_gadd_affil:V \l_keys_key_tl
-        }
+        { \__slauth_contact_new_gadd:Vn \l_keys_key_tl { affiliation } }
         { \msg_warning:nnx { slauth } { unknown-prop } { \l_keys_key_tl } }
     } ,
 }
@@ -192,17 +150,17 @@
 {
   % Munge authors from holding area -> \g__slauth_author_seq, \g__..._used_list_seq
   \seq_map_inline:Nn #1
-    { \__slauth_author_new:nn ##1 }
+    { \__slauth_author_new:nn ##1 } % ##1 = {name}{keys}
   % Delete unneeded data
   \seq_gclear:N #1
-  \prop_gclear:N \g__slauth_affil_def_prop
+  \prop_gclear:N \g__slauth_affiliation_def_prop
   \prop_gclear:N \g__slauth_email_def_prop
   \prop_gclear:N \g__slauth_thanks_def_prop
 }
 %================================================================================
 % Template implementation
 
-\DeclareTemplateCode { people-block } { author-block } {4}
+\DeclareTemplateCode { people-block } { author-block } {5}
   {
     authors         = \__slauth_block_au:n ,
     affiliations    = \__slauth_block_af:n ,
@@ -212,17 +170,21 @@
 {
   \group_begin:
     \AssignTemplateKeys
-    \__slauth_block_au:n {#1}
-    \__slauth_block_af:n {#2}
-    \__slauth_block_em:n {#3}
-    \__slauth_block_th:n {#4}
+    % Munge authors from holding area -> \g__slauth_author_seq, \g__..._used_prop
+    \__slauth_munge_authors:N #1
+    % create author block
+    \__slauth_block_au:n {#2}
+    % add contact info
+    \__slauth_block_af:n {#3}
+    \__slauth_block_em:n {#4}
+    \__slauth_block_th:n {#5}
     % create footer, if needed
     \__slauth_create_foot:
     % Delete unneeded data
-    \seq_gclear:N #1
-    \prop_gclear:N #2
+    \seq_gclear:N #2
     \prop_gclear:N #3
     \prop_gclear:N #4
+    \prop_gclear:N #5
   \group_end:
 }
 %================================================================================

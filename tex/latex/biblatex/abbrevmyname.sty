@@ -3,64 +3,25 @@
 %%
 %%  Put \myname{Smith} in your preamble.
 %%
-%% Requires packages: biblatex, xstring
+%% Requires packages: biblatex, highlightmyname, expl3, xparse
 %%
 %%
 %% See https://tex.stackexchange.com/a/73246/147422
+%%
+%% History: 2018/05/13 v1.0      abbreviate a specific name (SL)
+%%          2019/09/10 v2.0      using expl3 (SL)
 %================================================================================
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{abbrevmyname}[2018/5/13 abbreviate a specific name (SL)]
-%--------------------------------------------------------------------------------
-\@ifpackageloaded{biblatex}{}{\PackageWarning{abbrevmyname}{This package requires biblatex}}
 %================================================================================
-\RequirePackage{xstring}
-\makeatletter
+\RequirePackage{highlightmyname}
 %--------------------------------------------------------------------------------
-\providecommand{\highlightname}{}
-\providecommand{\myname}[1]{\renewcommand{\highlightname}{#1}}
-\providebibmacro{ifhighlightname}[3]{\IfSubStr{#1}{\highlightname}{#2}{#3}}%
-%--------------------------------------------------------------------------------
-\letcs{\old@abx@labelname}{abx@nfd@*@labelname}
-\DeclareNameFormat{labelname}{%
-  \usebibmacro{ifhighlightname}{\namepartgiven\namepartprefix\namepartfamily\namepartsuffix}%
-    {\usebibmacro{name:family}%
-        {\namepartgiveni\namepartprefixi\namepartfamilyi\namepartsuffixi}%
-        {\namepartgiveni}%
-        {\relax}%
-        {\namepartsuffixi}
-     \usebibmacro{name:andothers}}%
-    {\old@abx@labelname}
-}%
-%--------------------------------------------------------------------------------
-%\DeclareNameFormat{labelname}{%
-%  \ifcase\value{uniquename}%
-%    \usebibmacro{name:family}
-%      {\namepartfamily}
-%      {\namepartgiven}
-%      {\namepartprefix}
-%      {\namepartsuffix}%
-%  \or
-%    \ifuseprefix
-%      {\usebibmacro{name:given-family}
-%        {\namepartfamily}
-%        {\namepartgiveni}
-%        {\namepartprefix}
-%        {\namepartsuffixi}}
-%      {\usebibmacro{name:given-family}
-%        {\namepartfamily}
-%        {\namepartgiveni}
-%        {\namepartprefixi}
-%        {\namepartsuffixi}}%
-%  \or
-%    \usebibmacro{name:given-family}
-%      {\namepartfamily}
-%      {\namepartgiven}
-%      {\namepartprefix}
-%      {\namepartsuffix}%
-%  \fi
-%  \usebibmacro{name:andothers}
-%}%
-%================================================================================
-\makeatother
+\renewbibmacro {highlightname:cite} {%
+  \usebibmacro{name:family}%
+      {\namepartgiveni\namepartprefixi\namepartfamilyi\namepartsuffixi}%
+      {\namepartgiveni}%
+      {\relax}%
+      {\namepartsuffixi}%
+  }
 %================================================================================
 \endinput

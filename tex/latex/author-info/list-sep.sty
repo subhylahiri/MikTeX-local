@@ -1,0 +1,283 @@
+% -*- TeX -*- -*- STY -*- -*- LaTeX3 -*-
+%--------------------------------------------------------------------------------
+%     Processing lists, adding punctuation, ...
+%
+% You'll either need to \DeclareInstance or \UseTemplate, followed by a
+% \EditInstance { length = ... }
+% Or, inside template code where the instance comes from a kay:
+%   \listsep_edit_length:Nn \<template cs> {<new-length>}
+%
+% Before loop:  \int_zero:N <int-var>
+%               \UseInstance ... {<tl-var>} {<int-var>}
+% This sets up <int-var> as a countdown timer, and appends any prefix to <tl-var>
+% In loop:      \UseInstance ... {<tl-var>} {<int-var>}
+% This decrements the counter and appends punctuation to <tl-var>
+%
+\RequirePackage{expl3}
+\ProvidesExplPackage {list-sep} {2019/09/22} {v0.1} {automatic list separators}
+\RequirePackage{xtemplate}
+\RequirePackage{xparse}
+%================================================================================
+% Interface
+%================================================================================
+\DeclareObjectType { punctuator } {2} % return tl-var, countdown int-var
+%================================================================================
+\DeclareTemplateInterface { punctuator } { in-sentence } {2}
+  {
+    prefix          : tokenlist = {} ,
+    pair            : tokenlist = {} ,
+    antepenultimate : tokenlist = {} ,
+    penultimate     : tokenlist = {} ,
+    ultimate        : tokenlist = {} ,
+    append          : boolean = true ,
+    global          : boolean = false ,
+    length          : integer ,
+  }
+\DeclareTemplateInterface { punctuator } { agrammatical } {2}
+  {
+    prefix      : tokenlist = {} ,
+    separator   : tokenlist = {} ,
+    final       : tokenlist = {} ,
+    append      : boolean = true ,
+    global      : boolean = false ,
+    length      : integer ,
+  }
+%================================================================================
+\tl_new:N \l__listsep_scratch_tl
+\tl_new:N \l__listsep_insent_prf_tl
+\tl_new:N \l__listsep_insent_pr_tl
+\tl_new:N \l__listsep_insent_ap_tl
+\tl_new:N \l__listsep_insent_pu_tl
+\tl_new:N \l__listsep_insent_ul_tl
+\bool_new:N \l__listsep_insent_app_bool
+\bool_new:N \l__listsep_insent_glb_bool
+\int_new:N \l__listsep_insent_len_int
+
+\DeclareTemplateCode  { punctuator } { in-sentence } {2}
+  {
+    prefix          = \l__listsep_insent_prf_tl ,
+    pair            = \l__listsep_insent_pr_tl ,
+    antepenultimate = \l__listsep_insent_ap_tl ,
+    penultimate     = \l__listsep_insent_pu_tl ,
+    ultimate        = \l__listsep_insent_ul_tl ,
+    append          = \l__listsep_insent_app_bool ,
+    global          = \l__listsep_insent_glb_bool ,
+    length          = \l__listsep_insent_len_int ,
+  }
+{
+  \group_begin:
+    \AssignTemplateKeys
+    \int_gset:Nn \g_tmpa_int { #2 - 1 }
+    \bool_gset:Nn \g_tmpa_bool \l__listsep_insent_app_bool
+    \int_compare:nNnTF { \l__listsep_insent_len_int } > {0}
+      {
+        \int_case:nnF {#2}
+          {
+            {0} {
+                  \tl_gset_eq:NN \g_tmpa_tl \l__listsep_insent_prf_tl
+                  \int_gset_eq:NN \g_tmpa_int \l__listsep_insent_len_int
+                }
+            {1} { \tl_gset_eq:NN \g_tmpa_tl \l__listsep_insent_ul_tl }
+            {2} {
+                  \int_compare:nNnTF { \l__listsep_insent_len_int } = {2}
+                    { \tl_gset_eq:NN \g_tmpa_tl \l__listsep_insent_pr_tl }
+                    { \tl_gset_eq:NN \g_tmpa_tl \l__listsep_insent_pu_tl }
+                }
+          }
+          { \tl_gset_eq:NN \g_tmpa_tl \l__listsep_insent_ap_tl }
+      }
+      {
+        \tl_gclear:N \g_tmpa_tl
+        \int_gzero:N \g_tmpa_int
+      }
+  \group_end:
+  \bool_if:NTF \g_tmpa_bool
+    { \tl_put_right:NV #1 \g_tmpa_tl }
+    { \tl_set_eq:NN #1 \g_tmpa_tl }
+  \int_set_eq:NN #2 \g_tmpa_int
+  \tl_gclear:N \g_tmpa_tl
+}
+%--------------------------------------------------------------------------------
+\tl_new:N \l__listsep_agram_prf_tl
+\tl_new:N \l__listsep_agram_sep_tl
+\tl_new:N \l__listsep_agram_end_tl
+\bool_new:N \l__listsep_agram_app_bool
+\bool_new:N \l__listsep_agram_glb_bool
+\int_new:N \l__listsep_agram_len_int
+
+\DeclareTemplateCode  { punctuator } { agrammatical } {2}
+  {
+    prefix      = \l__listsep_agram_prf_tl ,
+    separator   = \l__listsep_agram_sep_tl ,
+    final       = \l__listsep_agram_end_tl ,
+    append      = \l__listsep_agram_app_bool ,
+    global      = \l__listsep_agram_glb_bool ,
+    length      = \l__listsep_agram_len_int ,
+  }
+{
+  \group_begin:
+    \AssignTemplateKeys
+    \int_gset:Nn \g_tmpa_int { #2 - 1 }
+    \bool_gset_eq:NN \g_tmpa_bool \l__listsep_agram_app_bool
+    \int_compare:nNnTF { \l__listsep_agram_len_int } > {0}
+      {
+        \int_case:nnF {#2}
+          {
+            {0} {
+                  \tl_gset_eq:NN \g_tmpa_tl \l__listsep_agram_prf_tl
+                  \int_gset_eq:NN \g_tmpa_int \l__listsep_agram_len_int
+                }
+            {1} { \tl_gset_eq:NN \g_tmpa_tl \l__listsep_agram_end_tl }
+          }
+          { \tl_gset_eq:NN \g_tmpa_tl \l__listsep_agram_sep_tl }
+      }
+      {
+        \tl_gclear:N \g_tmpa_tl
+        \int_gzero:N \g_tmpa_int
+      }
+  \group_end:
+  \bool_if:NTF \g_tmpa_bool
+    { \tl_put_right:NV #1 \g_tmpa_tl }
+    { \tl_set_eq:NN #1 \g_tmpa_tl }
+  \int_set_eq:NN #2 \g_tmpa_int
+  \tl_gclear:N \g_tmpa_tl
+}
+
+%================================================================================
+\DeclareRestrictedTemplate { punctuator } { in-sentence } { mid-sentence }
+  {
+    ultimate    = {} ,
+  }
+\DeclareRestrictedTemplate { punctuator } { agrammatical } { non-sentence }
+  {
+    final   = \KeyValue { separator } ,
+  }
+%--------------------------------------------------------------------------------
+\DeclareRestrictedTemplate { punctuator } { in-sentence } { oxford-comma }
+  {
+    pair            = {~and~} ,
+    antepenultimate = {,~} ,
+    penultimate     = {,~and~} ,
+    ultimate        = {.} ,
+  }
+\DeclareRestrictedTemplate { punctuator } { in-sentence } { cambridge-comma }
+  {
+    pair            = {~and~} ,
+    antepenultimate = {,~} ,
+    penultimate     = {~and~} ,
+    ultimate        = {.} ,
+  }
+%    ...............................................................
+\DeclareRestrictedTemplate { punctuator } { mid-sentence } { oxford-comma-mid }
+  {
+    pair            = {~and~} ,
+    antepenultimate = {,~} ,
+    penultimate     = {,~and~} ,
+  }
+\DeclareRestrictedTemplate { punctuator } { mid-sentence } { cambridge-comma-mid }
+  {
+    pair            = {~and~} ,
+    antepenultimate = {,~} ,
+    penultimate     = {~and~} ,
+  }
+%    ...............................................................
+\DeclareRestrictedTemplate { punctuator } { agrammatical } { all-comma }
+  {
+    separator = {,~} ,
+    final     = {.} ,
+  }
+\DeclareRestrictedTemplate { punctuator } { agrammatical } { semicolon }
+  {
+    separator = {;~} ,
+    final     = {.} ,
+  }
+%    ...............................................................
+\DeclareRestrictedTemplate { punctuator } { non-sentence } { all-comma-mid }
+  {
+    separator = {,~} ,
+  }
+\DeclareRestrictedTemplate { punctuator } { non-sentence } { semicolon-mid }
+  {
+    separator = {;~} ,
+  }
+%================================================================================
+
+% Get name of instance from template variable (function)
+% #1: function created by template key of type instance{}
+%
+\cs_new:Nn \__listsep_instance_name:N
+  { \tl_item:Nn #1 {-1} }
+
+% Change the length parameter of instance from template variable (function)
+% #1: function created by template key of type instance{}
+% #2: new value for length
+%
+\cs_new_protected:Nn \listsep_edit_length:Nn
+{
+  \exp_args:Nnx \EditInstance { punctuator } { \__listsep_instance_name:N #1 }
+    { length = #2 }
+}
+\cs_generate_variant:Nn \listsep_edit_length:Nn { Nx }
+%--------------------------------------------------------------------------------
+
+% Setup instance from template variable (function), counter and output
+% #1: function created by template key of type instance{}
+% #2: output, tl-var
+% #3: countdown, int-var
+% #4: integer expression for length
+%
+\cs_new_protected:Nn \listsep_setup:NNNn
+{
+  \listsep_edit_length:Nx #1 { \int_eval:n {#4} }
+  \int_zero:N #3
+  #1 {#2} {#3}
+}
+%--------------------------------------------------------------------------------
+
+\cs_new_protected:Nn \__listsep_output:nn
+{
+  \IfNoValueTF {#1}
+    { #2 }
+    { \tl_put_right:Nn #1 {#2} }
+}
+\cs_new_protected:Nn \__listsep_goutput:nn
+{
+  \IfNoValueTF {#1}
+    { #2 }
+    { \tl_gput_right:Nn #1 {#2} }
+}
+\cs_generate_variant:Nn \__listsep_output:nn { nV }
+\cs_generate_variant:Nn \__listsep_goutput:nn { nV }
+%--------------------------------------------------------------------------------
+% Set up a punctuator
+% #1: name of instance
+% #2: name of (restricted) template
+% #3: int-var countdown
+% #4: length of list
+% #5: tl-var to append to (output if absent)
+%
+\DeclareDocumentCommand \LoopPunct { O{ loop-punct } D<>{ oxford-comma } m m o }
+{
+  \IfInstanceExistTF { punctuator } {#1}
+    { \EditInstance { punctuator } {#1} { length = {#4} } }
+    { \DeclareInstance { punctuator } {#1} {#2} { length = {#4} } }
+  \int_zero:N #3
+  \tl_clear:N \l__listsep_scratch_tl
+  \UseInstance { punctuator } {#1} {\l__listsep_scratch_tl} {#3}
+  \__listsep_output:nV {#5} \l__listsep_scratch_tl
+}
+
+% #1: name of instance (of punctuator)
+% #2: int-var countdown
+% #3: tl-var to append to (output if absent)
+%
+\DeclareDocumentCommand \UseLoopPunct { O{ loop-punct } m o }
+{
+  \tl_clear:N \l__listsep_scratch_tl
+  \UseInstance { punctuator } {#1} { \l__listsep_scratch_tl } {#2}
+  \__listsep_output:nV {#3} \l__listsep_scratch_tl
+}
+
+
+%================================================================================
+\endinput

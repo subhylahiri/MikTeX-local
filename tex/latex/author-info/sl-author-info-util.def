@@ -15,7 +15,7 @@
 % #1: Label
 %
 \cs_new:Nn \slauth_left_super:n
-  { {}\textsuperscript { \hbox_overlap_left:n {#1} } }
+  { \mbox{} \hbox_overlap_left:n { {}\textsuperscript{#1} } }
 %--------------------------------------------------------------------------------
 % To create a token list { func{arg} }, where func & maybe arg are stored in tl-vars
 

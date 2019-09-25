@@ -8,10 +8,10 @@
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}
-%\RequirePackage{xparse}
 %\RequirePackage{xtemplate}
 %\RequirePackage{titling}
 %\RequirePackage{process-name}
+%\RequirePackage{list-sep}
 %================================================================================
 % hooks for format, content, format
 \tl_new:N \g__slauth_auth_pre_tl
@@ -25,10 +25,6 @@
 %================================================================================
 % Author list variables (auls)
 \seq_new:N \l__slauth_auls_seq
-\tl_new:N \l__slauth_auls_sep_pr_tl
-\tl_new:N \l__slauth_auls_sep_ap_tl
-\tl_new:N \l__slauth_auls_sep_pu_tl
-\tl_new:N \l__slauth_auls_sep_ul_tl
 \tl_new:N \l__slauth_auls_sorter_tl
 \tl_new:N \l__slauth_auls_individual_tl
 \tl_new:N \l__slauth_auls_style_pre_tl
@@ -40,18 +36,15 @@
 % The list was compiled elsewhere, it is a sequence of property lists.
 % Each property list has (some of) the keys:
 %   token-lists: given, family, refix, suffix
-%   sequences: affil, email, thanks
+%   sequences: affiliation, email, thanks
 %
 \DeclareTemplateCode { people } { author-list } {1}
   {
     style-pre           = \l__slauth_auls_style_pre_tl ,
     style-post          = \l__slauth_auls_style_post_tl ,
-    sep-pair            = \l__slauth_auls_sep_pr_tl ,
-    sep-antepenultimate = \l__slauth_auls_sep_ap_tl ,
-    sep-penultimate     = \l__slauth_auls_sep_pu_tl ,
-    sep-ultimate        = \l__slauth_auls_sep_ul_tl ,
     before-skip         = \l__slauth_auls_pr_skip ,
     after-skip          = \l__slauth_auls_po_skip ,
+    punctuation         = \__slauth_auls_punct:nn ,
     sorter              = \__slauth_auls_sorter:nn ,
     individual          = \__slauth_auls_individual:nn ,
   }
@@ -59,20 +52,17 @@
   \group_begin:
     \AssignTemplateKeys
     \seq_set_eq:NN \l__slauth_auls_seq #1
-    \int_set:Nn \l_tmpa_int { \seq_count:N \l__slauth_auls_seq }
-    \procname_sep_seq:NVVVVV \l_tmpa_seq \l_tmpa_int
-      \l__slauth_auls_sep_pr_tl \l__slauth_auls_sep_ap_tl
-      \l__slauth_auls_sep_pu_tl \l__slauth_auls_sep_ul_tl
+    \listsep_setup:NNNn \__slauth_auls_punct:nn \l_tmpa_tl \l_tmpa_int
+      { \seq_count:N \l__slauth_auls_seq }
 
     \procname_sort_seq:NN \l__slauth_auls_seq \__slauth_auls_sorter:nn
 
     % using prop-list as token-list variable?
     \seq_map_variable:NNn \l__slauth_auls_seq \l_tmpa_prop
       {
-        \tl_set:Nx \l_tmpa_tl
-          { \procname_sep_choose:NV \l_tmpa_seq \l_tmpa_int }
+        \tl_clear:N \l_tmpa_tl
+        \__slauth_auls_punct:nn { \l_tmpa_tl } { \l_tmpa_int }
         \__slauth_auls_individual:nn { \l_tmpa_prop } { \l_tmpa_tl }
-        \int_decr:N \l_tmpa_int
       }
 
     \__slauth_outer_hooks:VVVVn \l__slauth_auls_pr_skip \l__slauth_auls_po_skip
@@ -109,67 +99,64 @@
 %================================================================================
 % Insert all tags of a given type
 % #1: tl-var to append to
-% #2: seq-var of tag labels
-% #3: function to apply to labels
+% #2: punctuator
+% #3: counter, int-var
+% #4: seq-var of tag labels
+% #5: function to apply to labels
 %
-\cs_new_protected:Nn \__slauth_autag_type:NNN
+\cs_new_protected:Nn \__slauth_autag_type:NNNNN
 {
-  \int_set:Nn \l_tmpb_int { \seq_count:N #2 }
-  \seq_map_inline:Nn #2
+  \seq_map_inline:Nn #4
     {
-      \slauth_expand_func_arg:NNn #1 #3 {##1}
-      \int_compare:nNnT { \l_tmpb_int } > { 1 }
-        { \tl_put_right:NV #1 \l__slauth_autag_sep_tl }
-      \int_decr:N \l_tmpb_int
+      \slauth_expand_func_arg:NNn #1 #5 {##1}
+      #2 {#1} {#3}
     }
 }
 %--------------------------------------------------------------------------------
-\tl_new:N \l__slauth_autag_sep_tl
-\tl_new:N \l__slauth_autag_pre_tl
-\tl_new:N \l__slauth_autag_post_tl
+\seq_new:N \l__slauth_autag_af_seq
+\seq_new:N \l__slauth_autag_em_seq
+\seq_new:N \l__slauth_autag_th_seq
 
 \DeclareTemplateCode { person-info } { author-tags } {2}
   {
-    tags        = \__slauth_autag_outer:n ,
-    affil-tag   = \__slauth_autag_affil:n ,
-    email-tag   = \__slauth_autag_email:n ,
-    thanks-tag  = \__slauth_autag_thanks:n ,
-    tag-sep     = \l__slauth_autag_sep_tl ,
-    pre-tags    = \l__slauth_autag_pre_tl ,
-    post-tags   = \l__slauth_autag_post_tl ,
+    tags            = \__slauth_autag_outer:n ,
+    affiliation-tag = \__slauth_autag_af:n ,
+    email-tag       = \__slauth_autag_em:n ,
+    thanks-tag      = \__slauth_autag_th:n ,
+    punctuation     = \__slauth_autag_punct:nn ,
   }
 {
   \group_begin:
     \AssignTemplateKeys
     \tl_clear:N \l_tmpa_tl
     \tl_gclear:N \g_tmpa_tl
-    \tl_set_eq:NN \l_tmpb_tl \l__slauth_autag_pre_tl
+    \int_zero:N \l_tmpa_int
 
-    \prop_get:NnNT #2 { affil } \l_tmpa_seq
-      {
-        \tl_put_right:NV \l_tmpa_tl \l_tmpb_tl
-        \__slauth_autag_type:NNN \l_tmpa_tl \l_tmpa_seq \__slauth_autag_affil:n
-        \tl_set_eq:NN \l_tmpb_tl \l__slauth_autag_sep_tl
-      }
+    \prop_get:NnNTF #2 { affiliation } \l__slauth_autag_af_seq
+      { \int_add:Nn \l_tmpa_int { \seq_count:N \l__slauth_autag_af_seq } }
+      { \seq_clear:N \l__slauth_autag_af_seq }
 
-    \prop_get:NnNT #2 { email } \l_tmpa_seq
-      {
-        \tl_put_right:NV \l_tmpa_tl \l_tmpb_tl
-        \__slauth_autag_type:NNN \l_tmpa_tl \l_tmpa_seq \__slauth_autag_email:n
-        \tl_set_eq:NN \l_tmpb_tl \l__slauth_autag_sep_tl
-      }
+    \prop_get:NnNT #2 { email } \l__slauth_autag_em_seq
+      { \int_add:Nn \l_tmpa_int { \seq_count:N \l__slauth_autag_em_seq } }
+      { \seq_clear:N \l__slauth_autag_em_seq }
 
-    \prop_get:NnNT #2 { thanks } \l_tmpa_seq
-      {
-        \tl_put_right:NV \l_tmpa_tl \l_tmpb_tl
-        \__slauth_autag_type:NNN \l_tmpa_tl \l_tmpa_seq \__slauth_autag_thanks:n
-      }
+    \prop_get:NnNT #2 { thanks } \l__slauth_autag_th_seq
+      { \int_add:Nn \l_tmpa_int { \seq_count:N \l__slauth_autag_th_seq } }
+      { \seq_clear:N \l__slauth_autag_th_seq }
+
+    \listsep_setup:NNNn \__slauth_autag_punct:nn \l_tmpa_tl \l_tmpa_int { \l_tmpa_int }
+    \__slauth_autag_type:NNNNN
+      \l_tmpa_tl \__slauth_autag_punct:nn \l_tmpa_int
+      \l__slauth_autag_af_seq \__slauth_autag_af:n
+    \__slauth_autag_type:NNNNN
+      \l_tmpa_tl \__slauth_autag_punct:nn \l_tmpa_int
+      \l__slauth_autag_em_seq \__slauth_autag_em:n
+    \__slauth_autag_type:NNNNN
+      \l_tmpa_tl \__slauth_autag_punct:nn \l_tmpa_int
+      \l__slauth_autag_th_seq \__slauth_autag_th:n
 
     \tl_if_blank:VF \l_tmpa_tl
-      {
-        \tl_put_right:NV \l_tmpa_tl \l__slauth_autag_post_tl
-        \slauth_gexpand_func_arg:NNV \g_tmpa_tl \__slauth_autag_outer:n \l_tmpa_tl
-      }
+      { \slauth_gexpand_func_arg:NNV \g_tmpa_tl \__slauth_autag_outer:n \l_tmpa_tl }
   \group_end:
   % set the output variable then erase global changes
   \tl_put_right:NV #1 \g_tmpa_tl

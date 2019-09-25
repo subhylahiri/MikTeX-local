@@ -11,8 +11,8 @@
 %%          \affiliation[key]{My University}
 %%
 %% You can pair authors with affiliations, emails, other annotations like this:
-%%          \author[affil=key,email=alice@university,thanks=first]{Alice Smith}
-%%          \author[affil={key,key2},thanks=first]{Bob Jones}
+%%          \author[affiliation=key,email=alice@university,thanks=first]{Alice Smith}
+%%          \author[affiliation={key,key2},thanks=first]{Bob Jones}
 %%
 %% with other annotations defined by:
 %%          \thanks[first]{Equal contribution.}
@@ -37,6 +37,7 @@
 %\RequirePackage{l3keys2e}
 \RequirePackage{titling}
 \RequirePackage{process-name}
+\RequirePackage{list-sep}
 
 \newcommand{\noop}[1]{#1}
 %================================================================================
@@ -48,21 +49,18 @@
 \DeclareObjectType { people-info } {1}    % prop-list of defns used
 \DeclareObjectType { person-info } {2}    % output tl-var, input prop-list
 \DeclareObjectType { people-subinfo } {3} % label, parent, info
-\DeclareObjectType { people-block } {4}   % lists of authors, affiliations, emails, thanks
+\DeclareObjectType { people-block } {5}   % lists of authors(unmunged,munged), affiliations, emails, thanks
 %================================================================================
 
 \DeclareTemplateInterface { people } { author-list } {1}
   {
-    style-pre           : tokenlist = \centering\large ,
-    style-post          : tokenlist = \par ,
-    sep-pair            : tokenlist = {~and~} ,
-    sep-antepenultimate : tokenlist = {,~} ,
-    sep-penultimate     : tokenlist = {,~and~} ,
-    sep-ultimate        : tokenlist = {} ,
-    before-skip         : skip = 5pt ,
-    after-skip          : skip = 5pt ,
-    sorter              : instance { sorter } ,
-    individual          : instance { person } ,
+    style-pre   : tokenlist = \centering\large ,
+    style-post  : tokenlist = \par ,
+    before-skip : skip = 5pt ,
+    after-skip  : skip = 5pt ,
+    punctuation : instance { punctuator } ,
+    sorter      : instance { sorter } ,
+    individual  : instance { person } ,
   }
 
 \DeclareTemplateInterface { person } { author } {2}
@@ -74,13 +72,11 @@
 % Replaces '&' with the tags
 \DeclareTemplateInterface { person-info } { author-tags } {2}
   {
-    tags        : function{1} = \textsuperscript{#1} ,
-    affil-tag   : function{1} = \ref{#1} ,
-    email-tag   : function{1} = \ref{#1} ,
-    thanks-tag  : function{1} = \ref{#1} ,
-    tag-sep     : tokenlist   = {} ,
-    pre-tags    : tokenlist   = {} ,
-    post-tags   : tokenlist   = {} ,
+    tags            : function{1} = \textsuperscript{#1} ,
+    affiliation-tag : function{1} = \ref{#1} ,
+    email-tag       : function{1} = \ref{#1} ,
+    thanks-tag      : function{1} = \ref{#1} ,
+    punctuation     : instance { punctuator } ,
   }
 
 \DeclareTemplateInterface { people-info } { contact-list } {1}
@@ -95,16 +91,12 @@
     tags-post   : tokenlist = {} ,
     before-skip : skip = 5pt ,
     after-skip  : skip = 5pt ,
-    sep                 : tokenlist = {,~} ,
-    sep-pair            : tokenlist = \KeyValue { sep } ,
-    sep-antepenultimate : tokenlist = \KeyValue { sep } ,
-    sep-penultimate     : tokenlist = \KeyValue { sep } ,
-    sep-ultimate        : tokenlist = {.} ,
-    location  : choice { pretitle, posttitle, preauthor, postauthor,
-                         predate, postdate, foot } ,
+    punctuation : instance { punctuator } ,
+    location    : choice { pretitle, posttitle, preauthor, postauthor,
+                           predate, postdate, foot } ,
   }
 
-\DeclareTemplateInterface { people-block } { author-block } {4}
+\DeclareTemplateInterface { people-block } { author-block } {5}
   {
     authors         : instance { people } ,
     affiliations    : instance { people-info } ,
@@ -115,12 +107,12 @@
 %================================================================================
 % Implementation in sub-packages
 %--------------------------------------------------------------------------------
-% Holding place for authors, until we've noted all affils etc.
+% Holding place for authors, until we've noted all affiliations etc.
 \seq_new:N \g__slauth_au_wait_seq
 % munged list
 \seq_new:N \g__slauth_author_seq
 % which bits of contact info have been used?
-\prop_new:N \g__slauth_affil_used_prop
+\prop_new:N \g__slauth_affiliation_used_prop
 \prop_new:N \g__slauth_email_used_prop
 \prop_new:N \g__slauth_thanks_used_prop
 % Hook for footnote additions
@@ -140,25 +132,66 @@
 %================================================================================
 
 % Tagger will replace '&' with the tags
+\DeclareInstance { punctuator } { tagged-authors-ox } { in-sentence }
+  {
+    pair            = {&~and~} ,
+    antepenultimate = {\hbox_overlap_right:n{,}&~} ,
+    penultimate     = {\hbox_overlap_right:n{,}&~and~} ,
+    ultimate        = {&} ,
+    append          = false ,
+  }
+
+\DeclareInstance { punctuator } { tagged-authors-noox } { in-sentence }
+  {
+    pair            = {&~and~} ,
+    antepenultimate = {\hbox_overlap_right:n{,}&~} ,
+    penultimate     = {&~and~} ,
+    ultimate        = {&} ,
+    append          = false ,
+  }
+
+\DeclareInstance { punctuator } { newlines } { agrammatical }
+  {
+    separator = \par ,
+    final     = {} ,
+    append    = true ,
+  }
+
+\DeclareInstance { punctuator } { all-comma } { all-comma }
+  {
+    append  = true ,
+  }
+
+\DeclareInstance { punctuator } { none } { agrammatical }
+  {
+    separator = {} ,
+    final     = {} ,
+    append    = true ,
+  }
+
+\DeclareInstance { punctuator } { paren-comma } { agrammatical }
+  {
+    prefix      = {(} ,
+    separator   = {,} ,
+    final       = {)} ,
+    append      = true ,
+  }
+%--------------------------------------------------------------------------------
+
 \DeclareInstance { people } { tagged-authors-ox } { author-list }
   {
-    sep-pair            = {&~and~} ,
-    sep-antepenultimate = {\hbox_overlap_right:n{,}&~} ,
-    sep-penultimate     = {\hbox_overlap_right:n{,}&~and~} ,
-    sep-ultimate        = {&} ,
-    sorter              = no-sort ,
-    individual          = tagged-author-long ,
+    punctuation = tagged-authors-ox ,
+    sorter      = no-sort ,
+    individual  = tagged-author-long ,
   }
 
 \DeclareInstance { people } { tagged-authors-noox } { author-list }
   {
-    sep-pair            = {&~and~} ,
-    sep-antepenultimate = {\hbox_overlap_right:n{,}&~} ,
-    sep-penultimate     = {&~and~} ,
-    sep-ultimate        = {&} ,
-    sorter              = no-sort ,
-    individual          = tagged-author-long ,
+    punctuation = tagged-authors-ox ,
+    sorter      = no-sort ,
+    individual  = tagged-author-long ,
   }
+%--------------------------------------------------------------------------------
 
 \DeclareInstance { person } { tagged-author-long } { author }
   {
@@ -168,19 +201,19 @@
 
 \DeclareInstance { person-info } { author-tags-nolink } { author-tags }
   {
-    affil-tag   = \ref*{#1} ,
-    email-tag   = \ref*{#1} ,
-    thanks-tag  = \ref*{#1} ,
+    affiliation-tag = \ref*{#1} ,
+    email-tag       = \ref*{#1} ,
+    thanks-tag      = \ref*{#1} ,
+    punctuation     = none ,
   }
 
 \DeclareInstance { people-info } { affiliations } { contact-list }
   {
-    type        = affil ,
+    type        = affiliation ,
     style-pre   = \centering\itshape ,
     tags        = \slauth_left_super:n{#1} ,
     numbering   = \arabic{#1} ,
-    sep         = \par ,
-    sep-ultimate = {} ,
+    punctuation = newlines ,
     location    = postauthor ,
     before-skip = 0pt ,
     after-skip  = 0.1em ,
@@ -188,11 +221,12 @@
 
 \DeclareInstance { people-info } { emails } { contact-list }
   {
-    type      = email ,
-    style-pre = \centering\ttfamily ,
-    prefix    = \textrm{Email:}\hspace{1em} ,
-    numbering = \alph{#1} ,
-    location  = predate ,
+    type        = email ,
+    style-pre   = \centering\ttfamily ,
+    prefix      = \textrm{Email:}\hspace{1em} ,
+    numbering   = \alph{#1} ,
+    location    = predate ,
+    punctuation = all-comma ,
     before-skip = 0.5em ,
     after-skip  = 0pt ,
   }
@@ -203,11 +237,11 @@
     tags        = \slauth_left_super:n{#1} ,
     numbering   = \fnsymbol{#1} ,
     location    = foot ,
-    sep         = \par ,
-    sep-ultimate = {} ,
+    punctuation = newlines ,
     before-skip = 0pt ,
     after-skip  = 0pt ,
   }
+%--------------------------------------------------------------------------------
 
 \DeclareInstance { people-block } { basic-ox } { author-block }
   {
@@ -244,13 +278,13 @@
   { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {#1} } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \affiliation { O{} m }
-  { \__slauth_affil_new:nn  {#2} {#1} }
+  { \__slauth_contact_new:nnn {#2} {#1} { affiliation } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \email { O{} m }
-  { \__slauth_email_new:nn  {#2} {#1} }
+  { \__slauth_contact_new:nnn {#2} {#1} { email } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \thanks { O{} m }
-  { \__slauth_thanks_new:nn  {#2} {#1} }
+  { \__slauth_contact_new:nnn {#2} {#1} { thanks } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \preprint { m }
 {
@@ -263,12 +297,11 @@
 }
 %================================================================================
 \AtBeginDocument {
-  % Munge authors from holding area -> \g__slauth_author_seq, \g__..._used_list_seq
-  \__slauth_munge_authors:N \g__slauth_au_wait_seq
   % Build the displayed lists
   \exp_args:NnV \UseInstance { people-block } \g_slauth_instance_tl
-    { \g__slauth_author_seq } { \g__slauth_affil_used_prop }
-    { \g__slauth_email_used_prop } { \g__slauth_thanks_used_prop  }
+    { \g__slauth_au_wait_seq } { \g__slauth_author_seq }
+    { \g__slauth_affiliation_used_prop } { \g__slauth_email_used_prop }
+    { \g__slauth_thanks_used_prop  }
 }
 %================================================================================
 \endinput

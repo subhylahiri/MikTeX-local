@@ -3,35 +3,19 @@
 %%
 %%  Put \myname{Smith} in your preamble.
 %%
-%% Requires packages: biblatex, xstring, xpatch
+%% Requires packages: biblatex, expl3, xparse, xpatch
 %%
 %%
 %% See https://tex.stackexchange.com/a/73246/147422
+%%
+%% History: 2018/05/13 v1.0      highlight a specific name (SL)
+%%          2019/09/10 v2.0      using expl3 (SL)
 %================================================================================
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{boldmyname}[2018/5/13 highlight a specific name (SL)]
-\makeatletter
-%--------------------------------------------------------------------------------
-\@ifpackageloaded{biblatex}{}{\PackageWarning{boldmyname}{This package requires biblatex}}
 %================================================================================
-\RequirePackage{xstring}
-\RequirePackage{xpatch}
+\RequirePackage{highlightmyname}
 %--------------------------------------------------------------------------------
-\providecommand{\highlightname}{}
-\providecommand{\myname}[1]{\renewcommand{\highlightname}{#1}}
-\newbibmacro{ifhighlightname}[3]{\IfSubStr{#1}{\highlightname}{#2}{#3}}
-\xapptobibmacro{name:hook}{\usebibmacro{ifhighlightname}{#1}{\bfseries}{}}
-  {}{\PackageWarning{boldmyname}{Failed to patch bibmacro name:hook!}}
-%--------------------------------------------------------------------------------
-\newcommand{\@boldmyname@patchname}[1]{%
-\xpretobibmacro{#1}{\begingroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro #1!}}
-\xapptobibmacro{#1}{\endgroup}{}{\PackageWarning{boldmyname}{Failed to patch bibmacro #1!}}
-}
-%--------------------------------------------------------------------------------
-\@boldmyname@patchname{name:family}
-\@boldmyname@patchname{name:given-family}
-\@boldmyname@patchname{name:family-given}
-%--------------------------------------------------------------------------------
+\renewbibmacro{highlightname:bib}{\bfseries}
 %================================================================================
-\makeatother
 \endinput

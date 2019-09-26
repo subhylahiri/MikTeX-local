@@ -1,3 +1,5 @@
+% -*- TeX -*- -*- STY -*- -*- LaTeX3 -*-
+%--------------------------------------------------------------------------------
 %%  Get numbers from labels.
 %%
 %% Requires packages: expl3, xparse, hyperref
@@ -23,6 +25,25 @@
 \ExplSyntaxOn
 %================================================================================
 
+\msg_new:nnnn { refnum } { bad-counter }
+  { Unknown~counter~'#1' }
+  { You~attempted~to~use~the~counter~'#1',~but~no~such~ounter~has~been~defined.
+    \\ Maybe~a~typo? }
+
+% Local version of \setcounter
+% #1: name of counter, token-list
+% #2: new value, int-expression
+%
+\cs_new_protected:Nn \refnum_defcounter:nn
+{
+  \cs_if_exist:cTF { c@#1 }
+    { \int_set:cn { c@#1 } {#2} }
+    { \msg_error:nnn { refnum } { bad-counter } {#1} }
+}
+\cs_generate_variant:Nn \refnum_defcounter:nn { nV, Vn, VV, xV }
+\cs_generate_variant:Nn \refnum_defcounter:nn { nx, xn, xx, Vx }
+
+%================================================================================
 
 % Get hyperdest info from hyperref label as a sequence
 % #1: seq-variable to store result
@@ -132,7 +153,8 @@
 
 %--------------------------------------------------------------------------------
 
-% Set counter value from hyperref label
+\tl_new:N \l__refnum_toc_tl
+% Set counter value from hyperref label, locally
 % #1: target counter, tok_list
 % #2: How many generations up from label? int
 % #3: tok_list containing label
@@ -141,9 +163,23 @@
 {
   \cs_if_exist:cTF{r@#3}
     {
+      \__refnum_get_counter:Nnn \l__refnum_toc_tl {#2} {#3}
+      \refnum_defcounter:nV {#1} \l__refnum_toc_tl
+    }
+    {} %no such label
+}
+% Set counter value from hyperref label
+% #1: target counter, tok_list
+% #2: How many generations up from label? int
+% #3: tok_list containing label
+%
+\cs_new_protected:Nn \__refnum_gto_counter:nnn
+{
+  \cs_if_exist:cTF{r@#3}
+    {
       \group_begin:
-        \__refnum_get_counter:Nnn \l_tmpb_tl {#2} {#3}
-        \setcounter {#1} { \l_tmpb_tl }
+        \__refnum_get_counter:Nnn \l__refnum_toc_tl {#2} {#3}
+        \setcounter {#1} { \l__refnum_toc_tl }
       \group_end:
     }
     {} %no such label
@@ -154,92 +190,7 @@
 % #3: tok_list containing label
 %
 \cs_generate_variant:Nn \__refnum_to_counter:nnn { Vnn }
-
-
-\seq_new:N \l__refnum_to_prev_seq
-\seq_new:N \l__refnum_to_newv_seq
-\seq_new:N \l__refnum_to_names_seq
-% Set a counter & parents, saving the previous values
-% #1: Storage for previous values, sequence-variable
-% #2: New values for counter, sequence-variable
-% #3: Names of counters, sequence-variable
-%
-\cs_new_protected:Nn \__refnum_to_counter_parents:NNN
-{
-  \group_begin:
-    \seq_set_eq:NN \l__refnum_to_newv_seq #2
-    \seq_set_eq:NN \l__refnum_to_names_seq #3
-    \seq_clear:N \l__refnum_to_prev_seq
-%
-    \seq_map_inline:Nn \l__refnum_to_newv_seq
-      {
-        \seq_pop_left:NN \l__refnum_to_names_seq \l_tmpa_tl
-        \tl_set:Nx \l_tmpb_tl { \arabic{\l_tmpa_tl} }
-        \seq_put_right:Nx \l__refnum_to_prev_seq { \l_tmpb_tl }
-        \exp_args:Nx \setcounter \l_tmpa_tl {##1}
-      }
-    \sltools_seq_uset:NN #1 \l__refnum_to_prev_seq
-  \group_end:
-}
-
-% Set a counter & parents, NOT saving the previous values
-% #1: New values for counter, sequence-variable
-% #2: Names of counters, sequence-variable
-%
-\cs_new_protected:Nn \__refnum_to_counter_parents:NN
-{
-  \group_begin:
-    \seq_set_eq:NN \l__refnum_to_names_seq #2
-    \seq_map_inline:Nn #1
-      {
-        \seq_pop_left:NN \l__refnum_to_names_seq \l_tmpa_tl
-        \exp_args:Nx \setcounter \l_tmpa_tl {##1}
-      }
-  \group_end:
-}
-
-\seq_new:N \l__refnum_asc_prev_seq
-\seq_new:N \l__refnum_asc_newv_seq
-\seq_new:N \l__refnum_asc_names_seq
-% Format counter using value from hyperref label, incl all ancestors
-% #1: tok_list-variable to store result
-% #2: counter to display as, tok_list
-% #3: How many generations up from label? int
-% #4: tok_list containing label
-%
-\cs_new_protected:Nn \__refnum_as_counter_parents:Nnnn
-{
-  \cs_if_exist:cTF{r@#4}
-    {
-      \group_begin:
-        \__refnum_get_seq:Nn \l__refnum_asc_newv_seq {#4}
-        \int_set:Nn \l_tmpb_int {#3}
-        \tl_set:Nn \l_tmpb_tl {#2}
-        \seq_clear:N \l__refnum_asc_prev_seq
-%
-        \seq_pop_left:NN \l__refnum_asc_newv_seq \l_tmpa_tl
-        \int_while_do:nNnn { \l_tmpb_int } > { 0 }
-          {
-            \seq_pop_right:NN \l__refnum_asc_newv_seq \l_tmpa_tl
-            \int_decr:N \l_tmpb_int
-          }
-        \int_set:Nn \l_tmpa_int { \seq_count:N \l__refnum_asc_newv_seq - 1 }
-%
-        \__refnum_lineage:NNN \l__refnum_asc_names_seq \l_tmpb_tl \l_tmpa_int
-%
-        \__refnum_to_counter_parents:NNN
-          \l__refnum_asc_prev_seq
-          \l__refnum_asc_newv_seq
-          \l__refnum_asc_names_seq
-        \sltools_tl_uset:Nx #1 { \use:c { the#2 } }
-        \__refnum_to_counter_parents:NN
-          \l__refnum_asc_prev_seq
-          \l__refnum_asc_names_seq
-      \group_end:
-    }
-    { \tl_clear_new:N #1 }  %no such label
-}
-\cs_generate_variant:Nn \__refnum_as_counter_parents:Nnnn { NV }
+\cs_generate_variant:Nn \__refnum_gto_counter:nnn { Vnn }
 
 \tl_new:N \l__refnum_asc_tl
 % Format counter using value from hyperref label
@@ -253,10 +204,8 @@
   \cs_if_exist:cTF{r@#4}
     {
       \group_begin:
-        \tl_set:Nx \l__refnum_asc_tl { \value{#2} }
         \__refnum_to_counter:nnn {#2} {#3} {#4}
         \sltools_tl_uset:Nx #1 { \use:c { the#2 } }
-        \setcounter {#2} { \l__refnum_asc_tl }
       \group_end:
     }
     { \tl_clear_new:N #1 }  %no such label
@@ -268,6 +217,106 @@
 % #4: tok_list containing label
 %
 \cs_generate_variant:Nn \__refnum_as_counter:Nnnn { NV }
+
+%--------------------------------------------------------------------------------
+
+% get counter value & names from hyperref label, incl all ancestors
+% #1: target counter, tok_list
+% #2: How many generations up from label? int
+% #3: tok_list containing label
+% #4: store new counter values, seq-var
+% #5: store target counter names, seq-var
+%
+\cs_new_protected:Nn \__refnum_to_counter_parents_aux:nnnNN
+{
+  \group_begin:
+    \__refnum_get_seq:Nn \l_tmpa_seq {#3}
+    \int_set:Nn \l_tmpb_int {#2}
+    \tl_set:Nn \l_tmpb_tl {#1}
+% counter values of ref: ..., gparent, parent, child
+    \seq_pop_left:NN \l_tmpa_seq \l_tmpa_tl
+    \int_while_do:nNnn { \l_tmpb_int } > { 0 }
+      {
+        \seq_pop_right:NN \l_tmpa_seq \l_tmpa_tl
+        \int_decr:N \l_tmpb_int
+      }
+% counter names of target: ..., gparent, parent, child
+    \int_set:Nn \l_tmpa_int { \seq_count:N \l_tmpa_seq - 1 }
+    \__refnum_lineage:NNN \l_tmpb_seq \l_tmpb_tl \l_tmpa_int
+    \sltools_tl_uset:NN #4 \l_tmpa_seq
+    \sltools_seq_uset:NN #5 \l_tmpb_seq
+  \group_end:
+}
+
+\seq_new:N \l__refnum_toc_newv_seq
+\seq_new:N \l__refnum_toc_names_seq
+% Set counter value from hyperref label, incl all ancestors
+% #1: target counter, tok_list
+% #2: How many generations up from label? int
+% #3: tok_list containing label
+%
+\cs_new_protected:Nn \__refnum_to_counter_parents:nnn
+{
+  \cs_if_exist:cTF{r@#3}
+    {
+      \__refnum_to_counter_parents_aux:nnnNN {#1} {#2} {#3}
+        \l__refnum_toc_newv_seq \l__refnum_toc_names_seq
+      % set counters locally
+      \seq_map_inline:Nn \l__refnum_toc_names_seq
+        {
+          \seq_pop_left:NN \l__refnum_toc_newv_seq \l_tmpa_tl
+          \refnum_defcounter:nV {##1} \l_tmpa_tl
+        }
+      \seq_clear:N \l__refnum_toc_newv_seq
+      \seq_clear:N \l__refnum_toc_names_seq
+    }
+    {} %no such label
+}
+
+% Set counter value from hyperref label, incl all ancestors
+% #1: target counter, tok_list
+% #2: How many generations up from label? int
+% #3: tok_list containing label
+%
+\cs_new_protected:Nn \__refnum_gto_counter_parents:nnn
+{
+  \cs_if_exist:cTF{r@#3}
+    {
+      \group_begin:
+        \__refnum_to_counter_parents_aux:nnnNN {#1} {#2} {#3}
+          \l__refnum_toc_newv_seq \l__refnum_toc_names_seq
+        % set counters globally
+        \seq_map_inline:Nn \l__refnum_toc_names_seq
+          {
+            \seq_pop_left:NN \l__refnum_toc_newv_seq \l_tmpa_tl
+            \setcounter {##1} { \l_tmpa_tl }
+          }
+      \group_end:
+    }
+    {} %no such label
+}
+\cs_generate_variant:Nn \__refnum_to_counter_parents:nnn { Vnn }
+\cs_generate_variant:Nn \__refnum_gto_counter_parents:nnn { Vnn }
+
+% Format counter using value from hyperref label, incl all ancestors
+% #1: tok_list-variable to store result
+% #2: counter to display as, tok_list
+% #3: How many generations up from label? int
+% #4: tok_list containing label
+%
+\cs_new_protected:Nn \__refnum_as_counter_parents:Nnnn
+{
+  \cs_if_exist:cTF{r@#4}
+    {
+      \group_begin:
+        \__refnum_to_counter_parents:nnn {#2} {#3} {#4}
+        \sltools_tl_uset:Nx #1 { \use:c { the#2 } }
+      \group_end:
+    }
+    { \tl_clear_new:N #1 }  %no such label
+}
+\cs_generate_variant:Nn \__refnum_as_counter_parents:Nnnn { NV }
+
 %--------------------------------------------------------------------------------
 % Get name from label if it has not been given
 % #1: tok_list-variable to store result
@@ -323,11 +372,11 @@
 \tl_new:N \l__refnum_tmpa_tl
 \tl_new:N \l__refnum_tmpb_tl
 
-% get counter name
-% #1 Exclaimed: Assign globally?
-% #2 Optional: How many generations up parent counters do we go?
-% #3: Mandatory argument: label to ref.
-% #4: Last optional argument assigned to.
+% Get counter name
+% #1: Exclaimed: Assign globally?
+% #2: Optional:  How many generations up parent counters do we go?
+% #3: Mandatory: Label to ref.
+% #4: Optional:  Assigned to.
 %
 \NewDocumentCommand \refcountname { t! O{0} m o }
 {
@@ -335,11 +384,11 @@
   \__refnum_output:Nnn \l__refnum_tmpa_tl {#4} {#1}
 }
 
-% get counter / parent counter value as string
-% #1 Exclaimed: Assign globally?
-% #2 Optional: How many generations up parent counters do we go?
-% #3 Mandatory: label to ref.
-% #4 Optional: assigned to.
+% Get counter / parent counter value as string
+% #1: Exclaimed: Assign globally?
+% #2: Optional:  How many generations up parent counters do we go?
+% #3: Mandatory: Label to ref.
+% #4: Optional:  Assigned to.
 %
 \NewDocumentCommand \refnum { t! O{0} m o }
 {
@@ -347,25 +396,37 @@
   \__refnum_output:Nnn \l__refnum_tmpa_tl {#4} {#1}
 }
 
-% assign ref counter to other counter
-% #1 Optional: How many generations up parent counters do we go?
-% #2 Optional: Counter type to change
-% #3 Mandatory: label to ref.
+% Assign ref counter to other counter
+% #1: Starred:   Also change parent counters?
+% #2: Exclaimed: Change counter globally?
+% #3: Optional:  How many generations up parent counters do we go?
+% #4: Optional:  Counter type to change
+% #5: Mandatory: Label to ref.
 %
-\NewDocumentCommand \reftocounter { O{0} d<> m }
+\NewDocumentCommand \reftocounter { s t! O{0} d<> m }
 {
   % If we haven't been given a counter name, get it from ref
-  \__refnum_default_counter:Nnnn \l__refnum_tmpa_tl {#2} {#1} {#3}
-  \__refnum_to_counter:Vnn \l__refnum_tmpa_tl {#1} {#3}
+  \__refnum_default_counter:Nnnn \l__refnum_tmpa_tl {#4} {#3} {#5}
+  \IfBooleanTF {#1}
+    {
+      \IfBooleanTF {#2}
+        { \__refnum_gto_counter_parents:Vnn \l__refnum_tmpa_tl {#3} {#5} }
+        { \__refnum_to_counter_parents:Vnn \l__refnum_tmpa_tl {#3} {#5} }
+    }
+    {
+      \IfBooleanTF {#2}
+        { \__refnum_gto_counter:Vnn \l__refnum_tmpa_tl {#3} {#5} }
+        { \__refnum_to_counter:Vnn \l__refnum_tmpa_tl {#3} {#5} }
+    }
 }
 
-% temporarily assign ref counter to other counter & display
-% #1 Starred: Suppress hyperlink?
+% Temporarily assign ref counter to other counter & display
+% #1 Starred:   Suppress hyperlink?
 % #2 Exclaimed: Assign globally?
-% #3 Optional: How many generations up parent counters do we go?
-% #4 Optional: Counter type to display as
-% #5 Mandatory: label to ref.
-% #6 Optional: assigned to.
+% #3 Optional:  How many generations up parent counters do we go?
+% #4 Optional:  Counter type to display as
+% #5 Mandatory: Label to ref.
+% #6 Optional:  Assigned to.
 %
 \NewDocumentCommand \asref { s t! O{0} d<> m o }
 {
@@ -376,10 +437,11 @@
   \__refnum_output:Nnn \l__refnum_tmpb_tl {#6} {#2}
 }
 
-% #1 Exclaimed: Assign globally?
-% #2 Optional: How many generations up parent counters do we go?
-% #3 Mandatory: Counter type.
-% #4 Optional: assigned to.
+% Parent/ancestor counter name
+% #1: Exclaimed: Assign globally?
+% #2: Optional:  How many generations up parent counters do we go?
+% #3: Mandatory: Counter type.
+% #4: Optional:  Assigned to.
 %
 \ProvideDocumentCommand \parentcounter { t! O{1} m o }
 {
@@ -407,7 +469,7 @@ The basic commands are:
 \refcountname(!)[(level)]{(label)}[(def-to)]    The ref counter type as a string.
 \refnum(!)[(level)]{(label)}[(def-to)]          The ref counter number as a string.
 \asref(*!)[(level)]<(type)>{(label)}[(def-to)]  The ref counter as displayed by \the(type).
-\reftocounter[(level)]<(type)>{(label)}         Assign ref counter to (type) counter.
+\reftocounter(*!)[(level)]<(type)>{(label)}      Assign ref counter to (type) counter.
 \parentcounter(!)[(level)]{(type)}[(def-to)]    Get parent counter of (type)
 
 (label)  The label we are referencing.
@@ -421,6 +483,7 @@ The basic commands are:
 [] and <> both denote optional arguments.
 The different delimiters allow the command to determine which one has been omitted.
 The starred version of \asref suppresses the hyperlink.
+The starred version of \reftocounter also changes parent counters.
 The exclaimed versions perform global assignments, by default assignments are local.
 
 Let's look at an example.

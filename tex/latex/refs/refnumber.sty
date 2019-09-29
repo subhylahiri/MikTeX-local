@@ -60,6 +60,30 @@
 \cs_generate_variant:Nn \refnum_defcounter:nn { nV, Vn, VV, xV }
 \cs_generate_variant:Nn \refnum_defcounter:nn { nx, xn, xx, Vx }
 
+% Global version of \setcounter
+% #1: name of counter, token-list
+% #2: new value, int-expression
+%
+\cs_new_protected:Nn \refnum_gdefcounter:nn
+{
+  \__refnum_check_counter:nn {#1}
+    { \int_gset:cn { c@#1 } {#2} }
+}
+\cs_generate_variant:Nn \refnum_gdefcounter:nn { nV, Vn, VV, xV }
+\cs_generate_variant:Nn \refnum_gdefcounter:nn { nx, xn, xx, Vx }
+
+% Local-to-parent-scope version of \setcounter
+% #1: name of counter, token-list
+% #2: new value, int-expression
+%
+\cs_new_protected:Nn \refnum_udefcounter:nn
+{
+  \__refnum_check_counter:nn {#1}
+    { \sltools_int_uset:cn { c@#1 } {#2} }
+}
+\cs_generate_variant:Nn \refnum_udefcounter:nn { nV, Vn, VV, xV }
+\cs_generate_variant:Nn \refnum_udefcounter:nn { nx, xn, xx, Vx }
+
 %================================================================================
 % Read hyperref label info
 
@@ -67,17 +91,23 @@
 % #1: seq-variable to store result
 % #2: tok_list containing label
 %
-\cs_new_protected:Nn \__refnum_get_seq:Nn
+\cs_new_protected:Nn \__refnum_gget_seq:Nn
 {
   \group_begin:
     \tl_set:Nx \l_tmpa_tl { \tl_item:cn {r@#2} {4} }
-    \seq_set_split:NnV \l_tmpa_seq {.} \l_tmpa_tl
-    \sltools_seq_uset:NN #1 \l_tmpa_seq
+    \seq_gset_split:NnV #1 {.} \l_tmpa_tl
   \group_end:
+}
+\cs_new_protected:Nn \__refnum_get_seq:Nn
+{
+  \group_begin:
+    \__refnum_gget_seq:Nn \g_tmpa_seq {#2}
+  \group_end:
+  \sltools_transfer_seq:NN #1 \g_tmpa_seq
 }
 
 %--------------------------------------------------------------------------------
-% Parent counter names fro hyperref
+% Parent counter names from hyperref
 
 \regex_const:Nn \c__refnum_parent_regex { theH(\w*) }
 % Get parent counter name, as far as hyperref is concerned
@@ -117,7 +147,7 @@
   \group_end:
 }
 
-\seq_new:N \l__refnum_lineage_seq
+\seq_new:N \g__refnum_lineage_seq
 % Get sequence of parent counter names, as far as hyperref is concerned
 % #1: sequence-variable store counter names of input and ancestors
 % #2: Counter name, token list
@@ -128,16 +158,16 @@
   \group_begin:
     \tl_set_eq:NN \l_tmpb_tl #2
     \int_set_eq:NN \l_tmpa_int #3
-    \seq_clear:N \l__refnum_lineage_seq
-    \seq_put_left:NV \l__refnum_lineage_seq \l_tmpb_tl
+    \seq_gclear:N \g__refnum_lineage_seq
+    \seq_gput_left:NV \g__refnum_lineage_seq \l_tmpb_tl
     \int_while_do:nNnn { \l_tmpa_int } > { 0 }
       {
         \__refnum_parent_name:N \l_tmpb_tl
-        \seq_put_left:NV \l__refnum_lineage_seq \l_tmpb_tl
+        \seq_gput_left:NV \g__refnum_lineage_seq \l_tmpb_tl
         \int_decr:N \l_tmpa_int
       }
-    \sltools_seq_uset:NN #1 \l__refnum_lineage_seq
   \group_end:
+  \sltools_transfer_seq:NN #1 \g__refnum_lineage_seq
 }
 
 %================================================================================
@@ -147,7 +177,7 @@
 % #2: How many generations up? int
 % #3: tok_list containing label
 %
-\cs_new_protected:Nn \__refnum_get_name:Nnn
+\cs_new_protected:Nn \refnum_get_name:Nnn
 {
   \__refnum_check_label:nn {#3}
     {
@@ -160,13 +190,12 @@
     }
 }
 
-
 % Get counter value from hyperref label
 % #1: tok_list-variable to store result
 % #2: How many generations up? int
 % #3: tok_list containing label
 %
-\cs_new_protected:Nn \__refnum_get_counter:Nnn
+\cs_new_protected:Nn \refnum_get_counter:Nnn
 {
   \__refnum_check_label:nn {#3}
     {
@@ -190,7 +219,7 @@
 {
   \__refnum_check_label:nn {#3}
     {
-      \__refnum_get_counter:Nnn \l__refnum_toc_tl {#2} {#3}
+      \refnum_get_counter:Nnn \l__refnum_toc_tl {#2} {#3}
       \refnum_defcounter:nV {#1} \l__refnum_toc_tl
     }
 }
@@ -204,7 +233,7 @@
   \__refnum_check_label:nn {#3}
     {
     \group_begin:
-      \__refnum_get_counter:Nnn \l__refnum_toc_tl {#2} {#3}
+      \refnum_get_counter:Nnn \l__refnum_toc_tl {#2} {#3}
       \setcounter {#1} { \l__refnum_toc_tl }
     \group_end:
     }
@@ -227,22 +256,22 @@
 \cs_new_protected:Nn \__refnum_to_counter_parents_aux:nnnNN
 {
   \group_begin:
-    \__refnum_get_seq:Nn \l_tmpa_seq {#3}
+    \__refnum_gget_seq:Nn \g_tmpa_seq {#3}
     \int_set:Nn \l_tmpb_int {#2}
     \tl_set:Nn \l_tmpb_tl {#1}
 % counter values of ref: ..., gparent, parent, child
-    \seq_pop_left:NN \l_tmpa_seq \l_tmpa_tl
+    \seq_gpop_left:NN \g_tmpa_seq \l_tmpa_tl
     \int_while_do:nNnn { \l_tmpb_int } > { 0 }
       {
-        \seq_pop_right:NN \l_tmpa_seq \l_tmpa_tl
+        \seq_gpop_right:NN \g_tmpa_seq \l_tmpa_tl
         \int_decr:N \l_tmpb_int
       }
 % counter names of target: ..., gparent, parent, child
     \int_set:Nn \l_tmpa_int { \seq_count:N \l_tmpa_seq - 1 }
     \__refnum_lineage:NNN \l_tmpb_seq \l_tmpb_tl \l_tmpa_int
-    \sltools_tl_uset:NN #4 \l_tmpa_seq
     \sltools_seq_uset:NN #5 \l_tmpb_seq
   \group_end:
+  \sltools_transfer_seq:NN #4 \g_tmpa_seq
 }
 
 \seq_new:N \l__refnum_toc_newv_seq
@@ -299,7 +328,7 @@
 % #3: tok_list containing label
 % #4: Also change parent counters? bool
 %
-\cs_new_protected:Nn \__refnum_to_counter:nnnn
+\cs_new_protected:Nn \refnum_to_counter:nnnn
 {
   \__refnum_check_counter:nn {#1} {
     \__refnum_check_label:nn {#3} {
@@ -308,7 +337,7 @@
         { \__refnum_to_counter_child:nnn {#1} {#2} {#3} }
   } }
 }
-\cs_generate_variant:Nn \__refnum_to_counter:nnnn { V }
+\cs_generate_variant:Nn \refnum_to_counter:nnnn { V }
 
 % Set counter value from hyperref label
 % #1: target counter name, tok_list-variable
@@ -316,7 +345,7 @@
 % #3: tok_list containing label
 % #4: Also change parent counters? bool
 %
-\cs_new_protected:Nn \__refnum_gto_counter:nnnn
+\cs_new_protected:Nn \refnum_gto_counter:nnnn
 {
   \__refnum_check_counter:nn {#1} {
     \__refnum_check_label:nn {#3} {
@@ -325,7 +354,7 @@
         { \__refnum_gto_counter_child:nnn {#1} {#2} {#3} }
   } }
 }
-\cs_generate_variant:Nn \__refnum_gto_counter:nnnn { V }
+\cs_generate_variant:Nn \refnum_gto_counter:nnnn { V }
 
 % #5: Change counter globally? bool
 %================================================================================
@@ -343,17 +372,11 @@
   \__refnum_check_counter:nn {#2} {
     \__refnum_check_label:nn {#4} {
       \group_begin:
-        \__refnum_to_counter:nnn {#2} {#3} {#4}
+        \__refnum_to_counter_child:nnn {#2} {#3} {#4}
         \sltools_tl_uset:Nx #1 { \use:c { the#2 } }
       \group_end:
   } }
 }
-% Set counter value from hyperref label
-% #1: tok_list-variable to store result
-% #2: counter to display as, tok_list-variable
-% #3: How many generations up? int
-% #4: tok_list containing label
-%
 \cs_generate_variant:Nn \__refnum_as_counter_child:Nnnn { NV }
 
 %--------------------------------------------------------------------------------
@@ -377,6 +400,26 @@
 \cs_generate_variant:Nn \__refnum_as_counter_parents:Nnnn { NV }
 
 %--------------------------------------------------------------------------------
+
+% Format counter using value from hyperref label, incl all ancestors
+% #1: tok_list-variable to store result
+% #2: counter to display as, tok_list
+% #3: How many generations up from label? int
+% #4: tok_list containing label
+% #5: Also change parent counters? Boolean
+%
+\cs_new_protected:Nn \refnum_as_counter:Nnnnn
+{
+  \__refnum_check_counter:nn {#2} {
+    \__refnum_check_label:nn {#4} {
+      \IfBooleanTF {#5}
+        { \__refnum_as_counter_parents:Nnnn #1 {#2} {#3} {#4} }
+        { \__refnum_as_counter_child:Nnnn #1 {#2} {#3} {#4} }
+  } }
+}
+\cs_generate_variant:Nn \refnum_as_counter:Nnnnn { NV }
+
+%--------------------------------------------------------------------------------
 % Get name from label if it has not been given
 % #1: tok_list-variable to store result
 % #2: counter name or -NoValue-, tok_list
@@ -386,7 +429,7 @@
 {
   \group_begin:
     \IfNoValueTF{#2}
-      { \__refnum_get_name:Nnn \l_tmpb_tl {#3} {#4} }
+      { \refnum_get_name:Nnn \l_tmpb_tl {#3} {#4} }
       { \tl_set:Nn \l_tmpb_tl {#2} }
     \sltools_tl_uset:NV #1 \l_tmpb_tl
   \group_end:
@@ -396,7 +439,7 @@
 % #1: tok_list-variable to store result
 % #2: counter display, tok_list
 % #3: tok_list containing label
-% #4: Suppress hyperlink? bool
+% #4: Suppress hyperlink? Boolean
 %
 \cs_new_protected:Nn \__refnum_hyper_wrap:Nnnn
 {
@@ -412,7 +455,7 @@
 % Print or assign result of one of the above
 % #1: temporary macro holding result - cleared at end, tok_list-variable
 % #2: macro (to store result) or -NoValue- (to print out)
-% #3: global assignment? bool
+% #3: global assignment? Boolean
 %
 \cs_new_protected:Nn \__refnum_output:Nnn
 {
@@ -439,7 +482,7 @@
 %
 \NewDocumentCommand \refcountname { t! O{0} m o }
 {
-  \__refnum_get_name:Nnn \l__refnum_tmpa_tl {#2} {#3}
+  \refnum_get_name:Nnn \l__refnum_tmpa_tl {#2} {#3}
   \__refnum_output:Nnn \l__refnum_tmpa_tl {#4} {#1}
 }
 
@@ -451,7 +494,7 @@
 %
 \NewDocumentCommand \refnum { t! O{0} m o }
 {
-  \__refnum_get_counter:Nnn \l__refnum_tmpa_tl {#2} {#3}
+  \refnum_get_counter:Nnn \l__refnum_tmpa_tl {#2} {#3}
   \__refnum_output:Nnn \l__refnum_tmpa_tl {#4} {#1}
 }
 
@@ -467,8 +510,8 @@
   % If we haven't been given a counter name, get it from ref
   \__refnum_default_counter:Nnnn \l__refnum_tmpa_tl {#4} {#3} {#5}
   \IfBooleanTF {#2}
-    { \__refnum_gto_counter:Vnnn \l__refnum_tmpa_tl {#3} {#5} {#1} }
-    { \__refnum_to_counter:Vnnn \l__refnum_tmpa_tl {#3} {#5} {#1} }
+    { \refnum_gto_counter:Vnnn \l__refnum_tmpa_tl {#3} {#5} {#1} }
+    { \refnum_to_counter:Vnnn \l__refnum_tmpa_tl {#3} {#5} {#1} }
 }
 
 % Temporarily assign ref counter to other counter & display
@@ -483,7 +526,7 @@
 {
   % If we haven't been given a counter name, get it from ref
   \__refnum_default_counter:Nnnn \l__refnum_tmpa_tl {#4} {#3} {#5}
-  \__refnum_as_counter_parents:NVnn \l__refnum_tmpb_tl \l__refnum_tmpa_tl {#3} {#5}
+  \refnum_as_counter:NVnnn \l__refnum_tmpb_tl \l__refnum_tmpa_tl {#3} {#5} { \BooleanTrue }
   \__refnum_hyper_wrap:NVnn \l__refnum_tmpb_tl \l__refnum_tmpb_tl {#5} {#1}
   \__refnum_output:Nnn \l__refnum_tmpb_tl {#6} {#2}
 }
@@ -502,8 +545,6 @@
 }
 
 %================================================================================
-\ExplSyntaxOff
-%--------------------------------------------------------------------------------
 \makeatother
 \endinput
 %--------------------------------------------------------------------------------

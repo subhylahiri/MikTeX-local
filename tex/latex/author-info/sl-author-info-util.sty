@@ -3,7 +3,8 @@
 % Combining the parts
 %
 %================================================================================
-\ProvidesExplFile {sl-author-info-util.def} {2019/09/18} {v1.0}
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-author-info-util} {2019/09/18} {v1.0}
     {general tools for sl-author-info.sty (SL)}
 %================================================================================
 %\RequirePackage{expl3}
@@ -16,6 +17,12 @@
 %
 \cs_new:Nn \slauth_left_super:n
   { \mbox{} \hbox_overlap_left:n { {}\textsuperscript{#1} } }
+
+% Set label superscript over following punctuation
+% #1: Label
+%
+\cs_new:Nn \slauth_right_over:nn
+  { \hbox_overlap_right:n {#2} \textsuperscript{#1} }
 %--------------------------------------------------------------------------------
 % To create a token list { func{arg} }, where func & maybe arg are stored in tl-vars
 
@@ -65,7 +72,7 @@
 % Append a token list to a sequence item in prop-list, creates item if not present, global
 % #1: prop-list variable
 % #2: name of property, token list
-% #3: info to append, seq variable
+% #3: info to append, token list
 %
 \cs_new_protected:Nn \__slauth_prop_gappend_one:Nnn
 {

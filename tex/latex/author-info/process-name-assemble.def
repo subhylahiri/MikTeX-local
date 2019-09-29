@@ -25,60 +25,6 @@
 %================================================================================
 % Utilities
 %--------------------------------------------------------------------------------
-
-% Choose name separator
-% #1: separator seq-var {ultimate, penultimate, ante-penultimate} or {ultimate, pair}
-% #2: num remaining. int
-%
-\cs_new:Nn \procname_sep_choose:Nn
-  { \exp_args:NNe \seq_item:Nn #1 { \int_min:nn {#2} {3} } }
-
-\cs_generate_variant:Nn \procname_sep_choose:Nn { NV, cn, cV }
-
-% Make separator sequence
-% separator seq-var {ultimate, penultimate, ante-penultimate} or {ultimate, pair}
-% #1: seq-var for result
-% #2: length of list, int
-% #3-6: {pair, ante-penultimate, penultimate, ultimate}
-%
-\cs_new_protected:Nn \procname_sep_seq:Nnnnnn
-{
-  \seq_put_right:Nn #1 {#6}
-  \int_compare:nNnTF {#2} > {2}
-    {
-      \seq_put_right:Nn #1 {#5}
-      \seq_put_right:Nn #1 {#4}
-    }
-    { \seq_put_right:Nn #1 {#3} }
-}
-\cs_generate_variant:Nn \procname_sep_seq:Nnnnnn { NVVVVV, cnnnnn, cVVVVV }
-
-% Make simple separator sequence - no special treatment of penultimate
-% separator seq-var {ult, sep, sep}
-% #1: seq-var for result
-% #2: separator
-% #3: closer
-%
-\cs_new_protected:Nn \procname_simple_sep_seq:Nnn
-{
-  \seq_put_right:Nn #1 {#3}
-  \seq_put_right:Nn #1 {#2}
-  \seq_put_right:Nn #1 {#2}
-}
-\cs_generate_variant:Nn \procname_sep_seq:Nnn { NVV, cnn, cVV }
-% Make simple separator sequence - no special treatment of penultimate / ultimate
-% separator seq-var {{}, sep, sep}
-% #1: seq-var for result
-% #2: separator
-%
-\cs_new_protected:Nn \procname_simple_sep_seq:Nn
-{
-  \seq_put_right:Nn #1 {}
-  \seq_put_right:Nn #1 {#2}
-  \seq_put_right:Nn #1 {#2}
-}
-\cs_generate_variant:Nn \procname_sep_seq:Nn { NV, cn, cV }
-%--------------------------------------------------------------------------------
 % Spacing name parts
 
 % Does the name part style have spaces?
@@ -135,7 +81,6 @@
   {}
 
 %--------------------------------------------------------------------------------
-
 % Process one name part
 % #1: global tl-var to append to
 % #2: prop-list for name
@@ -163,8 +108,7 @@
 }
 
 %================================================================================
-%--------------------------------------------------------------------------------
-
+% Template code
 \tl_new:N \l__procname_name_tl
 \tl_new:N \l__procname_namepts_given_tl
 \tl_new:N \l__procname_namepts_prefix_tl
@@ -233,7 +177,6 @@
   \tl_put_right:NV #1 \g_tmpb_tl
   \tl_gclear:N \g_tmpb_tl
 }
-%================================================================================
 
 %================================================================================
 \endinput

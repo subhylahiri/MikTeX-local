@@ -135,6 +135,7 @@
   }
 {
   \AssignTemplateKeys
+  \seq_put_right:Nn \l__sort_by_name_seq { none }
   \seq_map_inline:Nn \l__sort_by_name_seq
     {
       \tl_if_eq:nnT {##1} { none } { \seq_map_break:n { \sort_return_same: } }
@@ -147,8 +148,6 @@
           {-1} { \seq_map_break:n { \sort_return_swapped: } }
         }
     }
-  \int_compare:nNnT { \l_tmpa_int } = {0}
-    { \sort_return_same: }
 }
 %================================================================================
 

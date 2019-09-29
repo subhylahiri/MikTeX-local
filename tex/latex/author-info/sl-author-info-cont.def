@@ -89,27 +89,7 @@
     \tl_gclear:N \g_tmpb_tl
   }
 \cs_generate_variant:Nn \__slauth_cont_label:NNnnn { NNVVV }
-%--------------------------------------------------------------------------------
 
-% Insert one piece of contact info
-% #1: local tl-var to append to
-% #2: label, token-list
-% #3: content, token-list
-% #4: counter label, token-list
-% #5: separators, cs
-% #6: loop counter, int-var
-%
-\cs_new_protected:Nn \__slauth_cont_one_entry:NnnnNN
-{
-  % stage each item in temp var
-  \tl_clear:N #1
-  \quark_if_no_value:nTF {#2}
-    { \tl_put_right:Nn #1 {#3} }
-    { \tl_put_right:Nn #1 { #4#3 \label {#2} } }
-  % Add separator/punctuation
-  #5 {#1} {#6}
-}
-\cs_generate_variant:Nn \__slauth_cont_one_entry:NnnnNN { NnnV }
 %================================================================================
 % Contact list variables (cont)
 \tl_new:N \l__slauth_cont_sep_tl
@@ -162,33 +142,20 @@
     % w/o labels, separate
     \prop_gpop:NnNF #1 { __nolabel } \l__slauth_cont_seq
       { \seq_clear:N \l__slauth_cont_seq }
-    % w/ labels, set up counters
+    % w/ labels, set up counters, add to seq
     \prop_if_empty:NF #1
       {
         \__slauth_cont_counter:NV \__slauth_cont_num:n \l__slauth_cont_type_tl
         \__slauth_cont_label:NNVVV \l_tmpb_tl \__slauth_cont_tag:n
           \l__slauth_cont_type_tl \l__slauth_cont_tag_pre_tl \l__slauth_cont_tag_post_tl
+        \prop_map_inline:Nn #1
+          { \seq_put_right:No \l__slauth_cont_seq { \l_tmpb_tl ##2 \label {##1} } }
       }
 
-    % preparation for adding separators/punctuation
-    \listsep_setup:NNNn \__slauth_cont_punct:nn \l__slauth_cont_tl \l_tmpa_int
-      { \prop_count:N #1 + \seq_count:N \l_tmpa_seq }
-
-    % w/o labels, write to hook
-    \seq_map_inline:Nn \l__slauth_cont_seq
-      {
-        \__slauth_cont_one_entry:NnnnNN \l__slauth_cont_tl {\q_no_value} {##1}
-          {\q_no_value} \__slauth_cont_punct:nn \l_tmpa_int
-        \tl_gput_right:cV { \l_tmpa_tl } \l__slauth_cont_tl
-      }
-    % w/ labels, write to hook
-    \prop_map_inline:Nn #1
-      {
-        \__slauth_cont_one_entry:NnnVNN \l__slauth_cont_tl {##1} {##2}
-          \l_tmpb_tl \__slauth_cont_punct:nn \l_tmpa_int
-        \tl_gput_right:cV { \l_tmpa_tl } \l__slauth_cont_tl
-%        \tl_show:N \l__slauth_cont_tl
-      }
+    % add puctuation and write to hook
+    \listsep_edit_key:Nnn \__slauth_cont_punct:nn { global } { true }
+    \listsep_edit_key:Nnn \__slauth_cont_punct:nn { append } { true }
+    \exp_args:Nx \__slauth_cont_punct:nn { \exp_not:c \l_tmpa_tl } { \l__slauth_cont_seq }
 
     \tl_put_right:NV \l__slauth_cont_style_pre_tl \l__slauth_cont_prefix_tl
     \__slauth_outer_hooks:VVVVV \l__slauth_cont_pr_skip \l__slauth_cont_po_skip

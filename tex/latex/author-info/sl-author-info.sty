@@ -36,8 +36,10 @@
 \RequirePackage{xtemplate}
 %\RequirePackage{l3keys2e}
 \RequirePackage{titling}
+% tools
 \RequirePackage{process-name}
 \RequirePackage{list-sep}
+\RequirePackage{sl-author-info-util}
 
 \newcommand{\noop}[1]{#1}
 %================================================================================
@@ -118,8 +120,6 @@
 % Hook for footnote additions
 \tl_new:N \g__slauth_foot_hook_tl
 %--------------------------------------------------------------------------------
-% General tools
-\input{sl-author-info-util.def}
 % Implement templates:
 % process inputs
 \input{sl-author-info-munge.def}
@@ -134,42 +134,29 @@
 % Tagger will replace '&' with the tags
 \DeclareInstance { punctuator } { tagged-authors-ox } { in-sentence }
   {
-    pair            = {&~and~} ,
-    antepenultimate = {\hbox_overlap_right:n{,}&~} ,
-    penultimate     = {\hbox_overlap_right:n{,}&~and~} ,
-    ultimate        = {&} ,
+    pair            = {{}~and~} ,
+    antepenultimate = {{,}~} ,
+    penultimate     = {{,}~and~} ,
+    ultimate        = {{}} ,
     append          = false ,
   }
 
 \DeclareInstance { punctuator } { tagged-authors-noox } { in-sentence }
   {
-    pair            = {&~and~} ,
-    antepenultimate = {\hbox_overlap_right:n{,}&~} ,
-    penultimate     = {&~and~} ,
-    ultimate        = {&} ,
+    pair            = {{}~and~} ,
+    antepenultimate = {{,}~} ,
+    penultimate     = {{}~and~} ,
+    ultimate        = {{}} ,
     append          = false ,
   }
 
-\DeclareInstance { punctuator } { newlines } { agrammatical }
+\DeclareInstance { punctuator } { newlines } { endless-list }
   {
     separator = \par ,
-    final     = {} ,
     append    = true ,
   }
 
-\DeclareInstance { punctuator } { all-comma } { all-comma }
-  {
-    append  = true ,
-  }
-
-\DeclareInstance { punctuator } { none } { agrammatical }
-  {
-    separator = {} ,
-    final     = {} ,
-    append    = true ,
-  }
-
-\DeclareInstance { punctuator } { paren-comma } { agrammatical }
+\DeclareInstance { punctuator } { paren-comma } { inline-list }
   {
     prefix      = {(} ,
     separator   = {,} ,
@@ -201,6 +188,7 @@
 
 \DeclareInstance { person-info } { author-tags-nolink } { author-tags }
   {
+    tags            = \slauth_right_over:nn{#1} ,
     affiliation-tag = \ref*{#1} ,
     email-tag       = \ref*{#1} ,
     thanks-tag      = \ref*{#1} ,

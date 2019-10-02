@@ -412,7 +412,7 @@
 {
   \__refnum_check_counter:nn {#2} {
     \__refnum_check_label:nn {#4} {
-      \IfBooleanTF {#5}
+      \bool_if:nTF {#5}
         { \__refnum_as_counter_parents:Nnnn #1 {#2} {#3} {#4} }
         { \__refnum_as_counter_child:Nnnn #1 {#2} {#3} {#4} }
   } }
@@ -526,7 +526,7 @@
 {
   % If we haven't been given a counter name, get it from ref
   \__refnum_default_counter:Nnnn \l__refnum_tmpa_tl {#4} {#3} {#5}
-  \refnum_as_counter:NVnnn \l__refnum_tmpb_tl \l__refnum_tmpa_tl {#3} {#5} { \BooleanTrue }
+  \refnum_as_counter:NVnnn \l__refnum_tmpb_tl \l__refnum_tmpa_tl {#3} {#5} { \c_true_bool }
   \__refnum_hyper_wrap:NVnn \l__refnum_tmpb_tl \l__refnum_tmpb_tl {#5} {#1}
   \__refnum_output:Nnn \l__refnum_tmpb_tl {#6} {#2}
 }
@@ -561,7 +561,7 @@ The basic commands are:
 \refcountname(!)[(level)]{(label)}[(def-to)]    The ref counter type as a string.
 \refnum(!)[(level)]{(label)}[(def-to)]          The ref counter number as a string.
 \asref(*!)[(level)]<(type)>{(label)}[(def-to)]  The ref counter as displayed by \the(type).
-\reftocounter(*!)[(level)]<(type)>{(label)}      Assign ref counter to (type) counter.
+\reftocounter(*!)[(level)]<(type)>{(label)}     Assign ref counter to (type) counter.
 \parentcounter(!)[(level)]{(type)}[(def-to)]    Get parent counter of (type)
 
 (label)  The label we are referencing.

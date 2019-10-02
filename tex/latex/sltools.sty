@@ -1,10 +1,12 @@
 %%  Some tools for working with expl3
 %%
 %%
+\RequirePackage{expl3}
 \ProvidesExplPackage {sltools} {2019/09/11} {v1.0}
   {Some tools for working with expl3 (SL)}
+\RequirePackage{xparse}
 %================================================================================
-\regex_const:Nn \c__sltools_number_regex { \d+ }
+\regex_const:Nn \c__sltools_number_regex { \A \d+ \Z }
 % Test if token list is a number
 % #1: tl to test
 % #2: code to execute if it is a number
@@ -391,8 +393,8 @@
 }
 \cs_generate_variant:Nn \sltools_gexpand_func_arg:NNn {      Ncn, cNn, ccn }
 \cs_generate_variant:Nn \sltools_gexpand_func_arg:NNn { NNV, NcV, cNV, ccV }
-\cs_generate_variant:Nn \sltools_expand_func_arg:NNn {      Ncn, cNn, ccn }
-\cs_generate_variant:Nn \sltools_expand_func_arg:NNn { NNV, NcV, cNV, ccV }
+\cs_generate_variant:Nn \sltools_expand_func_arg:NNn  {      Ncn, cNn, ccn }
+\cs_generate_variant:Nn \sltools_expand_func_arg:NNn  { NNV, NcV, cNV, ccV }
 %================================================================================
 % Using sequences as property-list values
 
@@ -427,7 +429,6 @@
 \cs_generate_variant:Nn \sltools_prop_gappend_one:Nnn {      NnV, NVn, NVV }
 \cs_generate_variant:Nn \sltools_prop_gappend_one:Nnn { cnn, cnV, cVn, cVV }
 
-
 %================================================================================
 % Set a sequence by splitting a token list at spaces (local)
 % #1: sequence variable
@@ -442,6 +443,29 @@
 %
 \cs_new_protected:Nn \sltools_seq_gsplit_space:Nn
   { \exp_args:NNV \seq_gset_split:NnV #1 \c_space_tl {#2} }
+
+%================================================================================
+% convert between Booleans from xparse & bools from expl3
+
+% #1: boolean expression (expandable)
+%
+\cs_new:Nn \sltools_bool_to_Boolean:n
+  {
+    \bool_if:nTF {#1}
+      { \BooleanTrue }
+      { \BooleanFalse }
+  }
+
+% #1: Boolean value
+%
+\cs_new:Nn \sltools_Boolean_to_bool:n
+  {
+    \IfBooleanTF {#1}
+      { \c_true_bool }
+      { \c_false_bool }
+  }
+
+\cs_generate_variant:Nn \sltools_Boolean_to_bool:n { V, v, x, e, o, f }
 
 %================================================================================
 \endinput

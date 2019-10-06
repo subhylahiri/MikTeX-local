@@ -15,8 +15,8 @@
 %
 \RequirePackage{expl3}
 \ProvidesExplPackage {list-sep} {2019/09/22} {v0.1} {automatic list separators}
+%\RequirePackage{interface3}
 \RequirePackage{xtemplate}
-\RequirePackage{xparse}
 %================================================================================
 % Interface
 %================================================================================
@@ -40,19 +40,29 @@
     append      : boolean = true ,
     global      : boolean = false ,
   }
+\DeclareTemplateInterface { punctuator } { inline-range } {2}
+  {
+    prefix      : tokenlist = {} ,
+    separator   : tokenlist = {} ,
+    final       : tokenlist = {} ,
+    append      : boolean = true ,
+    global      : boolean = false ,
+  }
 \DeclareTemplateInterface { punctuator } { map-clist } {2}
   {
     seq-version : instance { punctuator } ,
   }
 %================================================================================
+\cs_generate_variant:Nn \seq_use:Nn { NV }
+\cs_generate_variant:Nn \seq_use:Nnnn { NVVV }
 \tl_new:N \l__listsep_scratch_tl
 \tl_new:N \l__listsep_insent_prf_tl
 \tl_new:N \l__listsep_insent_pr_tl
 \tl_new:N \l__listsep_insent_ap_tl
 \tl_new:N \l__listsep_insent_pu_tl
 \tl_new:N \l__listsep_insent_ul_tl
-\bool_new:N \l__listsep_insent_app_bool
-\bool_new:N \l__listsep_insent_glb_bool
+\bool_new:N \g__listsep_insent_app_bool
+\bool_new:N \g__listsep_insent_glb_bool
 
 \DeclareTemplateCode  { punctuator } { in-sentence } {2}
   {
@@ -61,109 +71,95 @@
     antepenultimate = \l__listsep_insent_ap_tl ,
     penultimate     = \l__listsep_insent_pu_tl ,
     ultimate        = \l__listsep_insent_ul_tl ,
-    append          = \l__listsep_insent_app_bool ,
-    global          = \l__listsep_insent_glb_bool ,
+    append          = global \g__listsep_insent_app_bool ,
+    global          = global \g__listsep_insent_glb_bool ,
   }
 {
   \group_begin:
     \AssignTemplateKeys
-    \int_set:Nn \l_tmpa_int { \seq_count:N #2 }
-    \tl_clear:N \l__listsep_scratch_tl
-    \int_compare:nNnT { \l_tmpa_int } = {2}
-      { \tl_set_eq:NN \l__listsep_insent_pu_tl \l__listsep_insent_pr_tl }
-
-    \int_compare:nNnT { \l_tmpa_int } > {0}
+    \tl_gclear:N \g_tmpa_tl
+    \seq_if_empty:NF #2
       {
-        \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_insent_prf_tl
-        \seq_map_inline:Nn #2
-          {
-            \tl_put_right:Nn \l__listsep_scratch_tl {##1}
-            \int_case:nnF { \l_tmpa_int }
-              {
-                {1} { \tl_gput_right:NV \l__listsep_scratch_tl \l__listsep_insent_ul_tl }
-                {2} { \tl_gput_right:NV \l__listsep_scratch_tl \l__listsep_insent_pu_tl }
-              }
-              { \tl_gput_right:NV \l__listsep_scratch_tl \l__listsep_insent_ap_tl }
-            \int_decr:N \l_tmpa_int
+        \tl_gset:Nx \g_tmpa_tl
+          {                             %
+            \l__listsep_insent_prf_tl   %
+            \seq_use:NVVV #2            %
+              \l__listsep_insent_pr_tl  %
+              \l__listsep_insent_ap_tl  %
+              \l__listsep_insent_pu_tl  %
+              \l__listsep_insent_ul_tl  %
           }
       }
-
-    \bool_if:NTF \l__listsep_insent_glb_bool
-      {
-        \bool_if:NTF \l__listsep_insent_app_bool
-          { \tl_gput_right:NV #1 \l__listsep_scratch_tl }
-          { \tl_gset_eq:NN #1 \l__listsep_scratch_tl }
-        \bool_gset_false:N \g_tmpb_bool
-      }
-      {
-        \tl_gset_eq:NN \g_tmpa_tl \l__listsep_scratch_tl
-        \bool_gset_eq:NN \g_tmpa_bool \l__listsep_insent_app_bool
-        \bool_gset_true:N \g_tmpb_bool
-      }
   \group_end:
-  \bool_if:NT \g_tmpb_bool
-    {
-      \bool_if:NTF \g_tmpa_bool
-        { \tl_put_right:NV #1 \g_tmpa_tl }
-        { \tl_set_eq:NN #1 \g_tmpa_tl }
-      \tl_gclear:N \g_tmpa_tl
-    }
+  \__listsep_bool_if_if_set:NNNN
+    \g__listsep_insent_glb_bool \g__listsep_insent_app_bool #1 \g_tmpa_tl
 }
 %--------------------------------------------------------------------------------
 \tl_new:N \l__listsep_agram_prf_tl
 \tl_new:N \l__listsep_agram_sep_tl
 \tl_new:N \l__listsep_agram_end_tl
-\bool_new:N \l__listsep_agram_app_bool
-\bool_new:N \l__listsep_agram_glb_bool
+\bool_new:N \g__listsep_agram_app_bool
+\bool_new:N \g__listsep_agram_glb_bool
 
 \DeclareTemplateCode  { punctuator } { inline-list } {2}
   {
     prefix      = \l__listsep_agram_prf_tl ,
     separator   = \l__listsep_agram_sep_tl ,
     final       = \l__listsep_agram_end_tl ,
-    append      = \l__listsep_agram_app_bool ,
-    global      = \l__listsep_agram_glb_bool ,
+    append      = global \g__listsep_agram_app_bool ,
+    global      = global \g__listsep_agram_glb_bool ,
   }
 {
   \group_begin:
     \AssignTemplateKeys
-    \bool_gset:Nn \g_tmpa_bool \l__listsep_agram_app_bool
-    \int_set:Nn \l_tmpa_int { \seq_count:N #2 }
-    \tl_clear:N \l__listsep_scratch_tl
-
-    \int_compare:nNnT { \l_tmpa_int } > {0}
+    \tl_gclear:N \g_tmpa_tl
+    \seq_if_empty:NF #2
       {
-        \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_agram_prf_tl
-        \seq_map_inline:Nn #2
-          {
-            \tl_put_right:Nn \l__listsep_scratch_tl {##1}
-            \int_compare:nNnTF { \l_tmpa_int } = {1}
-              { \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_agram_end_tl }
-              { \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_agram_sep_tl }
-            \int_decr:N \l_tmpa_int
+        \tl_gset:Nx \g_tmpa_tl
+          {                                         %
+            \l__listsep_agram_prf_tl                %
+            \seq_use:NV #2 \l__listsep_agram_sep_tl %
+            \l__listsep_agram_end_tl                %
           }
       }
-
-    \bool_if:NTF \l__listsep_agram_glb_bool
-      {
-        \bool_if:NTF \l__listsep_agram_app_bool
-          { \tl_gput_right:NV #1 \l__listsep_scratch_tl }
-          { \tl_gset_eq:NN #1 \l__listsep_scratch_tl }
-        \bool_gset_false:N \g_tmpb_bool
-      }
-      {
-        \tl_gset_eq:NN \g_tmpa_tl \l__listsep_scratch_tl
-        \bool_gset_eq:NN \g_tmpa_bool \l__listsep_agram_app_bool
-        \bool_gset_true:N \g_tmpb_bool
-      }
   \group_end:
-  \bool_if:NT \g_tmpb_bool
-    {
-      \bool_if:NTF \g_tmpa_bool
-        { \tl_put_right:NV #1 \g_tmpa_tl }
-        { \tl_set_eq:NN #1 \g_tmpa_tl }
-      \tl_gclear:N \g_tmpa_tl
-    }
+  \__listsep_bool_if_if_set:NNNN
+    \g__listsep_agram_glb_bool \g__listsep_agram_app_bool #1 \g_tmpa_tl
+}
+
+%--------------------------------------------------------------------------------
+\tl_new:N \l__listsep_range_prf_tl
+\tl_new:N \l__listsep_range_sep_tl
+\tl_new:N \l__listsep_range_end_tl
+\bool_new:N \l__listsep_range_app_bool
+\bool_new:N \l__listsep_range_glb_bool
+
+\DeclareTemplateCode  { punctuator } { inline-range } {2}
+  {
+    prefix      = \l__listsep_range_prf_tl ,
+    separator   = \l__listsep_range_sep_tl ,
+    final       = \l__listsep_range_end_tl ,
+    append      = \l__listsep_range_app_bool ,
+    global      = \l__listsep_range_glb_bool ,
+  }
+{
+  \group_begin:
+    \AssignTemplateKeys
+    \tl_clear:N \l__listsep_scratch_tl
+    \seq_if_empty:NF #2
+      {
+        \tl_set:NV \l__listsep_scratch_tl \l__listsep_range_prf_tl
+        \seq_get_left:NN #2 \l_tmpa_tl
+        \tl_put_right:NV \l__listsep_scratch_tl \l_tmpa_tl
+        \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_range_sep_tl
+        \seq_get_right:NN #2 \l_tmpa_tl
+        \tl_put_right:NV \l__listsep_scratch_tl \l_tmpa_tl
+        \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_range_end_tl
+      }
+    \tl_gset_eq:NN \g_tmpa_tl \l__listsep_scratch_tl
+  \group_end:
+  \__listsep_bool_if_if_set:NNNN
+    \l__listsep_range_glb_bool \l__listsep_range_app_bool #1 \g_tmpa_tl
 }
 
 %--------------------------------------------------------------------------------
@@ -177,6 +173,27 @@
   \seq_set_from_clist:Nn \l__listsep_scratch_seq {#2}
   \__listsep_clist_wrapper:nn {#1} { \l__listsep_scratch_seq }
 }
+%--------------------------------------------------------------------------------
+% #1: bool global
+% #2: bool append
+% #3: tl-var out
+% #4: tl-var in
+\cs_new_protected:Nn \__listsep_bool_if_if_set:NNNN
+  {
+    \bool_if:NTF #1
+      {
+        \bool_if:NTF #2
+          { \tl_gput_right:NV #3 #4 }
+          { \tl_gset_eq:NN #3 #4 }
+      }
+      {
+        \bool_if:NTF #2
+          { \tl_put_right:NV #3 #4 }
+          { \tl_set_eq:NN #3 #4 }
+      }
+      \tl_gclear:N #4
+  }
+
 %================================================================================
 \DeclareRestrictedTemplate { punctuator } { in-sentence } { mid-sentence }
   {
@@ -250,6 +267,11 @@
 \DeclareInstance { punctuator } { none } { endless-list }
   {
     separator = {} ,
+  }
+%--------------------------------------------------------------------------------
+\DeclareInstance { punctuator } { en-dash } { inline-range }
+  {
+    separator = {--} ,
   }
 %================================================================================
 

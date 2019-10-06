@@ -6,22 +6,8 @@
 \ProvidesExplFile {process-name-split.def} {2019/09/16} {v1.0}
   {process names for process-name.sty (SL)}
 %================================================================================
-%\RequirePackage{expl3}
-%\RequirePackage{xparse}
-%\RequirePackage{xtemplate}
-%\RequirePackage{l3keys2e}
 %\RequirePackage{interface3}
-%%================================================================================
-%\DeclareObjectType { assembler } {2}
-%
-%\DeclareTemplateInterface { assembler } { name-parts } {2}
-%  {
-%    order   : choice { given-family, family-given } = given-family ,
-%    given   : choice { full, inits, terseinits, none } = full ,
-%    prefix  : choice { full, inits, terseinits, none } = full ,
-%    family  : choice { full, inits, terseinits, none } = full ,
-%    suffix  : choice { full, inits, terseinits, none } = full ,
-%  }
+%\RequirePackage{expl3}
 %================================================================================
 % Error messages
 %================================================================================

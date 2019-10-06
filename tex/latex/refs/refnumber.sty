@@ -112,9 +112,9 @@
 \regex_const:Nn \c__refnum_parent_regex { theH(\w*) }
 % Get parent counter name, as far as hyperref is concerned
 % #1: tok_list-variable containing counter name and to store result
-% Leaves #1 unchanged if it cant find a parent
+% Leaves #1 unchanged if it can't find a parent
 %
-\cs_new_protected:Nn \__refnum_parent_name:N
+\cs_new_protected:Nn \__refnum_parent_gname:N
 {
   \group_begin:
     \tl_map_inline:cn {theH#1}
@@ -122,51 +122,65 @@
         \tl_set:Nx \l_tmpa_tl { \cs_to_str:N ##1 }
         \regex_replace_once:NnNT \c__refnum_parent_regex { \1 } \l_tmpa_tl
           {
-            \sltools_tl_uset:NV #1 \l_tmpa_tl
+            \tl_gset_eq:NN #1 \l_tmpa_tl
             \tl_map_break:
           }
       }
   \group_end:
+}
+\cs_new_protected:Nn \__refnum_parent_name:N
+{
+  \tl_gset_eq:NN \g_tmpa_tl #1
+  \__refnum_parent_gname:N \g_tmpa_tl
+  \sltools_transfer_tl:NN #1 \g_tmpa_tl
 }
 
 % Get parent counter name, as far as hyperref is concerned
 % #1: tok_list-variable store counternames of input and result
 % #2: How many generations up? int
 %
-\cs_new_protected:Nn \__refnum_ancestor_name:Nn
+\cs_new_protected:Nn \__refnum_ancestor_gname:Nn
 {
   \group_begin:
-    \tl_set_eq:NN \l_tmpb_tl #1
     \int_set:Nn \l_tmpa_int {#2}
     \int_while_do:nNnn { \l_tmpa_int } > { 0 }
       {
-        \__refnum_parent_name:N \l_tmpb_tl
+        \__refnum_parent_gname:N #1
         \int_decr:N \l_tmpa_int
       }
-    \sltools_tl_uset:NV #1 \l_tmpb_tl
   \group_end:
+}
+\cs_new_protected:Nn \__refnum_ancestor_name:Nn
+{
+  \tl_gset_eq:NN \g_tmpb_tl #1
+  \__refnum_ancestor_gname:Nn \g_tmpb_tl {#2}
+  \sltools_transfer_tl:NN #1 \g_tmpb_tl
 }
 
 \seq_new:N \g__refnum_lineage_seq
 % Get sequence of parent counter names, as far as hyperref is concerned
 % #1: sequence-variable store counter names of input and ancestors
-% #2: Counter name, token list
+% #2: Counter name, token list variable
 % #3: How many generations up? int variable
 %
-\cs_new_protected:Nn \__refnum_lineage:NNN
+\cs_new_protected:Nn \__refnum_glineage:NNN
 {
   \group_begin:
     \tl_set_eq:NN \l_tmpb_tl #2
     \int_set_eq:NN \l_tmpa_int #3
-    \seq_gclear:N \g__refnum_lineage_seq
-    \seq_gput_left:NV \g__refnum_lineage_seq \l_tmpb_tl
+    \seq_gclear:N #1
+    \seq_gput_left:NV #1 \l_tmpb_tl
     \int_while_do:nNnn { \l_tmpa_int } > { 0 }
       {
         \__refnum_parent_name:N \l_tmpb_tl
-        \seq_gput_left:NV \g__refnum_lineage_seq \l_tmpb_tl
+        \seq_gput_left:NV #1 \l_tmpb_tl
         \int_decr:N \l_tmpa_int
       }
   \group_end:
+}
+\cs_new_protected:Nn \__refnum_lineage:NNN
+{
+  \__refnum_glineage:NNN \g__refnum_lineage_seq #2 #3
   \sltools_transfer_seq:NN #1 \g__refnum_lineage_seq
 }
 
@@ -177,16 +191,23 @@
 % #2: How many generations up? int
 % #3: tok_list containing label
 %
-\cs_new_protected:Nn \refnum_get_name:Nnn
+\cs_new_protected:Nn \refnum_gget_name:Nnn
 {
   \__refnum_check_label:nn {#3}
     {
     \group_begin:
       \__refnum_get_seq:Nn \l_tmpb_seq {#3}
-      \tl_set:Nx \l_tmpb_tl {\seq_item:Nn \l_tmpb_seq {1}}
-      \__refnum_ancestor_name:Nn \l_tmpb_tl {#2}
-      \sltools_tl_uset:NV #1 \l_tmpb_tl
+      \tl_gset:Nx #1 {\seq_item:Nn \l_tmpb_seq {1}}
+      \__refnum_ancestor_gname:Nn #1 {#2}
     \group_end:
+    }
+}
+\cs_new_protected:Nn \refnum_get_name:Nnn
+{
+  \__refnum_check_label:nn {#3}
+    {
+      \refnum_gget_name:Nnn \g_tmpa_tl {#2} {#3}
+      \sltools_transfer_tl:NN #1 \g_tmpa_tl
     }
 }
 
@@ -195,14 +216,22 @@
 % #2: How many generations up? int
 % #3: tok_list containing label
 %
-\cs_new_protected:Nn \refnum_get_counter:Nnn
+\cs_new_protected:Nn \refnum_gget_counter:Nnn
 {
   \__refnum_check_label:nn {#3}
     {
     \group_begin:
       \__refnum_get_seq:Nn \l_tmpb_seq {#3}
-      \sltools_tl_uset:Nx #1 {\seq_item:Nn \l_tmpb_seq {-1 - #2}}
+      \tl_gset:Nx #1 {\seq_item:Nn \l_tmpb_seq {-1 - #2}}
     \group_end:
+    }
+}
+\cs_new_protected:Nn \refnum_get_counter:Nnn
+{
+  \__refnum_check_label:nn {#3}
+    {
+      \refnum_gget_counter:Nnn \g_tmpa_tl {#2} {#3}
+      \sltools_transfer_tl:NN #1 \g_tmpa_tl
     }
 }
 
@@ -267,11 +296,11 @@
         \int_decr:N \l_tmpb_int
       }
 % counter names of target: ..., gparent, parent, child
-    \int_set:Nn \l_tmpa_int { \seq_count:N \l_tmpa_seq - 1 }
-    \__refnum_lineage:NNN \l_tmpb_seq \l_tmpb_tl \l_tmpa_int
-    \sltools_seq_uset:NN #5 \l_tmpb_seq
+    \int_set:Nn \l_tmpa_int { \seq_count:N \g_tmpa_seq - 1 }
+    \__refnum_glineage:NNN \g_tmpb_seq \l_tmpb_tl \l_tmpa_int
   \group_end:
   \sltools_transfer_seq:NN #4 \g_tmpa_seq
+  \sltools_transfer_seq:NN #5 \g_tmpb_seq
 }
 
 \seq_new:N \l__refnum_toc_newv_seq
@@ -373,8 +402,9 @@
     \__refnum_check_label:nn {#4} {
       \group_begin:
         \__refnum_to_counter_child:nnn {#2} {#3} {#4}
-        \sltools_tl_uset:Nx #1 { \use:c { the#2 } }
+        \tl_gset:Nx \g_tmpa_tl { \use:c { the#2 } }
       \group_end:
+      \sltools_transfer_tl:NN #1 \g_tmpa_tl
   } }
 }
 \cs_generate_variant:Nn \__refnum_as_counter_child:Nnnn { NV }
@@ -393,8 +423,9 @@
     \__refnum_check_label:nn {#4} {
       \group_begin:
         \__refnum_to_counter_parents:nnn {#2} {#3} {#4}
-        \sltools_tl_uset:Nx #1 { \use:c { the#2 } }
+        \tl_gset:Nx \g_tmpa_tl { \use:c { the#2 } }
       \group_end:
+      \sltools_transfer_tl:NN #1 \g_tmpa_tl
   } }
 }
 \cs_generate_variant:Nn \__refnum_as_counter_parents:Nnnn { NV }
@@ -427,12 +458,10 @@
 % #4: tok_list containing label
 \cs_new_protected:Nn \__refnum_default_counter:Nnnn
 {
-  \group_begin:
-    \IfNoValueTF{#2}
-      { \refnum_get_name:Nnn \l_tmpb_tl {#3} {#4} }
-      { \tl_set:Nn \l_tmpb_tl {#2} }
-    \sltools_tl_uset:NV #1 \l_tmpb_tl
-  \group_end:
+  \IfNoValueTF{#2}
+    { \refnum_gget_name:Nnn \g_tmpb_tl {#3} {#4} }
+    { \tl_gset:Nn \g_tmpb_tl {#2} }
+  \sltools_transfer_tl:NN #1 \g_tmpb_tl
 }
 
 % Wrap counter display in a hyperlink

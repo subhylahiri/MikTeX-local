@@ -6,11 +6,9 @@
 \ProvidesExplFile {process-name-assemble.DEF} {2019/09/16} {v1.0}
   {format & combine name parts for process-name.sty (SL)}
 %================================================================================
-%\RequirePackage{expl3}
-%\RequirePackage{xparse}
-%\RequirePackage{xtemplate}
-%\RequirePackage{l3keys2e}
 %\RequirePackage{interface3}
+%\RequirePackage{expl3}
+%\RequirePackage{xtemplate}
 %%================================================================================
 %\DeclareObjectType { assembler } {2}
 %

@@ -97,16 +97,20 @@
 %================================================================================
 % Insert all tags of a given type
 % #1: seq-var to append to
-% #2: seq-var of tag labels
+% #2: prop-var of with labels
 % #3: function to apply to labels
+% #4: key for prop-list
 %
-\cs_new_protected:Nn \__slauth_autag_type:NNN
+\cs_new_protected:Nn \__slauth_autag_type:NNNn
 {
-  \seq_map_inline:Nn #2
+  \prop_get:NnNT #2 {#4} \l_tmpa_seq
     {
-      \tl_clear:N \l_tmpb_tl
-      \slauth_expand_func_arg:NNn \l_tmpb_tl #3 {##1}
-      \seq_put_right:NV #1 \l_tmpb_tl
+      \seq_map_inline:Nn \l_tmpa_seq
+        {
+          \tl_clear:N \l_tmpb_tl
+          \slauth_expand_func_arg:NNn \l_tmpb_tl #3 {##1}
+          \seq_put_right:NV #1 \l_tmpb_tl
+        }
     }
 }
 %--------------------------------------------------------------------------------
@@ -115,6 +119,9 @@
 \seq_new:N \l__slauth_autag_em_seq
 \seq_new:N \l__slauth_autag_th_seq
 
+% #1: tl-var to append to
+% #2: property list for author, prop-var
+%
 \DeclareTemplateCode { person-info } { author-tags } {2}
   {
     tags            = \__slauth_autag_outer:n ,
@@ -125,17 +132,11 @@
   }
 {
   \group_begin:
-    \AssignTemplateKeys
+  \AssignTemplateKeys
     \seq_clear:N \l__slauth_autag_seq
-
-    \prop_get:NnNT #2 { affiliation } \l__slauth_autag_af_seq
-      { \__slauth_autag_type:NNN \l__slauth_autag_seq \l__slauth_autag_af_seq \__slauth_autag_af:n }
-
-    \prop_get:NnNT #2 { email } \l__slauth_autag_em_seq
-      { \__slauth_autag_type:NNN \l__slauth_autag_seq \l__slauth_autag_em_seq \__slauth_autag_em:n }
-
-    \prop_get:NnNT #2 { thanks } \l__slauth_autag_th_seq
-      { \__slauth_autag_type:NNN \l__slauth_autag_seq \l__slauth_autag_th_seq \__slauth_autag_th:n }
+    \__slauth_autag_type:NNNn \l__slauth_autag_seq #2 \__slauth_autag_af:n { affiliation }
+    \__slauth_autag_type:NNNn \l__slauth_autag_seq #2 \__slauth_autag_em:n { email }
+    \__slauth_autag_type:NNNn \l__slauth_autag_seq #2 \__slauth_autag_th:n { thanks }
 
     \listsep_edit_key:Nnn \__slauth_autag_punct:nn { append } { false }
     \listsep_edit_key:Nnn \__slauth_autag_punct:nn { global } { false }

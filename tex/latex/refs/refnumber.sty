@@ -37,7 +37,7 @@
 {
   \cs_if_exist:cTF { c@#1 }
     {#2}
-    { \msg_error:nnn { refnum } { bad-counter } {#1} }
+    { \msg_warning:nnn { refnum } { bad-counter } {#1} }
 }
 
 \cs_new_protected:Nn \__refnum_check_label:nn
@@ -47,6 +47,7 @@
     { \msg_warning:nnn { refnum } { bad-label } {#1} }
 }
 %================================================================================
+% Scope management
 
 % Local version of \setcounter
 % #1: name of counter, token-list
@@ -84,6 +85,43 @@
 \cs_generate_variant:Nn \refnum_udefcounter:nn { nV, Vn, VV, xV }
 \cs_generate_variant:Nn \refnum_udefcounter:nn { nx, xn, xx, Vx }
 
+%--------------------------------------------------------------------------------
+
+% save label info from the last \refstepcounter before new \refstepcounter / \endgroup
+% #1: seq variable
+%
+\cs_new_protected:Nn \refnum_gsave_currentlabel:N
+  {
+    \tl_if_exist:NT \cref@currentlabel { \seq_gpush:NV #1 \cref@currentlabel }
+    \seq_gpush:NV #1 \@currentlabel
+  }
+\cs_new_protected:Nn \refnum_save_currentlabel:N
+  {
+    \tl_if_exist:NT \cref@currentlabel { \seq_push:NV #1 \cref@currentlabel }
+    \seq_push:NV #1 \@currentlabel
+  }
+% restore label info from a previous \refstepcounter
+% #1: seq variable
+%
+\cs_new_protected:Nn \refnum_grestore_currentlabel:N
+  {
+    \seq_gpop:NN #1 \@currentlabel
+    \tl_if_exist:NT \cref@currentlabel { \seq_gpop:NN #1 \cref@currentlabel }
+  }
+\cs_new_protected:Nn \refnum_restore_currentlabel:N
+  {
+    \seq_pop:NN #1 \@currentlabel
+    \tl_if_exist:NT \cref@currentlabel { \seq_pop:NN #1 \cref@currentlabel }
+  }
+% make the last \refstepcounter global
+%
+\cs_new_protected:Nn \refnum_globalise_currentlabel:
+  {
+    \tl_gset_eq:NN \@currentlabel \@currentlabel
+    \tl_if_exist:NT \cref@currentlabel { \tl_gset_eq:NN \cref@currentlabel \cref@currentlabel }
+  }
+
+
 %================================================================================
 % Read hyperref label info
 
@@ -100,12 +138,11 @@
 }
 \cs_new_protected:Nn \__refnum_get_seq:Nn
 {
-  \group_begin:
-    \__refnum_gget_seq:Nn \g_tmpa_seq {#2}
-  \group_end:
+  \__refnum_gget_seq:Nn \g_tmpa_seq {#2}
   \sltools_transfer_seq:NN #1 \g_tmpa_seq
 }
-
+% \r@#2@cref = {[counter-name][counter-val][prefix-clist] \p@#2 \the#2}{page info}
+% parentage \cref@resetby{counter}\tl-var
 %--------------------------------------------------------------------------------
 % Parent counter names from hyperref
 
@@ -437,7 +474,7 @@
 % #2: counter to display as, tok_list
 % #3: How many generations up from label? int
 % #4: tok_list containing label
-% #5: Also change parent counters? Boolean
+% #5: Also change parent counters? bool
 %
 \cs_new_protected:Nn \refnum_as_counter:Nnnnn
 {
@@ -555,7 +592,7 @@
 {
   % If we haven't been given a counter name, get it from ref
   \__refnum_default_counter:Nnnn \l__refnum_tmpa_tl {#4} {#3} {#5}
-  \refnum_as_counter:NVnnn \l__refnum_tmpb_tl \l__refnum_tmpa_tl {#3} {#5} { \c_true_bool }
+  \refnum_as_counter:NVnnn \l__refnum_tmpb_tl \l__refnum_tmpa_tl {#3} {#5} { \c_false_bool }
   \__refnum_hyper_wrap:NVnn \l__refnum_tmpb_tl \l__refnum_tmpb_tl {#5} {#1}
   \__refnum_output:Nnn \l__refnum_tmpb_tl {#6} {#2}
 }

@@ -467,5 +467,29 @@
 
 \cs_generate_variant:Nn \sltools_Boolean_to_bool:n { V, v, x, e, o, f }
 
+\NewDocumentCommand \MakeNoValue { o }
+  { #1 }
+
+% #1: boolean expression (expandable)
+%
+\cs_new_protected:Nn \sltools_quark_to_NoValue:n
+  {
+    \quark_if_no_value:nTF {#1}
+      { \MakeNoValue }
+      { #1 }
+  }
+
+% #1: Boolean value
+%
+\cs_new:Nn \sltools_NoValue_to_quark:n
+  {
+    \IfNoValueTF {#1}
+      { \q_no_value }
+      { #1 }
+  }
+
+\cs_generate_variant:Nn \sltools_Boolean_to_bool:n { V, v, x, e, o, f }
+
+
 %================================================================================
 \endinput

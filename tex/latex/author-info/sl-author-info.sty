@@ -60,15 +60,15 @@
     style-post  : tokenlist = \par ,
     before-skip : skip = 5pt ,
     after-skip  : skip = 5pt ,
-    punctuation : instance { punctuator } ,
-    sorter      : instance { sorter } ,
+    punctuation : instance { punctuator } , % see list-sep.sty
+    sorter      : instance { sorter } ,     % see process-names.sty
     individual  : instance { person } ,
   }
 
 \DeclareTemplateInterface { person } { author } {2}
   {
     tagger      : instance { person-info } ,
-    formatter   : instance { assembler } ,
+    formatter   : instance { assembler } ,  % see process-names.sty
   }
 
 % Replaces '&' with the tags
@@ -78,7 +78,7 @@
     affiliation-tag : function{1} = \ref{#1} ,
     email-tag       : function{1} = \ref{#1} ,
     thanks-tag      : function{1} = \ref{#1} ,
-    punctuation     : instance { punctuator } ,
+    punctuation     : instance { punctuator } , % see list-sep.sty
   }
 
 \DeclareTemplateInterface { people-info } { contact-list } {1}
@@ -93,7 +93,7 @@
     tags-post   : tokenlist = {} ,
     before-skip : skip = 5pt ,
     after-skip  : skip = 5pt ,
-    punctuation : instance { punctuator } ,
+    punctuation : instance { punctuator } , % see list-sep.sty
     location    : choice { pretitle, posttitle, preauthor, postauthor,
                            predate, postdate, foot } ,
   }
@@ -131,7 +131,7 @@
 % Design choices
 %================================================================================
 
-% Tagger will replace '&' with the tags
+% First token will be placed under tags
 \DeclareInstance { punctuator } { tagged-authors-ox } { in-sentence }
   {
     pair            = {{}~and~} ,

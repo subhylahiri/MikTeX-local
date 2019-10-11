@@ -1,0 +1,60 @@
+% -*- TeX -*- -*- STY -*- -*- LaTeX3 -*-
+%--------------------------------------------------------------------------------
+%%  Get numbers from labels using hcleverref.
+%%
+%% Requires packages: expl3, xparse, hyperref, sltools
+%%
+%%
+%% History: 2018/03/31 v1.0       get numbers from labels (SL)
+%%          2019/09/10 v2.0       using expl3 (SL)
+%--------------------------------------------------------------------------------
+%\NeedsTeXFormat{LaTeX2e}
+%\RequirePackage{expl3}
+\ProvidesExplFile{refnumber-hyperref.def}{2019/9/10} {v2.0} {get numbers from labels using
+cleverref}
+%--------------------------------------------------------------------------------
+\makeatletter
+%================================================================================
+% Read cleveref label info
+
+\regex_const:Nn \c__refnum_rcref_regex { \[(.*?)\] }
+\tl_new:N \l__refnum_cparent_tl
+% Get hyperdest info from cleveref label as a sequence
+% #1: seq-variable to store result
+% #2: tok_list containing label
+%
+\cs_new_protected:Nn \__refnum_gget_seq:Nn
+{
+  \group_begin:
+    \tl_set:Nx \l_tmpa_tl { \tl_item:cn {r@#2@cref} {1} }
+    \exp_args:NNV
+    \regex_extract_all:NnN \c__refnum_rcref_regex \l_tmpa_tl \l_tmpa_seq
+    \seq_pop_left:NN \l_tmpa_seq \l_tmpa_tl
+    \seq_pop_left:NN \l_tmpa_seq \l_tmpa_tl
+    \seq_pop_left:NN \l_tmpa_seq \l_tmpb_tl
+    \seq_pop_left:NN \l_tmpa_seq \l_tmpb_tl
+    \seq_pop_left:NN \l_tmpa_seq \l__refnum_cparent_tl
+    \seq_pop_left:NN \l_tmpa_seq \l__refnum_cparent_tl
+    \seq_gset_from_clist:NN #1 \l__refnum_cparent_tl
+    \seq_gput_left:NV #1 \l_tmpa_tl
+    \seq_gput_right:NV #1 \l_tmpb_tl
+  \group_end:
+}
+% \r@#2@cref = {[counter-name][counter-val][prefix-clist] \p@#2 \the#2}{page info}
+%--------------------------------------------------------------------------------
+% Parent counter names from cleveref
+
+% Get parent counter name, as far as cleveref is concerned
+% #1: tok_list-variable containing counter name and to store result
+% Leaves #1 unchanged if it can't find a parent
+%
+\cs_new_protected:Nn \__refnum_parent_gname:N
+{
+  \group_begin:
+    \exp_args:NV \cref@resetby #1 \l__refnum_cparent_tl
+    \tl_if_empty:NF \l__refnum_cparent_tl
+      { \tl_gset_eq:NN #1 \l__refnum_cparent_tl }
+  \group_end:
+}
+%================================================================================
+\endinput

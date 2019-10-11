@@ -10,18 +10,20 @@
 %--------------------------------------------------------------------------------
 %\NeedsTeXFormat{LaTeX2e}
 \RequirePackage{expl3}
-\ProvidesExplPackage{refnumber}{2019/9/10} {v2.0} {get numbers from labels (SL)}
+\ProvidesExplPackage{refnumber}{2019/9/10} {v2.0} {get numbers from labels}
 %--------------------------------------------------------------------------------
 \makeatletter
 %--------------------------------------------------------------------------------
-
-%\RequirePackage{refcount} % we're replacing this!
 %\RequirePackage{interface3} % for docs
 \RequirePackage{xparse}
-\RequirePackage{hyperref}
+%\RequirePackage{hyperref}
+%\RequirePackage{cleveref}
 \RequirePackage{sltools}
-
 %================================================================================
+
+\msg_new:nnnn { refnum } { no-hcref }
+  { Neither~hyperref~nor~cleveref~loaded }
+  { This~package~needs~either~hyperref~or~cleverref~to~parse~counter~info. }
 
 \msg_new:nnnn { refnum } { bad-counter }
   { Unknown~counter~'#1' }
@@ -120,29 +122,37 @@
     \tl_gset_eq:NN \@currentlabel \@currentlabel
     \tl_if_exist:NT \cref@currentlabel { \tl_gset_eq:NN \cref@currentlabel \cref@currentlabel }
   }
-
+\seq_new:N \l__refnum_currentlabel_seq
+% make the last \refstepcounter apply one scope level out
+%
+\cs_new_protected:Nn \refnum_outscope_currentlabel:
+  {
+    \refnum_save_currentlabel:N \l__refnum_currentlabel_seq
+    \group_insert_after:N \refnum_restore_currentlabel:N
+    \group_insert_after:N \l__refnum_currentlabel_seq
+  }
 
 %================================================================================
 % Read hyperref label info
+
+\AtBeginDocument{
+\@ifpackageloaded{cleveref}
+  { \input{refnumber-cleveref.def} }
+  { \@ifpackageloaded{hyperref}
+      { \input{refnumber-cleveref.def} }
+      { \msg_error:nn { refnum } { bad-counter } }
+  }
+}
 
 % Get hyperdest info from hyperref label as a sequence
 % #1: seq-variable to store result
 % #2: tok_list containing label
 %
-\cs_new_protected:Nn \__refnum_gget_seq:Nn
-{
-  \group_begin:
-    \tl_set:Nx \l_tmpa_tl { \tl_item:cn {r@#2} {4} }
-    \seq_gset_split:NnV #1 {.} \l_tmpa_tl
-  \group_end:
-}
 \cs_new_protected:Nn \__refnum_get_seq:Nn
 {
   \__refnum_gget_seq:Nn \g_tmpa_seq {#2}
   \sltools_transfer_seq:NN #1 \g_tmpa_seq
 }
-% \r@#2@cref = {[counter-name][counter-val][prefix-clist] \p@#2 \the#2}{page info}
-% parentage \cref@resetby{counter}\tl-var
 %--------------------------------------------------------------------------------
 % Parent counter names from hyperref
 
@@ -151,20 +161,6 @@
 % #1: tok_list-variable containing counter name and to store result
 % Leaves #1 unchanged if it can't find a parent
 %
-\cs_new_protected:Nn \__refnum_parent_gname:N
-{
-  \group_begin:
-    \tl_map_inline:cn {theH#1}
-      {
-        \tl_set:Nx \l_tmpa_tl { \cs_to_str:N ##1 }
-        \regex_replace_once:NnNT \c__refnum_parent_regex { \1 } \l_tmpa_tl
-          {
-            \tl_gset_eq:NN #1 \l_tmpa_tl
-            \tl_map_break:
-          }
-      }
-  \group_end:
-}
 \cs_new_protected:Nn \__refnum_parent_name:N
 {
   \tl_gset_eq:NN \g_tmpa_tl #1

@@ -4,8 +4,8 @@
 %
 %================================================================================
 \RequirePackage{expl3}
-\ProvidesExplPackage {sl-author-info-util} {2019/09/18} {v1.0}
-    {general tools for sl-author-info.sty (SL)}
+\ProvidesExplPackage {author-info-util} {2019/09/18} {v1.0}
+    {general tools for author-info.sty (SL)}
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}
@@ -15,13 +15,13 @@
 % Label at beginning of line: zero width superscript
 % #1: Label
 %
-\cs_new:Nn \slauth_left_super:n
+\cs_new:Nn \authinfo_left_super:n
   { \mbox{} \hbox_overlap_left:n { {}\textsuperscript{#1} } }
 
 % Set label superscript over following punctuation
 % #1: Label
 %
-\cs_new:Nn \slauth_right_over:nn
+\cs_new:Nn \authinfo_right_over:nn
   { \hbox_overlap_right:n {#2} \textsuperscript{#1} }
 %--------------------------------------------------------------------------------
 % To create a token list { func{arg} }, where func & maybe arg are stored in tl-vars
@@ -31,7 +31,7 @@
 % #2: cs-var holding the function
 % #3: tl of the argument
 %
-\cs_new_protected:Nn \slauth_gexpand_func_arg:NNn
+\cs_new_protected:Nn \authinfo_gexpand_func_arg:NNn
 {
   \group_begin:
     \tl_set:Nn \l_tmpa_tl { #2 {#3} }
@@ -40,17 +40,17 @@
   \group_end:
 }
 % local version
-\cs_new_protected:Nn \slauth_expand_func_arg:NNn
+\cs_new_protected:Nn \authinfo_expand_func_arg:NNn
 {
   \tl_gclear:N \g_tmpa_tl
-  \slauth_gexpand_func_arg:NNn \g_tmpa_tl #2 {#3}
+  \authinfo_gexpand_func_arg:NNn \g_tmpa_tl #2 {#3}
   \tl_put_right:NV #1 \g_tmpa_tl
   \tl_gclear:N \g_tmpa_tl
 }
-\cs_generate_variant:Nn \slauth_gexpand_func_arg:NNn {      Ncn, cNn, ccn }
-\cs_generate_variant:Nn \slauth_gexpand_func_arg:NNn { NNV, NcV, cNV, ccV }
-\cs_generate_variant:Nn \slauth_expand_func_arg:NNn {      Ncn, cNn, ccn }
-\cs_generate_variant:Nn \slauth_expand_func_arg:NNn { NNV, NcV, cNV, ccV }
+\cs_generate_variant:Nn \authinfo_gexpand_func_arg:NNn {      Ncn, cNn, ccn }
+\cs_generate_variant:Nn \authinfo_gexpand_func_arg:NNn { NNV, NcV, cNV, ccV }
+\cs_generate_variant:Nn \authinfo_expand_func_arg:NNn {      Ncn, cNn, ccn }
+\cs_generate_variant:Nn \authinfo_expand_func_arg:NNn { NNV, NcV, cNV, ccV }
 %================================================================================
 % Prop lists with sequence items
 
@@ -59,7 +59,7 @@
 % #2: name of property, token list
 % #3: info to append, seq variable
 %
-\cs_new_protected:Nn \__slauth_prop_gappend:NnN
+\cs_new_protected:Nn \__authinfo_prop_gappend:NnN
 {
   \group_begin:
     \prop_gpop:NnNTF #1 {#2} \l_tmpb_seq
@@ -74,16 +74,16 @@
 % #2: name of property, token list
 % #3: info to append, token list
 %
-\cs_new_protected:Nn \__slauth_prop_gappend_one:Nnn
+\cs_new_protected:Nn \__authinfo_prop_gappend_one:Nnn
 {
   \group_begin:
     \seq_clear:N \l_tmpa_seq
     \seq_put_right:Nn \l_tmpa_seq {#3}
-    \__slauth_prop_gappend:NnN #1 {#2} \l_tmpa_seq
+    \__authinfo_prop_gappend:NnN #1 {#2} \l_tmpa_seq
   \group_end:
 }
-\cs_generate_variant:Nn \__slauth_prop_gappend_one:Nnn {      NnV, NVn, NVV }
-\cs_generate_variant:Nn \__slauth_prop_gappend_one:Nnn { cnn, cnV, cVn, cVV }
+\cs_generate_variant:Nn \__authinfo_prop_gappend_one:Nnn {      NnV, NVn, NVV }
+\cs_generate_variant:Nn \__authinfo_prop_gappend_one:Nnn { cnn, cnV, cVn, cVV }
 
 %================================================================================
 % Hooks
@@ -95,30 +95,30 @@
 % #4: post-text
 % #5: hook name
 %
-\cs_new_protected:Nn \__slauth_outer_hooks:nnnnn
+\cs_new_protected:Nn \__authinfo_outer_hooks:nnnnn
 {
   % Don't add spaces if there's nothing in the hook!
-  \tl_if_empty:cF { g__slauth_#5_hook_tl }
+  \tl_if_empty:cF { g__authinfo_#5_hook_tl }
     {
-      \tl_gput_right:cn { g__slauth_#5_pre_tl } { \skip_vertical:n {#1} #3 }
-      \tl_gput_right:cn { g__slauth_#5_post_tl } { #4 \skip_vertical:n {#2} }
+      \tl_gput_right:cn { g__authinfo_#5_pre_tl } { \skip_vertical:n {#1} #3 }
+      \tl_gput_right:cn { g__authinfo_#5_post_tl } { #4 \skip_vertical:n {#2} }
     }
 }
-\cs_generate_variant:Nn \__slauth_outer_hooks:nnnnn {        VVnVn, VVVnn, VVVVn, }
-\cs_generate_variant:Nn \__slauth_outer_hooks:nnnnn { VVnnV, VVnVV, VVVnV, VVVVV, }
+\cs_generate_variant:Nn \__authinfo_outer_hooks:nnnnn {        VVnVn, VVVnn, VVVVn, }
+\cs_generate_variant:Nn \__authinfo_outer_hooks:nnnnn { VVnnV, VVnVV, VVVnV, VVVVV, }
 %--------------------------------------------------------------------------------
 
 % Place the foot hook in the footer, if needed
 %
-\cs_new_protected:Nn \__slauth_create_foot:
+\cs_new_protected:Nn \__authinfo_create_foot:
 {
-  \tl_if_empty:NF \g__slauth_foot_hook_tl
+  \tl_if_empty:NF \g__authinfo_foot_hook_tl
     {
       \global\setlength{\thanksmarkwidth}{0em}
       \global\setlength{\thanksmargin}{-1em}
       \gdef\tamark{}
       \tl_gput_right:Nn \@thanks
-        { \footnotetext[1]{\g__slauth_foot_hook_tl} }
+        { \footnotetext[1]{\g__authinfo_foot_hook_tl} }
     }
 }
 %================================================================================

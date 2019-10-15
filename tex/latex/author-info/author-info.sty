@@ -25,10 +25,10 @@
 %%          2017/12/28 v1.0      (SL) using xkeyval and lists to automate
 %================================================================================
 %\NeedsTeXFormat{LaTeX2e}
-%\ProvidesPackage{sl-author-info3}
+%\ProvidesPackage{author-info3}
 %         [2017/12/28 v1.0 titling macros for affiliations etc. (SL)]
 \RequirePackage{expl3}
-\ProvidesExplPackage {sl-author-info} {2019/09/21} {v2.0}
+\ProvidesExplPackage {author-info} {2019/09/21} {v2.0}
     {titling macros for affiliations etc. (SL)}
 %================================================================================
 %\RequirePackage{interface3}
@@ -39,7 +39,7 @@
 % tools
 \RequirePackage{process-name}
 \RequirePackage{list-sep}
-\RequirePackage{sl-author-info-util}
+\RequirePackage{author-info-util}
 
 \newcommand{\noop}[1]{#1}
 %================================================================================
@@ -110,23 +110,23 @@
 % Implementation in sub-packages
 %--------------------------------------------------------------------------------
 % Holding place for authors, until we've noted all affiliations etc.
-\seq_new:N \g__slauth_au_wait_seq
+\seq_new:N \g__authinfo_au_wait_seq
 % munged list
-\seq_new:N \g__slauth_author_seq
+\seq_new:N \g__authinfo_author_seq
 % which bits of contact info have been used?
-\prop_new:N \g__slauth_affiliation_used_prop
-\prop_new:N \g__slauth_email_used_prop
-\prop_new:N \g__slauth_thanks_used_prop
+\prop_new:N \g__authinfo_affiliation_used_prop
+\prop_new:N \g__authinfo_email_used_prop
+\prop_new:N \g__authinfo_thanks_used_prop
 % Hook for footnote additions
-\tl_new:N \g__slauth_foot_hook_tl
+\tl_new:N \g__authinfo_foot_hook_tl
 %--------------------------------------------------------------------------------
 % Implement templates:
 % process inputs
-\input{sl-author-info-munge.def}
+\input{author-info-munge.def}
 % print author list
-\input{sl-author-info-au.def}
+\input{author-info-au.def}
 % print contact lists
-\input{sl-author-info-cont.def}
+\input{author-info-cont.def}
 %================================================================================
 % Design choices
 %================================================================================
@@ -188,7 +188,7 @@
 
 \DeclareInstance { person-info } { author-tags-nolink } { author-tags }
   {
-    tags            = \slauth_right_over:nn{#1} ,
+    tags            = \authinfo_right_over:nn{#1} ,
     affiliation-tag = \ref*{#1} ,
     email-tag       = \ref*{#1} ,
     thanks-tag      = \ref*{#1} ,
@@ -199,7 +199,7 @@
   {
     type        = affiliation ,
     style-pre   = \centering\itshape ,
-    tags        = \slauth_left_super:n{#1} ,
+    tags        = \authinfo_left_super:n{#1} ,
     numbering   = \arabic{#1} ,
     punctuation = newlines ,
     location    = postauthor ,
@@ -222,7 +222,7 @@
 \DeclareInstance { people-info } { thanks } { contact-list }
   {
     type        = thanks ,
-    tags        = \slauth_left_super:n{#1} ,
+    tags        = \authinfo_left_super:n{#1} ,
     numbering   = \fnsymbol{#1} ,
     location    = foot ,
     punctuation = newlines ,
@@ -250,12 +250,12 @@
 % Package options
 %================================================================================
 
-\tl_new:N \g_slauth_instance_tl
-\tl_gset:Nn \g_slauth_instance_tl { basic-ox }
+\tl_new:N \g_authinfo_instance_tl
+\tl_gset:Nn \g_authinfo_instance_tl { basic-ox }
 
-\DeclareOption{nooxfordcomma}{ \tl_gset:Nn \g_slauth_instance_tl { basic-noox } }
-\DeclareOption{oxfordcomma}{ \tl_gset:Nn \g_slauth_instance_tl { basic-ox } }
-\DeclareOption*{\tl_gset_eq:NN \g_slauth_instance_tl \CurrentOption}
+\DeclareOption{nooxfordcomma}{ \tl_gset:Nn \g_authinfo_instance_tl { basic-noox } }
+\DeclareOption{oxfordcomma}{ \tl_gset:Nn \g_authinfo_instance_tl { basic-ox } }
+\DeclareOption*{\tl_gset_eq:NN \g_authinfo_instance_tl \CurrentOption}
 \ExecuteOptions{oxfordcomma}
 \ProcessOptions
 
@@ -263,16 +263,16 @@
 % Document interface
 %================================================================================
 \DeclareDocumentCommand \author { O{} m }
-  { \seq_gput_right:Nn \g__slauth_au_wait_seq { {#2} {#1} } }
+  { \seq_gput_right:Nn \g__authinfo_au_wait_seq { {#2} {#1} } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \affiliation { O{} m }
-  { \__slauth_contact_new:nnn {#2} {#1} { affiliation } }
+  { \__authinfo_contact_new:nnn {#2} {#1} { affiliation } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \email { O{} m }
-  { \__slauth_contact_new:nnn {#2} {#1} { email } }
+  { \__authinfo_contact_new:nnn {#2} {#1} { email } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \thanks { O{} m }
-  { \__slauth_contact_new:nnn {#2} {#1} { thanks } }
+  { \__authinfo_contact_new:nnn {#2} {#1} { thanks } }
 %--------------------------------------------------------------------------------
 \DeclareDocumentCommand \preprint { m }
 {
@@ -286,10 +286,10 @@
 %================================================================================
 \AtBeginDocument {
   % Build the displayed lists
-  \exp_args:NnV \UseInstance { people-block } \g_slauth_instance_tl
-    { \g__slauth_au_wait_seq } { \g__slauth_author_seq }
-    { \g__slauth_affiliation_used_prop } { \g__slauth_email_used_prop }
-    { \g__slauth_thanks_used_prop  }
+  \exp_args:NnV \UseInstance { people-block } \g_authinfo_instance_tl
+    { \g__authinfo_au_wait_seq } { \g__authinfo_author_seq }
+    { \g__authinfo_affiliation_used_prop } { \g__authinfo_email_used_prop }
+    { \g__authinfo_thanks_used_prop  }
 }
 %================================================================================
 \endinput

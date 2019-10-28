@@ -139,7 +139,7 @@
 \@ifpackageloaded{cleveref}
   { \input{refnumber-cleveref.def} }
   { \@ifpackageloaded{hyperref}
-      { \input{refnumber-cleveref.def} }
+      { \input{refnumber-hyperref.def} }
       { \msg_error:nn { refnum } { bad-counter } }
   }
 }
@@ -156,7 +156,6 @@
 %--------------------------------------------------------------------------------
 % Parent counter names from hyperref
 
-\regex_const:Nn \c__refnum_parent_regex { theH(\w*) }
 % Get parent counter name, as far as hyperref is concerned
 % #1: tok_list-variable containing counter name and to store result
 % Leaves #1 unchanged if it can't find a parent

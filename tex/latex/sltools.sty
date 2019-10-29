@@ -27,6 +27,44 @@
 %--------------------------------------------------------------------------------
 \prg_generate_conditional_variant:Nnn \tl_if_eq:nn { nV, Vn, VV } { TF, T, F }
 %================================================================================
+
+\prop_new:N \g__sltools_outscope_prop
+
+\cs_new_protected:Nn \__sltools_outscope_save:N
+  { \prop_gput:NnV \g__sltools_outscope_prop {#1} #1 }
+\cs_new_protected:Nn \__sltools_outscope_restore:N
+  {
+    \tl_clear_new:N #1
+    \prop_gpop:NnN \g__sltools_outscope_prop {#1} #1
+  }
+
+% Pass a variable to the containing scope
+% #1: variable
+\cs_new_protected:Nn \sltools_outscope:N
+ {
+   \__sltools_outscope_save:N #1
+   \group_insert_after:N \__sltools_outscope_restore:N
+   \group_insert_after:N #1
+ }
+\cs_generate_variant:Nn \sltools_outscope:N { c }
+% Pass a variable to the containing scope
+% #1: number of scopes out
+% #2: variable
+\cs_new_protected:Nn \sltools_outscope:nN
+ {
+   \__sltools_outscope_save:N #2
+   \group_insert_after:N \__sltools_outscope_restore:N
+   \group_insert_after:N #2
+   \int_compare:nNnT {#1} > {1}
+     {
+       \group_insert_after:N \sltools_outscope:nN
+       \sltools_tl_insert_after:x { \int_eval:n { #1 - 1 } }
+       \group_insert_after:N #2
+     }
+ }
+\cs_generate_variant:Nn \sltools_outscope:nN { nc, VN, Vc, xN, xc }
+
+%--------------------------------------------------------------------------------
 % insert token list after current group.
 %
 \cs_new_protected:Nn \sltools_tl_insert_after:n
@@ -41,7 +79,7 @@
   }
 % insert contents of token list variable after current group
 %
-\cs_generate_variant:Nn \sltools_tl_insert_after:n { V }
+\cs_generate_variant:Nn \sltools_tl_insert_after:n { V, x }
 
 % Assign a variable after the current group.
 % Places the next two tokens and the following token list after current group.

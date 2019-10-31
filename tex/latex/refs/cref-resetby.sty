@@ -11,10 +11,12 @@
 %--------------------------------------------------------------------------------
 \RequirePackage{etoolbox}
 %================================================================================
+\AtBeginDocument{%
 \@ifpackageloaded{cleveref}{}% otherwise, why bother
-    {\PackageError{cref-resetby}{This package must be loaded after cleveref.}
+    {\PackageError{cref-resetby}{This package must be loaded with cleveref.}
                   {This package modifies an internal cleveref command,
                    so that command must have been defined!}}
+}
 %--------------------------------------------------------------------------------
 %% List of potential {child counter}{parent counter} pairs stored in this mcro:
 \newcommand{\cref@resetby@list}{}
@@ -31,8 +33,8 @@
 %      \def#2{figure}%
 %    \fi%
 %  }{}%
+%  etc.
 %}
-%etc.
 %--------------------------------------------------------------------------------
 %% Process a list entry, will get called with arguments:
 %%   {current-counter}{output-macro}{listed-counter}{parent-counter}.
@@ -51,9 +53,11 @@
      \dolistloop{\cref@resetby@list}%                           run through list.
    \endgroup}%
 %% Append the list checker to \cref@resetby.
+\AtBeginDocument{
 \apptocmd{\cref@resetby}{\cref@resetby@check{#1}{#2}}%
     {\PackageInfo{cref-resetby}{Added flexibility to cleveref counter reset detection}}%
     {\PackageWarning{cref-resetby}{Failed to update cleveref counter reset detection.}}%
+}
 %================================================================================
 \makeatother
 \endinput

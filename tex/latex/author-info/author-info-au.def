@@ -62,7 +62,7 @@
 
     \listsep_edit_key:Nnn \__authinfo_auls_punct:nn { global } { true }
     \listsep_edit_key:Nnn \__authinfo_auls_punct:nn { append } { true }
-    \__authinfo_auls_punct:nn { \g__authinfo_auth_hook_tl } { \g_tmpa_seq }
+    \__authinfo_auls_punct:nn { \g_tmpa_seq } { \g__authinfo_auth_hook_tl }
     \seq_gclear:N \g_tmpa_seq
 
     \__authinfo_outer_hooks:VVVVn \l__authinfo_auls_pr_skip \l__authinfo_auls_po_skip
@@ -140,7 +140,7 @@
 
     \listsep_edit_key:Nnn \__authinfo_autag_punct:nn { append } { false }
     \listsep_edit_key:Nnn \__authinfo_autag_punct:nn { global } { false }
-    \__authinfo_autag_punct:nn { \l_tmpa_tl } { \l__authinfo_autag_seq }
+    \__authinfo_autag_punct:nn { \l__authinfo_autag_seq } { \l_tmpa_tl }
 
     \tl_if_blank:VTF \l_tmpa_tl
       { \tl_gclear:N \g_tmpa_tl }

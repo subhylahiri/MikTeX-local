@@ -155,7 +155,7 @@
     % add puctuation and write to hook
     \listsep_edit_key:Nnn \__authinfo_cont_punct:nn { global } { true }
     \listsep_edit_key:Nnn \__authinfo_cont_punct:nn { append } { true }
-    \exp_args:Nx \__authinfo_cont_punct:nn { \exp_not:c \l_tmpa_tl } { \l__authinfo_cont_seq }
+    \exp_args:Nnx \__authinfo_cont_punct:nn { \l__authinfo_cont_seq } { \exp_not:c \l_tmpa_tl }
 
     \tl_put_right:NV \l__authinfo_cont_style_pre_tl \l__authinfo_cont_prefix_tl
     \__authinfo_outer_hooks:VVVVV \l__authinfo_cont_pr_skip \l__authinfo_cont_po_skip

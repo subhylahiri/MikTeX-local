@@ -20,7 +20,7 @@
 %================================================================================
 % Interface
 %================================================================================
-\DeclareObjectType { punctuator } {2} % return tl-var, list members seq-var
+\DeclareObjectType { punctuator } {2} % list members seq-var, return tl-var
 \DeclareObjectType { punctuated } {1} % list members seq-var
 %================================================================================
 \DeclareTemplateInterface { punctuated } { in-sentence } {1}
@@ -103,10 +103,10 @@
 {
   \group_begin:
     \AssignTemplateKeys
-    \tl_gset:Nn \g__listsep_scratch_tl { \__listsep_def_wrapper:n {#2} }
+    \tl_gset:Nn \g__listsep_scratch_tl { \__listsep_def_wrapper:n {#1} }
   \group_end:
   \__listsep_bool_if_if_set:NNNN
-    \g__listsep_glb_bool \g__listsep_app_bool #1 \g__listsep_scratch_tl
+    \g__listsep_glb_bool \g__listsep_app_bool #2 \g__listsep_scratch_tl
 }
 
 %--------------------------------------------------------------------------------
@@ -156,12 +156,12 @@
   \group_begin:
     \AssignTemplateKeys
     \tl_gclear:N \g__listsep_scratch_tl
-    \seq_if_empty:NF #2
+    \seq_if_empty:NF #1
       {
         \tl_gset:Nx \g__listsep_scratch_tl
           {                             %
             \l__listsep_insent_prf_tl   %
-            \seq_use:NVVV #2            %
+            \seq_use:NVVV #1            %
               \l__listsep_insent_pr_tl  %
               \l__listsep_insent_ap_tl  %
               \l__listsep_insent_pu_tl  %
@@ -170,7 +170,7 @@
       }
   \group_end:
   \__listsep_bool_if_if_set:NNNN
-    \g__listsep_insent_glb_bool \g__listsep_insent_app_bool #1 \g__listsep_scratch_tl
+    \g__listsep_insent_glb_bool \g__listsep_insent_app_bool #2 \g__listsep_scratch_tl
 }
 %--------------------------------------------------------------------------------
 \tl_new:N \l__listsep_agram_prf_tl
@@ -210,18 +210,18 @@
   \group_begin:
     \AssignTemplateKeys
     \tl_gclear:N \g__listsep_scratch_tl
-    \seq_if_empty:NF #2
+    \seq_if_empty:NF #1
       {
         \tl_gset:Nx \g__listsep_scratch_tl
           {                                         %
             \l__listsep_agram_prf_tl                %
-            \seq_use:NV #2 \l__listsep_agram_sep_tl %
+            \seq_use:NV #1 \l__listsep_agram_sep_tl %
             \l__listsep_agram_end_tl                %
           }
       }
   \group_end:
   \__listsep_bool_if_if_set:NNNN
-    \g__listsep_agram_glb_bool \g__listsep_agram_app_bool #1 \g__listsep_scratch_tl
+    \g__listsep_agram_glb_bool \g__listsep_agram_app_bool #2 \g__listsep_scratch_tl
 }
 
 %--------------------------------------------------------------------------------
@@ -263,20 +263,20 @@
 {
   \group_begin:
     \AssignTemplateKeys
-    \seq_if_empty:NF #2
+    \seq_if_empty:NF #1
       {
         \tl_set_eq:NN \l__listsep_scratch_tl \l__listsep_range_prf_tl
-        \seq_get_left:NN #2 \l_tmpa_tl
+        \seq_get_left:NN #1 \l_tmpa_tl
         \tl_put_right:NV \l__listsep_scratch_tl \l_tmpa_tl
         \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_range_sep_tl
-        \seq_get_right:NN #2 \l_tmpa_tl
+        \seq_get_right:NN #1 \l_tmpa_tl
         \tl_put_right:NV \l__listsep_scratch_tl \l_tmpa_tl
         \tl_put_right:NV \l__listsep_scratch_tl \l__listsep_range_end_tl
       }
     \tl_gset_eq:NN \g__listsep_scratch_tl \l__listsep_scratch_tl
   \group_end:
   \__listsep_bool_if_if_set:NNNN
-    \l__listsep_range_glb_bool \l__listsep_range_app_bool #1 \g__listsep_scratch_tl
+    \l__listsep_range_glb_bool \l__listsep_range_app_bool #2 \g__listsep_scratch_tl
 }
 
 %--------------------------------------------------------------------------------
@@ -297,8 +297,8 @@
     seq-version = \__listsep_clist_wrapper:nn ,
   }
 {
-  \seq_set_from_clist:Nn \l__listsep_scratch_seq {#2}
-  \__listsep_clist_wrapper:nn {#1} { \l__listsep_scratch_seq }
+  \seq_set_from_clist:Nn \l__listsep_scratch_seq {#1}
+  \__listsep_clist_wrapper:nn { \l__listsep_scratch_seq } {#2}
 }
 %--------------------------------------------------------------------------------
 % #1: bool global

@@ -2,8 +2,8 @@
 %%
 %% Requires packages: geometry, titling, titlesec, amsmath, amssymb, graphicx,
 %%                    xcolor, hyperref, cleveref, etoolbox, caption, biblatex
-%% Optional packages: subfigure, floatrow, wrapfig, adjustbox
-%%                      (all to do with figure arrangement)
+%% Optional packages: subfigure, subfig, subfigmat, subcaption, floatrow, wrapfig,
+%%                    adjustbox  (all to do with figure arrangement)
 %% Options: names of optional packages + whatever article takes
 %%
 %% It uses biblatex, so:
@@ -23,6 +23,9 @@
 \newcommand{\OptionalPackageHook}{}
 \DeclareOption{subfigure}{\appto\OptionalPackageHook{%
             \RequirePackage[FIGBOTCAP,nooneline,raggedright,tight]{subfigure}}}
+\DeclareOption{subcaption}{\appto\OptionalPackageHook{\RequirePackage{subcaption}}}
+\DeclareOption{subfig}{\appto\OptionalPackageHook{\RequirePackage{subfig}}}
+\DeclareOption{subfigmat}{\appto\OptionalPackageHook{\RequirePackage{subfigmat}}}
 \DeclareOption{floatrow}{\appto\OptionalPackageHook{\RequirePackage{floatrow}}}
 \DeclareOption{wrapfig}{\appto\OptionalPackageHook{\RequirePackage{wrapfig}}}
 \DeclareOption{adjustbox}{\appto\OptionalPackageHook{\RequirePackage{adjustbox}}}

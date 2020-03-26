@@ -72,12 +72,27 @@
     {\href{http://dx.doi.org/\thefield{doi}}}}
     {}{#1}}
 %--------------------------------------------------------------------------------
-\newbibmacro*{journal+date}{%
-  \usebibmacro{journal+issuetitle}
-  \newunit
-  \usebibmacro{byeditor+others}%
+\newbibmacro*{journal+pages+issuetitle}{%
+  \usebibmacro{journal}%
+  \setunit*{\addspace}%
+  \iffieldundef{series}
+    {}
+    {\newunit
+     \printfield{series}%
+     \setunit{\addspace}}%
+  \usebibmacro{volume+number+eid}%
   \setunit{\bibpagespunct}%
   \printfield{pages}%
+  \setunit*{\addcomma\space}%
+  \usebibmacro{issue+date}%
+  \setunit*{\addcolon\space}%
+  \usebibmacro{issue}%
+  \newunit\newblock}
+%--------------------------------------------------------------------------------
+\newbibmacro*{journal+date}{%
+  \usebibmacro{journal+pages+issuetitle}%
+  \newunit%
+  \usebibmacro{byeditor+others}%
   \newunit}
 %--------------------------------------------------------------------------------
 \newbibmacro*{note+addendum+pubstate}{%
@@ -93,10 +108,10 @@
      \printfield{part}%
      \setunit{\addcomma\space}}
     {}
+  \usebibmacro{chapter+pages}
   \printtext[parens]{%
     \usebibmacro{date}}%
-  \newunit\newblock
-  \usebibmacro{chapter+pages}}
+  \newunit\newblock}
 %--------------------------------------------------------------------------------
 \newbibmacro*{publisher+location}{%
   \printlist{location}%
@@ -274,10 +289,10 @@
   \printfield{version}%
   \newunit\newblock
 %  \usebibmacro{in:}%
+  \usebibmacro{doi+eprint+url}%
+  \setunit*{\addcomma\space}%
   \printtext[parens]{%
     \usebibmacro{date}}%
-  \newunit\newblock
-  \usebibmacro{doi+eprint+url}%
   \newunit\newblock
   \usebibmacro{note+addendum+pubstate}%
   \setunit{\bibpagerefpunct}\newblock

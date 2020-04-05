@@ -41,6 +41,7 @@
    \iffieldundef{eprintclass}
      {}
      {\addspace\texttt{\mkbibbrackets{\thefield{eprintclass}}}}}}
+\DeclareFieldAlias{eprint:arXiv}{eprint:arxiv}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat{eprint:biorxiv}{%
   \ifhyperref{\href{https://dx.doi.org/10.1101/#1}}{}%
@@ -64,36 +65,47 @@
     \intitlepunct}}
 %--------------------------------------------------------------------------------
 \newbibmacro*{link+doi/url}[1]{%
-  \printtext{\relax}\ifhyperref%
-  {\iffieldundef{doi}
-    {\iffieldundef{url}
-      {}
-      {\href{\thefield{url}}}}
-    {\href{http://dx.doi.org/\thefield{doi}}}}
-    {}{#1}}
+  \printtext{\relax}%
+  \ifboolexpr{
+    not test {\ifhyperref}
+    or
+    test {\iffieldundef{doi}}
+    and
+    test {\iffieldundef{url}}}
+    {}
+    {\iffieldundef{doi}
+        {\href{\thefield{url}}}
+        {\href{https://dx.doi.org/\thefield{doi}}}%
+      }{#1}}
 %--------------------------------------------------------------------------------
-\newbibmacro*{journal+pages+issuetitle}{%
+\newbibmacro*{volume+pages}{%
+  \printfield{volume}%
+  \setunit*{\adddot}%
+  \printfield{number}%
+  \setunit{\bibpagespunct}%
+  \iffieldundef{eid}
+    {\printfield{pages}}
+    {\printfield{eid}}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{journal+series}{%
   \usebibmacro{journal}%
-  \setunit*{\addspace}%
   \iffieldundef{series}
     {}
-    {\newunit
-     \printfield{series}%
-     \setunit{\addspace}}%
-  \usebibmacro{volume+number+eid}%
-  \setunit{\bibpagespunct}%
-  \printfield{pages}%
-  \setunit*{\addcomma\space}%
+    {\setunit*{\addspace}\newunit%
+     \printfield{series}}}
+%--------------------------------------------------------------------------------
+\newbibmacro*{issue+date+issuetitle}{%
   \usebibmacro{issue+date}%
   \setunit*{\addcolon\space}%
-  \usebibmacro{issue}%
-  \newunit\newblock}
+  \usebibmacro{issue}}
 %--------------------------------------------------------------------------------
-\newbibmacro*{journal+date}{%
-  \usebibmacro{journal+pages+issuetitle}%
-  \newunit%
-  \usebibmacro{byeditor+others}%
-  \newunit}
+\newbibmacro*{journal+pages+date}{%
+  \usebibmacro{journal+series}%
+  \setunit*{\addspace}%
+  \usebibmacro{volume+pages}%
+  \setunit*{\addcomma\space}%
+  \usebibmacro{issue+date+issuetitle}%
+  \newunit\newblock}
 %--------------------------------------------------------------------------------
 \newbibmacro*{note+addendum+pubstate}{%
   \printfield{note}
@@ -167,7 +179,9 @@
   \setunit{\printdelim{posttitledelim}}\newblock
 %  \usebibmacro{in:}%
   \usebibmacro{link+doi/url}{%
-      \usebibmacro{journal+date}}
+      \usebibmacro{journal+pages+date}}%
+  \newunit%
+  \usebibmacro{byeditor+others}%
   \newunit\newblock
   \iftoggle{bbx:isbn}
     {\printfield{issn}}

@@ -24,6 +24,18 @@
 \makeatletter
 \ExplSyntaxOn
 %================================================================================
+\tl_new:N \g__highlightmyname_name_tl
+\cs_generate_variant:Nn \tl_if_in:nnTF { xV }
+%--------------------------------------------------------------------------------
+\keys_define:nn { highlightmyname }
+  {
+    myname .tl_gset:N = \g__highlightmyname_name_tl,
+    myname .value_required:n = true
+  }
+%================================================================================
+\DeclareOption*{ \keys_set:nV { highlightmyname } \CurrentOption }
+\ProcessOptions\relax
+%================================================================================
 % Error messages
 \msg_new:nnnn { highlightmyname } { needs-biblatex }
   { This~package~requires~biblatex! }
@@ -40,9 +52,6 @@
 %--------------------------------------------------------------------------------
 \@ifpackageloaded{biblatex}{}{\msg_warning:nn { highlightmyname } { needs-biblatex } }
 %================================================================================
-\tl_new:N \g__highlightmyname_name_tl
-\cs_generate_variant:Nn \tl_if_in:nnTF { xV }
-%--------------------------------------------------------------------------------
 \providebibmacro{highlightname:bib}{}
 \providebibmacro{highlightname:cite}{\usebibmacro{highlightname:restoreuniquename}}
 %--------------------------------------------------------------------------------

@@ -14,6 +14,9 @@
 \NeedsTeXFormat{LaTeX2e}
 \ProvidesPackage{boldmyname}[2018/5/13 highlight a specific name (SL)]
 %================================================================================
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{highlightmyname}}
+\ProcessOptions\relax
+%--------------------------------------------------------------------------------
 \RequirePackage{highlightmyname}
 %--------------------------------------------------------------------------------
 \renewbibmacro{highlightname:bib}{\bfseries}

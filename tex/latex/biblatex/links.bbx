@@ -49,11 +49,11 @@
 \DeclareFieldAlias{eprint:bioRxiv}{eprint:biorxiv}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat{eprint:pubmed}{%
-  \ifhyperref{\href{http://www.ncbi.nlm.nih.gov/pubmed/#1}}{}%
+  \ifhyperref{\href{https://www.ncbi.nlm.nih.gov/pubmed/#1}}{}%
   {\nolinkurl{PMID:#1}}}
 %--------------------------------------------------------------------------------
 \DeclareFieldFormat{eprint:pmc}{%
-  \ifhyperref{\href{http://www.ncbi.nlm.nih.gov/pmc/articles/#1}}{}%
+  \ifhyperref{\href{https://www.ncbi.nlm.nih.gov/pmc/articles/#1}}{}%
   {\nolinkurl{PMC:#1}}}
 \DeclareFieldAlias{eprint:PMC}{eprint:pmc}
 %================================================================================
@@ -76,7 +76,7 @@
     {\iffieldundef{doi}
         {\href{\thefield{url}}}
         {\href{https://dx.doi.org/\thefield{doi}}}%
-      }{#1}}
+    }{#1}}
 %--------------------------------------------------------------------------------
 \newbibmacro*{volume+pages}{%
   \printfield{volume}%
@@ -108,19 +108,19 @@
   \newunit\newblock}
 %--------------------------------------------------------------------------------
 \newbibmacro*{note+addendum+pubstate}{%
-  \printfield{note}
+  \printfield{note}%
   \newunit\newblock
   \usebibmacro{addendum+pubstate}}
 %--------------------------------------------------------------------------------
 \newbibmacro*{book+date+pages}{%
   \usebibmacro{maintitle+booktitle}%
-  \setunit{\addcomma\space}
+  \setunit{\addcomma\space}%
   \iffieldundef{maintitle}
     {\printfield{volume}%
      \printfield{part}%
      \setunit{\addcomma\space}}
-    {}
-  \usebibmacro{chapter+pages}
+    {}%
+  \usebibmacro{chapter+pages}%
   \printtext[parens]{%
     \usebibmacro{date}}%
   \newunit\newblock}
@@ -302,7 +302,6 @@
   \newunit\newblock
   \printfield{version}%
   \newunit\newblock
-%  \usebibmacro{in:}%
   \usebibmacro{doi+eprint+url}%
   \setunit*{\addcomma\space}%
   \printtext[parens]{%
@@ -322,38 +321,38 @@
   \usebibmacro{bibindex}%
   \usebibmacro{begentry}%
 %--------------------------------------------------------------------------------
-\iftoggle{bbx:eventfirst}{
-%--------------------------------------------------------------------------------
-%bbx:eventfirst true
-  \usebibmacro{link+doi/url}{%
-    \usebibmacro{organization+event}}%
-  \setunit{\printdelim{posteventdelim}}\newblock
-  \printfield{format}%
-  \usebibmacro{author/translator+others}%
-  \setunit{\printdelim{nametitledelim}}\newblock
-  \usebibmacro{title}%
-  \newunit
-  \printlist{language}%
-  \setunit{\printdelim{posttitledelim}}\newblock
-  \usebibmacro{byauthor}%
-  \setunit{\printdelim{posttitledelim}}\newblock
-}{%
-%--------------------------------------------------------------------------------
-%bbx:eventfirst false
-  \usebibmacro{author/translator+others}%
-  \setunit{\printdelim{nametitledelim}}\newblock
-  \usebibmacro{title}%
-  \newunit
-  \printlist{language}%
-  \setunit{\printdelim{posttitledelim}}\newblock
-  \usebibmacro{byauthor}%
-  \setunit{\printdelim{posttitledelim}}\newblock
-  \printfield{format}%
-  \usebibmacro{at:}%
-  \usebibmacro{link+doi/url}{%
-    \usebibmacro{organization+event}}%
-  \newunit\newblock
-}
+  \iftoggle{bbx:eventfirst}{%
+  %--------------------------------------------------------------------------------
+  %bbx:eventfirst true
+    \usebibmacro{link+doi/url}{%
+      \usebibmacro{organization+event}}%
+    \setunit{\printdelim{posteventdelim}}\newblock
+    \printfield{format}%
+    \usebibmacro{author/translator+others}%
+    \setunit{\printdelim{nametitledelim}}\newblock
+    \usebibmacro{title}%
+    \newunit
+    \printlist{language}%
+    \setunit{\printdelim{posttitledelim}}\newblock
+    \usebibmacro{byauthor}%
+    \setunit{\printdelim{posttitledelim}}\newblock
+  }{%
+  %--------------------------------------------------------------------------------
+  %bbx:eventfirst false
+    \usebibmacro{author/translator+others}%
+    \setunit{\printdelim{nametitledelim}}\newblock
+    \usebibmacro{title}%
+    \newunit
+    \printlist{language}%
+    \setunit{\printdelim{posttitledelim}}\newblock
+    \usebibmacro{byauthor}%
+    \setunit{\printdelim{posttitledelim}}\newblock
+    \printfield{format}%
+    \usebibmacro{at:}%
+    \usebibmacro{link+doi/url}{%
+      \usebibmacro{organization+event}}%
+    \newunit\newblock
+  }
 %--------------------------------------------------------------------------------
   \printfield{volumes}%
   \newunit\newblock

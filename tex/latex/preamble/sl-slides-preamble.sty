@@ -1,0 +1,162 @@
+%%  My standard preamble for slides.
+%%
+%% Requires packages: beamer, appendixnumberbeamer, backref, bookmark, etoolbox,
+%%                    lmodern, fontenc, pgfpages
+%%
+%%
+%--------------------------------------------------------------------------------
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-slides-preamble} {2020/4/27} {v1.0}
+    {standard preamble for slides (SL)}
+%================================================================================
+\RequirePackage{l3keys2e}
+\tl_new:N \g__slslides_theme_tl
+\tl_new:N \g__slslides_notes_tl
+\bool_new:N \g__slslides_symb_bool
+\bool_new:N \g__slslides_section_bool
+\bool_new:N \g__slslides_video_bool
+%---------Colours-------------------------------------------------------------------------
+\definecolor{darkgrey}{rgb}{.5 .5 .5}
+\definecolor{darkblue}{rgb}{0.27843137 0.27058824 0.5372549}
+\definecolor{darkgreen}{rgb}{0.27843137 0.5372549 0.27058824}
+\definecolor{darkred}{rgb}{0.5372549 0.27843137 0.27058824}
+%---------Citations-----------------------------------------------------------------------
+\newcommand{\rref}[1]{\hfill {\small{\color{darkgrey} [#1]}}}
+\newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
+\newcommand{\citerr}[1]{\hfill {\scriptsize{\color{darkgrey}\cite{#1}}}}
+\newcommand{\citerrr}[1]{{\scriptsize{\color{darkgrey}\cite{#1}}}}
+\newcommand{\citerp}[1]{\hfill {\scriptsize{\color{darkgrey}\citep{#1}}}}
+\newcommand{\bref}[2]{\hyperlink{#1}{\beamerbutton{#2}}}
+%--------------------------------------------------------------------------------
+% Error message for incorrect key
+\msg_new:nnnn { slslides } { unknown-option } { Unknown~option~'#1'! }
+  { Known~options:~colour/color,~theme,~notes,~symb,~section,~video. }
+%--------------------------------------------------------------------------------
+% Package options
+\keys_define:nn { slslides }
+  {
+    colour .code:n = \usecolortheme[#1]{structure},
+    colour .value_required:n = true,
+    color .code:n = \usecolortheme[#1]{structure},
+    color .value_required:n = true,
+    theme .tl_gset:N = \g__slslides_theme_tl,
+    theme .value_required:n = true,
+    theme .initial:n = Spare,
+    notes .tl_gset:N = \g__slslides_notes_tl,
+    notes .default:n = right,
+    notes .initial:n = none,
+    symb .bool_gset:N = \g__slslides_symb_bool,
+    symb .default:n = true,
+    symb .initial:n = true,
+    section .bool_gset:N = \g__slslides_section_bool,
+    section .default:n = true,
+    video .bool_gset:N = \g__slslides_video_bool,
+    video .default:n = true,
+    unknown .code:n = \msg_warning:nnn { slslides } { unknown-option } {#1},
+  }
+\ProcessKeysPackageOptions { slslides }
+%================================================================================
+\exp_args:NV \usetheme \g__slslides_theme_tl
+\RequirePackage{lmodern}
+\RequirePackage[T1]{fontenc}
+%frame numbers for slides after \appendix
+\RequirePackage{appendixnumberbeamer}
+%---------Format--------------------------------------------------------------------------
+%new section slides:
+\bool_if:NT \g__slslides_section_bool
+  { \AtBeginSection[]{\frame{\sectionpage}} }
+%--------------------------------------------------------------------------------
+%videos:
+\bool_if:NT \g__slslides_video_bool
+  { \RequirePackage[type=pdf,controls=none,poster=first]{animate} }
+%================================================================================
+%---Slide bookmarks-----------------------------------------------------------------------
+\RequirePackage{bookmark}
+\RequirePackage{etoolbox}
+\ExplSyntaxOff
+\makeatletter
+\apptocmd{\beamer@@frametitle}{\only<1>{\bookmark[page=\the\c@page,level=4]{#1}}}%
+{\message{** patching of \string\beamer@@frametitle succeeded **}}%
+{\message{** patching of \string\beamer@@frametitle failed **}}%
+\makeatother
+\ExplSyntaxOn
+%---Back references-----------------------------------------------------------------------
+\RequirePackage[hyperpageref]{backref}
+\renewcommand*{\backref}[1]{}
+\renewcommand*{\backrefalt}[4]{%
+ \ifcase #1 %
+  %
+ \or
+  #2
+ \else
+  #2
+ \fi
+}
+\renewcommand*{\backrefentrycount}[2]{\beamerbutton{#1}}
+\renewcommand*{\backrefsep}{ }
+\renewcommand*{\backreftwosep}{ }
+\renewcommand*{\backreflastsep}{ }
+%================================================================================
+\tl_if_in:NnF \g__slslides_notes_tl { none false }
+  {
+    \RequirePackage{pgfpages}
+    \exp_args:Nx \setbeameroption{show notes on second screen=\g__slslides_notes_tl}
+  }
+%================================================================================
+\bool_if:NT \g__slslides_symb_bool
+{
+\newcommand{\CD}{\mathcal{D}}
+\newcommand{\CE}{\mathcal{E}}
+\newcommand{\CG}{\mathcal{G}}
+\newcommand{\CH}{\mathcal{H}}
+\newcommand{\CK}{\mathcal{K}}
+\newcommand{\CO}{\mathcal{O}}
+\newcommand{\CL}{\mathcal{L}}
+\newcommand{\CM}{\mathcal{M}}
+\newcommand{\CN}{\mathcal{N}}
+\newcommand{\CV}{\mathcal{V}}
+%
+\newcommand{\dM}{\mathfrak{M}}
+\newcommand{\dmd}{\mathfrak{d}}
+\newcommand{\dmD}{\mathfrak{D}}
+%
+\newcommand{\bR}{\mathbb{R}}
+\newcommand{\bC}{\mathbb{C}}
+\newcommand{\CP}{\mathbb{CP}}
+\newcommand{\bZ}{\mathbb{Z}}
+%
+\newcommand{\ad}{{\dot{\alpha}}}
+\newcommand{\bd}{{\dot{\beta}}}
+\newcommand{\gd}{{\dot{\gamma}}}
+\newcommand{\dd}{{\dot{\delta}}}
+\newcommand{\ed}{{\dot{\epsilon}}}
+%
+\newcommand{\bs}{\overline{\sigma}}
+\newcommand{\br}{\overline{\rho}}
+\newcommand{\bpsi}{\overline{\psi}}
+\newcommand{\bchi}{\overline{\chi}}
+\newcommand{\bPsi}{\overline{\Psi}}
+\newcommand{\bQ}{\overline{Q}}
+\newcommand{\bS}{\overline{S}}
+\newcommand{\bJ}{\overline{J}}
+\newcommand{\zb}{{\bar z}}
+\newcommand{\wb}{{\overline w}}
+\newcommand{\cb}{{\bar c}}
+\newcommand{\ab}{{\bar a}}
+\newcommand{\bb}{{\bar b}}
+%\newcommand{\bp}{{\bar\partial}}
+%
+%\newcommand{\p}{\partial}
+\newcommand{\apm}{{\alpha^{\prime}}}
+\newcommand{\adg}{a^\dagger}
+%
+\newcommand{\impl}{$\implies$}
+\newcommand{\lto}{$\to$}
+
+% Un-italicised letters
+\renewcommand{\dr}{\mathsf{d}}
+\renewcommand{\e}{\mathsf{e}}
+\renewcommand{\ir}{\mathsf{i}}
+}
+%================================================================================
+\endinput

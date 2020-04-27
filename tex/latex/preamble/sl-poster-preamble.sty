@@ -1,0 +1,91 @@
+%%  My standard preamble for posters.
+%%
+%% Requires packages: beamer, appendixnumberbeamer, backref, bookmark, etoolbox,
+%%                    lmodern, fontenc, pgfpages
+%%
+%%
+%--------------------------------------------------------------------------------
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-slides-poster} {2020/4/27} {v1.0}
+    {standard preamble for posters (SL)}
+%--------------------------------------------------------------------------------
+\RequirePackage{l3keys2e}
+%================================================================================
+\tl_new:N \g__slposter_theme_tl
+\tl_new:N \g__slposter_orientation_tl
+\bool_new:N \g__slposter_section_bool
+\prop_new:N \g__slposter_beamer_prop
+\prop_new:N \g__slposter_options_prop
+%--------------------------------------------------------------------------------
+% Error message for incorrect key
+\msg_new:nnnn { slposter } { unknown-option } { Unknown~option~'#1'! }
+  { Known~options:~colour/color,~theme,~symb,~section. }
+%================================================================================
+% Package options
+\keys_define:nn { slposter }
+  {
+    colour .prop_gput:N = \g__slposter_beamer_prop,
+    colour .value_required:n = true,
+    color .code:n = \prop_gput:Nnn \g__slposter_beamer_prop { colour } {#1},
+    color .value_required:n = true,
+    theme .prop_gput:N = \g__slposter_beamer_prop,
+    theme .value_required:n = true,
+    theme .initial:n = Spartan,
+    symb .prop_gput:N = \g__slposter_beamer_prop,
+    symb .default:n = true,
+    section .bool_gset:N = \g__slposter_section_bool,
+    section .default:n = true,
+    section .initial:n = true,
+    orientation .prop_gput:N = \g__slposter_options_prop,
+    orientation .value_required:n = true,
+    orientation .initial:n = Landscape,
+    scale .prop_gput:N = \g__slposter_options_prop,
+    scale .value_required:n = true,
+    size .prop_gput:N = \g__slposter_options_prop,
+    size .value_required:n = true,
+    width .prop_gput:N = \g__slposter_options_prop,
+    width .value_required:n = true,
+    height .prop_gput:N = \g__slposter_options_prop,
+    height .value_required:n = true,
+    unknown .code:n = \msg_warning:nnn { slposter } { unknown-option } {#1},
+  }
+\ProcessKeysPackageOptions { slposter }
+%================================================================================
+\prop_gput:Nnn \g__slposter_beamer_prop { section } { false }
+\prop_map_inline:Nn \g__slposter_beamer_prop
+  { \PassOptionsToPackage { #1=#2 } { sl-slides-preamble } }
+\RequirePackage{sl-slides-preamble}
+%================================================================================
+\bool_lazy_or:nnT
+  { \prop_if_in_p:Nn \g__slposter_options_prop { width } }
+  { \prop_if_in_p:Nn \g__slposter_options_prop { height } }
+    { \prop_gput_if_new:Nnn \g__slposter_options_prop { size } { custom } }
+\prop_if_in:NnT \g__slposter_options_prop { width }
+  {
+    \prop_get:NnN \g__slposter_options_prop { width } \l_tmpa_dim
+    \prop_gput:Nnx \g__slposter_options_prop  { width }
+      { \exp_args:NV \dim_to_decimal_in_unit:nn \l_tmpa_dim { 1cm } }
+  }
+\prop_if_in:NnT \g__slposter_options_prop { height }
+  {
+    \prop_get:NnN \g__slposter_options_prop { height } \l_tmpa_dim
+    \prop_gput:Nnx \g__slposter_options_prop  { height }
+      { \exp_args:NV \dim_to_decimal_in_unit:nn \l_tmpa_dim { 1cm } }
+  }
+%--------------------------------------------------------------------------------
+\prop_map_inline:Nn \g__slposter_options_prop
+  { \PassOptionsToPackage { #1=#2 } { beamerposter } }
+\RequirePackage{beamerposter}
+%---------Citations-------------------------------------------------------
+\renewcommand{\rref}[1]{\hfill {\footnotesize{\color{darkgrey} [#1]}}}
+\renewcommand{\rrref}[1]{ {\color{darkgrey} #1}}
+\renewcommand{\citerr}[1]{\hfill {\footnotesize{\color{darkgrey}\cite{#1}}}}
+\renewcommand{\citerp}[1]{\hfill {\footnotesize{\color{darkgrey}\citep{#1}}}}
+%---------Format--------------------------------------------------------------------------
+\RequirePackage{times}
+\addtolength{\abovedisplayshortskip}{-\baselinestretch\baselineskip}
+%new section block
+\bool_if:NT \g__slposter_section_bool
+  { \AtBeginSection[]{\usebeamertemplate{section title block}} }
+%================================================================================
+\endinput

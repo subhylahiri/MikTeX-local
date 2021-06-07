@@ -9,6 +9,11 @@
 \ProvidesExplPackage {sl-slides-preamble} {2020/4/27} {v1.0}
     {standard preamble for slides (SL)}
 %================================================================================
+% Error message for incorrect key
+\msg_new:nnnn { slslides } { unknown-option } { Unknown~option~'#1'! }
+  { Known~options:~colour/color,~theme,~notes,~symb,~section,~video. }
+\msg_new:nnn { slslides } { generic-info } { \msg_line_context: ~'#1' }
+%================================================================================
 \RequirePackage{l3keys2e}
 \tl_new:N \g__slslides_theme_tl
 \tl_new:N \g__slslides_notes_tl
@@ -16,10 +21,12 @@
 \bool_new:N \g__slslides_section_bool
 \bool_new:N \g__slslides_video_bool
 %---------Colours-------------------------------------------------------------------------
+\ExplSyntaxOff
 \definecolor{darkgrey}{rgb}{.5 .5 .5}
 \definecolor{darkblue}{rgb}{0.27843137 0.27058824 0.5372549}
 \definecolor{darkgreen}{rgb}{0.27843137 0.5372549 0.27058824}
 \definecolor{darkred}{rgb}{0.5372549 0.27843137 0.27058824}
+\ExplSyntaxOn
 %---------Citations-----------------------------------------------------------------------
 \newcommand{\rref}[1]{\hfill {\small{\color{darkgrey} [#1]}}}
 \newcommand{\rrref}[1]{ {\color{darkgrey} #1}}
@@ -28,16 +35,13 @@
 \newcommand{\citerp}[1]{\hfill {\scriptsize{\color{darkgrey}\citep{#1}}}}
 \newcommand{\bref}[2]{\hyperlink{#1}{\beamerbutton{#2}}}
 %--------------------------------------------------------------------------------
-% Error message for incorrect key
-\msg_new:nnnn { slslides } { unknown-option } { Unknown~option~'#1'! }
-  { Known~options:~colour/color,~theme,~notes,~symb,~section,~video. }
 %--------------------------------------------------------------------------------
 % Package options
 \keys_define:nn { slslides }
   {
-    colour .code:n = \usecolortheme[#1]{structure},
+    colour .code:n = { \usecolortheme[#1]{structure} },
     colour .value_required:n = true,
-    color .code:n = \usecolortheme[#1]{structure},
+    color .code:n = { \usecolortheme[#1]{structure} },
     color .value_required:n = true,
     theme .tl_gset:N = \g__slslides_theme_tl,
     theme .value_required:n = true,
@@ -52,7 +56,7 @@
     section .default:n = true,
     video .bool_gset:N = \g__slslides_video_bool,
     video .default:n = true,
-    unknown .code:n = \msg_warning:nnn { slslides } { unknown-option } {#1},
+    unknown .code:n = { \msg_warning:nnn { slslides } { unknown-option } {#1} },
   }
 \ProcessKeysPackageOptions { slslides }
 %================================================================================
@@ -97,10 +101,10 @@
 \renewcommand*{\backreftwosep}{ }
 \renewcommand*{\backreflastsep}{ }
 %================================================================================
-\tl_if_in:NnF \g__slslides_notes_tl { none false }
+\tl_if_in:noF { none false } \g__slslides_notes_tl
   {
     \RequirePackage{pgfpages}
-    \exp_args:Nx \setbeameroption{show notes on second screen=\g__slslides_notes_tl}
+    \exp_args:Nx \setbeameroption { show~notes~on~second~screen = \g__slslides_notes_tl }
   }
 %================================================================================
 \bool_if:NT \g__slslides_symb_bool
@@ -154,9 +158,9 @@
 \newcommand{\lto}{$\to$}
 
 % Un-italicised letters
-\renewcommand{\dr}{\mathsf{d}}
-\renewcommand{\e}{\mathsf{e}}
-\renewcommand{\ir}{\mathsf{i}}
+\newcommand{\dr}{\mathsf{d}}
+\newcommand{\e}{\mathsf{e}}
+\newcommand{\ir}{\mathsf{i}}
 }
 %================================================================================
 \endinput

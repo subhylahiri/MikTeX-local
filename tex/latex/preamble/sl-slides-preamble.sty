@@ -17,6 +17,7 @@
 \RequirePackage{l3keys2e}
 \tl_new:N \g__slslides_theme_tl
 \tl_new:N \g__slslides_notes_tl
+\tl_new:N \g__slslides_inkdir_tl
 \bool_new:N \g__slslides_symb_bool
 \bool_new:N \g__slslides_section_bool
 \bool_new:N \g__slslides_video_bool
@@ -61,8 +62,8 @@
 \ProcessKeysPackageOptions { slslides }
 %================================================================================
 \exp_args:NV \usetheme \g__slslides_theme_tl
-\RequirePackage{lmodern}
-\RequirePackage[T1]{fontenc}
+% \RequirePackage{lmodern}
+% \RequirePackage[T1]{fontenc}
 %frame numbers for slides after \appendix
 \RequirePackage{appendixnumberbeamer}
 %---------Format--------------------------------------------------------------------------
@@ -106,6 +107,32 @@
     \RequirePackage{pgfpages}
     \exp_args:Nx \setbeameroption { show~notes~on~second~screen = \g__slslides_notes_tl }
   }
+%================================================================================
+% Graphics
+\pdfsuppresswarningpagegroup=1
+\RequirePackage{epstopdf}
+\epstopdfsetup{update,suffix=-generated}
+%
+\file_if_exist:nT { "C:/Program~Files/Inkscape/inkscape.exe" }
+  {
+    \tl_gset:Nn \g__slslides_inkdir_tl { C:/Program~Files/Inkscape/ }
+  }
+\file_if_exist:nT { "/Applications/Inkscape.app/Contents/Resources/bin/inkscape" }
+  {
+    \tl_gset:Nn \g__slslides_inkdir_tl { /Applications/Inkscape.app/Contents/Resources/bin/ }
+  }
+%
+\sys_if_output_pdf:TF
+  {
+    \epstopdfDeclareGraphicsRule {.svg} {pdf} {.pdf}
+      { "\g__slslides_inkdir_tl inkscape"~-f~#1~-C~-A~\OutputFile }
+  }
+  { \DeclareGraphicsRule{.png}{eps}{.bb}{} }
+% \RequirePackage{float-panels}
+\RequirePackage{adjustbox}
+\newcommand{\aligntop}[1]{\adjustbox{valign=t}{#1}}
+\newcommand{\alignmid}[1]{\adjustbox{valign=c}{#1}}
+
 %================================================================================
 \bool_if:NT \g__slslides_symb_bool
 {
@@ -158,9 +185,9 @@
 \newcommand{\lto}{$\to$}
 
 % Un-italicised letters
-\newcommand{\dr}{\mathsf{d}}
-\newcommand{\e}{\mathsf{e}}
-\newcommand{\ir}{\mathsf{i}}
+\providecommand{\dr}{\mathsf{d}}
+\providecommand{\e}{\mathsf{e}}
+\providecommand{\ir}{\mathsf{i}}
 }
 %================================================================================
 \endinput

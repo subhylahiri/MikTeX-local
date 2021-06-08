@@ -131,6 +131,9 @@
         \DeclareGraphicsRule{.png}{eps}{.bb}{}
     \fi
     % \RequirePackage{float-panels}
+    \usepackage{adjustbox}
+    \newcommand{\aligntop}[1]{\adjustbox{valign=t}{#1}}
+    \newcommand{\alignmid}[1]{\adjustbox{valign=c}{#1}}
 }{}
 \iftoggle{sl@draft}{
   \RequirePackage[notref,notcite,color]{showkeys}

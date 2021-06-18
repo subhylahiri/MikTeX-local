@@ -1,0 +1,33 @@
+%%  My standard preamble.
+%%
+%% Requires packages: caption, array, multirow, booktabs
+%%
+%% History: 2021/06/16 v1.0      copied from sl_preamble.sty
+%--------------------------------------------------------------------------------
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{sl-tables-preamble}[2021/6/16 v1.0 standard preamble for tables]
+%--------------------------------------------------------------------------------
+\makeatletter
+%--------------------------------------------------------------------------------
+\RequirePackage{etoolbox}
+\RequirePackage[hypcap]{caption}%links to figures
+\RequirePackage{array}
+\RequirePackage{multirow}
+\RequirePackage{booktabs}
+%--------------------------------------------------------------------------------
+\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{array}}
+\ProcessOptions
+%--------------------------------------------------------------------------------
+%% Preamble:
+%
+\newcolumntype{C}{>{$}c<{$}}
+\newcolumntype{L}{>{$}l<{$}}
+\newcolumntype{R}{>{$}r<{$}}
+\newcolumntype{A}{R@{\,}L}
+\newcommand{\colhead}[1]{\multicolumn{2}{l}{#1}}
+\newcommand{\colheadc}[1]{\multicolumn{2}{c}{#1}}
+\newcommand{\colheadr}[1]{\multicolumn{2}{r}{#1}}
+% \RequirePackage{float-panels}
+% ----------------------------------------------------------------
+\makeatother
+\endinput

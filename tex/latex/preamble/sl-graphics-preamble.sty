@@ -1,0 +1,120 @@
+%%  My standard preamble.
+%%
+%% Requires packages: xcolor, ifpdf, caption, graphicx, epstopdf, expl3, l3keys2e
+%%                    paralist*, enumitem*, subfigure*
+%%  (* depending on options)
+%%
+%% Options: (no)svg  - enable svg files (requires inkscape)
+%%          panels   - which package to use for panels:  paralist, enumitem, none(default)?
+%%          unknown  - passed to `graphicx`.
+%%
+%% History: 2021/06/16 v1.0      copied from sl-slides-preamble.sty
+%--------------------------------------------------------------------------------
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-graphics-preamble} {2020/6/16} {v1.0}
+    {standard preamble for graphics}
+%================================================================================
+% Error message for incorrect key
+\msg_new:nnnn { slgraphics } { unknown-choice } { Unknown~vlue~'#3'~for~option~'#1'! }
+  { Known~choices~for~option~'#1':~#2. }
+\msg_new:nnn { slgraphics } { generic-info } { \msg_line_context: ~'#1' }
+%================================================================================
+\RequirePackage{l3keys2e}
+\tl_new:N \g__slgraphics_inkdir_tl
+\tl_new:N \g__slgraphics_panels_tl
+\bool_new:N \g__slgraphics_svg_bool
+%--------------------------------------------------------------------------------
+% Package options
+\keys_define:nn { slgraphics }
+  {
+    nosvg .bool_gset_inverse:N = \g__slgraphics_svg_bool,
+    nosvg .default:n = true,
+    svg .bool_gset:N = \g__slgraphics_svg_bool,
+    svg .default:n = true,
+    svg .initial:n = true,
+    panels .choices:nn = { paralist, enumitem, none }
+      { \tl_gset:NV \g__slgraphics_panels_tl \l_keys_choice_tl },
+    panels / unknown .code:n =
+      \msg_warning:nnxxx { slgraphics } { unknown-choice }
+        { panels } { paralist, enumitem, none } % Name of choice key, Valid choices
+        { \exp_not:n {#1} }                     % Invalid choice given
+    panels .value_required:n = true,
+    panels .initial:n = none,
+    unknown .code:n = { \PassOptionsToPackage{\CurrentOption}{graphicx} },
+  }
+\ProcessKeysPackageOptions { slgraphics }
+%================================================================================
+%% Preamble:
+% \RequirePackage{graphics} for finding documentation only
+% \RequirePackage{pgf}
+\RequirePackage{xcolor}
+\RequirePackage{ifpdf}
+\RequirePackage[hypcap]{caption}%links to figures
+\RequirePackage{graphicx}
+\RequirePackage{epstopdf}
+%
+\epstopdfsetup{update,suffix=-generated}
+\pdfsuppresswarningpagegroup=1
+%
+\bool_if:NT \g__slgraphics_svg_bool
+{%
+  \file_if_exist:nT { "C:/Program~Files/Inkscape/inkscape.exe" }
+    {
+      \tl_gset:Nn \g__slslides_inkdir_tl { C:/Program~Files/Inkscape/ }
+    }
+  \file_if_exist:nT { "/Applications/Inkscape.app/Contents/Resources/bin/inkscape" }
+    {
+      \tl_gset:Nn \g__slslides_inkdir_tl { /Applications/Inkscape.app/Contents/Resources/bin/ }
+    }
+    %
+  \sys_if_output_pdf:T
+    {
+      \epstopdfDeclareGraphicsRule {.svg} {pdf} {.pdf}
+        { "\g__slslides_inkdir_tl inkscape"~-f~#1~-C~-A~\OutputFile }
+    }
+}
+%
+\sys_if_output_pdf:F
+  { \DeclareGraphicsRule{.png}{eps}{.bb}{} }
+% ----------------------------------------------------------------
+% \RequirePackage{float-panels}
+%
+\tl_if_eq:NnT \g__slgraphics_panels_tl { paralist }
+  {
+    \RequirePackage{paralist}
+    \ExplSyntaxOff
+    \newenvironment{myenuma}{\begin{inparaenum}[(a)]}{\end{inparaenum}}
+    \newenvironment{myenumi}{\begin{inparaenum}[i)]}{\end{inparaenum}}
+    \newenvironment{myenumA}{\begin{inparaenum}[\bfseries A.]}{\end{inparaenum}}
+    \newenvironment{myenumI}{\begin{inparaenum}[\bfseries I.]}{\end{inparaenum}}
+    \newenvironment{myenumr}{\begin{inparaenum}[1.]}{\end{inparaenum}}
+    % for nested lists, \ref only produces innermost item:  (hacky)
+    \makeatletter % for internal macros with @
+    \renewcommand\p@enumii{}
+    \makeatother
+    \ExplSyntaxOn
+  }
+\tl_if_eq:NnT \g__slgraphics_panels_tl { enumitem }
+  {
+    \RequirePackage[inline]{enumitem}
+    \newlist{myenuma}{enumerate*}{10}
+    \setlist[myenuma]{label=(\alph*),ref=\alph*}
+    \newlist{myenumA}{enumerate*}{10}
+    \setlist[myenumA]{label=\Alph*.,ref=\Alph*}
+    \newlist{myenumi}{enumerate*}{10}
+    \setlist[myenumi]{label=\roman*),ref=\roman*}
+    \newlist{myenumI}{enumerate*}{10}
+    \setlist[myenumI]{label=\Roman*.,ref=\Roman*}
+  }
+\tl_if_eq:NnT \g__slgraphics_panels_tl { subfigure }
+  {
+    \RequirePackage[FIGBOTCAP,nooneline,raggedright,tight]{subfigure}
+    \newcommand{\labelsf}[1]{\label{#1}\subref{#1}}
+  }
+% ----------------------------------------------------------------
+\RequirePackage{adjustbox}
+\newcommand{\aligntop}[1]{\adjustbox{valign=t}{#1}}
+\newcommand{\alignmid}[1]{\adjustbox{valign=c}{#1}}
+% ----------------------------------------------------------------
+\makeatother
+\endinput

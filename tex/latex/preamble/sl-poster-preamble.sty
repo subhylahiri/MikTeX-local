@@ -1,13 +1,26 @@
 %%  My standard preamble for posters.
 %%
 %% Requires packages: beamer, beamerposter, appendixnumberbeamer, backref, bookmark,
-%%                    etoolbox, lmodern, fontenc, pgfpages, times, expl3, l3keys2e,
+%%                    etoolbox, lmodern, fontenc, times, expl3, l3keys2e,
 %%                    sl-slides-preamble
+%%  (* depending on options)
 %%
+%% Options: colour/color  - Base for colour scheme, e.g. colour={rgb={0.53 0.27 0.27}}
+%%          theme         - Beamer theme to use, default=Spare
+%%          symb          - define symbols
+%%          section       - put a section-title box at the start of each section
+%%          orientation   - landscape(default)/portrait
+%%          scale         - passed to `beamerposter`
+%%          size          - passed to `beamerposter`
+%%          width         - units converted and passed to `beamerposter`
+%%          height        - units converted and passed to `beamerposter`
+%%          unknown       - passed to `sl-slides-preamble`. 
+%%
+%% History: 2020/04/27 v1.0      copied from sl_poster_preamble.tex
 %--------------------------------------------------------------------------------
 \RequirePackage{expl3}
-\ProvidesExplPackage {sl-slides-poster} {2020/4/27} {v1.0}
-    {standard preamble for posters (SL)}
+\ProvidesExplPackage {sl-poster-preamble} {2020/4/27} {v1.0}
+    {standard preamble for posters}
 %--------------------------------------------------------------------------------
 \RequirePackage{l3keys2e}
 %================================================================================
@@ -47,7 +60,7 @@
     width .value_required:n = true,
     height .prop_gput:N = \g__slposter_options_prop,
     height .value_required:n = true,
-    unknown .code:n = \msg_warning:nnn { slposter } { unknown-option } {#1},
+    unknown .code:n = { \PassOptionsToPackage{\CurrentOption}{sl-slides-preamble} },
   }
 \ProcessKeysPackageOptions { slposter }
 %================================================================================

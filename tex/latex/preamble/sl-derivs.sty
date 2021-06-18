@@ -22,19 +22,18 @@
 %%    \intd[_0^\infty]{t} f(t)
 %%    \integ[_0^\infty][f(x)]{x}
 %%
-%% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
-%%          2019/09/10 v2.0      (SL) using expl3
-
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{sl-derivs}[2019/09/10 v2.0 derivative notation (SL)]
+%% History: 2018/03/17 v1.0      copied & updated defns from sl_definitions.tex
+%%          2019/09/10 v2.0      using expl3
+%%          2021/06/17 v2.0      using expl3 packaging
+%================================================================================
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-derivs} {2019/09/10} {v2.0} {derivative notation}
 %--------------------------------------------------------------------------------
 %\RequirePackage{interface3}
-\RequirePackage{expl3}
 \RequirePackage{xparse}
 \RequirePackage{sltools}
 \ExplSyntaxOn
 %================================================================================
-
 \tl_new:N \l__slderivs_numer_tl
 \tl_new:N \l__slderivs_denom_tl
 \int_new:N \l__slderivs_order_int

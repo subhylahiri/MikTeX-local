@@ -1,34 +1,52 @@
-%%  My standard definitions.
+%%  My standard definitions for mathematics.
 %%
-%% Requires packages: amsmath, amssymb, delim
+%% Requires packages: amsmath, amssymb, amsthm*, delim*, xparse*
+%%  (* depending on options)
 %%
+%% Options: (no)delims  - use sl-delims.sty
+%%          (no)derivs  - use sl-derivs.sty
+%%          (no)symb    - define symbols
+%%          theorem     - use amsthm and define theorem-like environments
 %%
+%% History: 2018/04/02 v1.0      copied from sl_definitions.tex
+%%          2021/06/16 v2.0      use expl3
+%-------------------------------------------------------------------------------
+\RequirePackage{expl3}
+\ProvidesExplPackage {sl-defs} {2018/4/20} {v2.0} {standard definitions}
+\ExplSyntaxOn
 %--------------------------------------------------------------------------------
-\NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{sl-defs}[2018/4/20 v1.0 standard definitions (SL)]
-%--------------------------------------------------------------------------------
-\RequirePackage{etoolbox}
-\newtoggle{sl@del}
-\newtoggle{sl@der}
-\newtoggle{sl@symb}
-%\usepackage{ams} for finding documentation only
-%\usepackage{amsmath} for finding documentation only
-%\usepackage{amssymb} for finding documentation only
+\RequirePackage{l3keys2e}
+\bool_new:N \g__sldefs_delims_bool
+\bool_new:N \g__sldefs_derivs_bool
+\bool_new:N \g__sldefs_symb_bool
+\bool_new:N \g__sldefs_thm_bool
 \RequirePackage{amsmath,amssymb}
 %--------------------------------------------------------------------------------
-\DeclareOption{nodelims}{\togglefalse{sl@del}}
-\DeclareOption{delims}{\toggletrue{sl@del}}
-\DeclareOption{noderivs}{\togglefalse{sl@der}}
-\DeclareOption{derivs}{\toggletrue{sl@der}}
-\DeclareOption{nosymb}{\togglefalse{sl@symb}}
-\DeclareOption{symb}{\toggletrue{sl@symb}}
-
-%\DeclareOption*{\PassOptionsToPackage{\CurrentOption}{}}
-\ExecuteOptions{delims,derivs,symb}
-\ProcessOptions
-%--------------------------------------------------------------------------------
-\iftoggle{sl@del}{\RequirePackage{sl-delims}}{}
-\iftoggle{sl@der}{\RequirePackage{sl-derivs}}{}
+\keys_define:nn { sldefs }
+  {
+    nodelims .bool_gset_inverse:N = \g__sldefs_delims_bool,
+    nodelims .default:n = true,
+    delims .bool_gset:N = \g__sldefs_delims_bool,
+    delims .default:n = true,
+    delims .initial:n = true,
+    noderivs .bool_gset_inverse:N = \g__sldefs_derivs_bool,
+    noderivs .default:n = true,
+    derivs .bool_gset:N = \g__sldefs_derivs_bool,
+    derivs .default:n = true,
+    derivs .initial:n = true,
+    nosymb .bool_gset_inverse:N = \g__sldefs_symb_bool,
+    nosymb .default:n = true,
+    symb .bool_gset:N = \g__sldefs_symb_bool,
+    symb .default:n = true,
+    symb .initial:n = true,
+    theorem .bool_gset:N = \g__sldefs_thm_bool,
+    theorem .default:n = true,
+    theorem .initial:n = false,
+  }
+\ProcessKeysPackageOptions { sldefs }
+%================================================================================
+\bool_if:NT \g__sldefs_delims_bool { \RequirePackage{sl-delims} }
+\bool_if:NT \g__sldefs_derivs_bool { \RequirePackage{sl-derivs} }
 %--------------------------------------------------------------------------------
 \newcommand{\vp}{\vspace{0.5cm}}
 \newcommand{\hp}{\hspace{0.5cm}}
@@ -93,7 +111,9 @@
 \newcommand{\means}{\Longleftrightarrow}
 \newcommand{\requires}{\Longleftarrow}
 %--------------------------------------------------------------------------------
-\iftoggle{sl@symb}{%
+\bool_if:NT \g__sldefs_symb_bool
+% \iftoggle{sl@symb}
+{%
   \RequirePackage{bbm}
   %
   \newcommand{\R}{\mathbb{R}}
@@ -148,6 +168,42 @@
   %
   \newcommand{\apm}{{\alpha^{\prime}}}
   \newcommand{\adg}{a^\dagger}
-}{}
+}%{}
+%--------------------------------------------------------------------------------
+\bool_if:NT \g__sldefs_thm_bool
+% \iftoggle{sl@theorem}
+{
+  \RequirePackage{amsthm}
+  \newtheoremstyle{sldefinition}%
+    {3pt}%space above
+    {3pt}%space below
+    {}%body font
+    {}%indent amount
+    {\bfseries}%theorem head font
+    {}%theorem head punctuation
+    {\newline}%space after head
+    {\thmname{#1}\thmnumber{~#2}:{\bfseries\thmnote{~#3}}}%head spec
+  \newtheoremstyle{slplain}%
+    {3pt}%space above
+    {3pt}%space below
+    {}%body font
+    {}%indent amount
+    {\bfseries}%theorem head font
+    {}%theorem head punctuation
+    {\newline}%space after head
+    {\thmname{#1}\thmnumber{~#2}{\bfseries\thmnote{~(#3)}}:~}%head spec
+  %
+  \theoremstyle{slplain}
+  \newtheorem{thm}{Theorem}
+  \newtheorem{cor}[thm]{Corollary}
+  \newtheorem{lem}[thm]{Lemma}
+  %
+  \theoremstyle{sldefinition}
+  \newtheorem{defn}{Definition}
+  %
+  \theoremstyle{remark}
+  \newtheorem*{notn}{Notation}
+  \newtheorem*{rem}{Remark}
+}%{}
 %--------------------------------------------------------------------------------
 \endinput

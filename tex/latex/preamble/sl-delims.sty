@@ -31,20 +31,18 @@
 %%    \brcfrac{}{}
 %%    \brkfrac{}{}
 %%
-%% History: 2018/03/17 v1.0      (SL) copied & updated defns from sl_definitions.tex
-
+%% History: 2018/03/17 v1.0      copied & updated defns from sl_definitions.tex
+%================================================================================
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesPackage{sl-delims}[2018/3/17 v1.0 custom delimiters (SL)]
-
+\ProvidesPackage{sl-delims}[2018/3/17 v1.0 custom delimiters]
+%================================================================================
 \RequirePackage{delim}
 \RequirePackage{etoolbox}
 \RequirePackage{MnSymbol}
-
-
+%--------------------------------------------------------------------------------
 \makeatletter
 \newcommand{\dlm@opt}[1]{\ifblank{#1}{\:\cdot\:}{#1}}
-
-
+%--------------------------------------------------------------------------------
 % brackets etc.
 \delimdef\prn#1{\dleft( \dlm@opt{#1} \dright)}
 \delimdef\brc#1{\dleft\{ \dlm@opt{#1} \dright\}}
@@ -75,5 +73,6 @@
 \newcommand{\absfrac}[2]{\abs{\frac{#1}{#2}}}
 \newcommand{\ceilfrac}[2]{\ceil{\frac{#1}{#2}}}
 \newcommand{\floorfrac}[2]{\floor{\frac{#1}{#2}}}
-
+%================================================================================
 \makeatother
+\endinput

@@ -4,7 +4,7 @@
 %
 %================================================================================
 \ProvidesExplFile {process-name-split.def} {2019/09/16} {v1.0}
-  {process names for process-name.sty (SL)}
+  {process names for process-name.sty}
 %================================================================================
 %\RequirePackage{interface3}
 %\RequirePackage{expl3}

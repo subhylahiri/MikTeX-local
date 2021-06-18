@@ -4,7 +4,7 @@
 %
 %================================================================================
 \ProvidesExplFile {process-name-sort.def} {2019/09/16} {v1.0}
-  {sorting names for process-name.sty (SL)}
+  {sorting names for process-name.sty}
 %================================================================================
 %\RequirePackage{interface3}
 %\RequirePackage{expl3}

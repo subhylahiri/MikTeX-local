@@ -4,7 +4,7 @@
 %
 %================================================================================
 \ProvidesExplFile {process-name-assemble.DEF} {2019/09/16} {v1.0}
-  {format & combine name parts for process-name.sty (SL)}
+  {format & combine name parts for process-name.sty}
 %================================================================================
 %\RequirePackage{interface3}
 %\RequirePackage{expl3}

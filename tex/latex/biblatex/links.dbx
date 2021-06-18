@@ -1,4 +1,4 @@
-\ProvidesFile{links.dbx}[2018/5/20 custom data types (SL)]
+\ProvidesFile{links.dbx}[2018/5/20 custom data types]
 %================================================================================
 \DeclareDatamodelEntrytypes{presentation,preprint}
 \DeclareDatamodelFields[type=field,datatype=literal]{format}

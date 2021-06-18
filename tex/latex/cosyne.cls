@@ -14,10 +14,10 @@
 %%
 %% To save extra space, try \usepackage{savetrees}
 %%
-%% History: 2018/11/8 v1.0      (SL) created
+%% History: 2018/11/8 v1.0      created
 %--------------------------------------------------------------------------------
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{cosyne}[2018/3/17 v1.0 Cosyne abstract documents (SL)]
+\ProvidesClass{cosyne}[2018/3/17 v1.0 Cosyne abstract documents]
 %--------------------------------------------------------------------------------
 \RequirePackage{etoolbox}
 \newcommand{\OptionalPackageHook}{}

@@ -4,7 +4,7 @@
 %
 %================================================================================
 \ProvidesExplFile {author-info-cont.def} {2019/09/18} {v1.0}
-    {print contact lists for author-info.sty (SL)}
+    {print contact lists for author-info.sty}
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}

@@ -4,7 +4,7 @@
 %
 %================================================================================
 \ProvidesExplFile {author-info-munge.def} {2017/12/28} {v1.0}
-    {process name inputs, etc. for author-info.sty (SL)}
+    {process name inputs, etc. for author-info.sty}
 %================================================================================
 %\RequirePackage{expl3}
 %\RequirePackage{interface3}

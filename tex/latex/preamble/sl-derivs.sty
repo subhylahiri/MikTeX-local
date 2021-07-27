@@ -10,10 +10,10 @@
 %% Derivatives defined:
 %%    \diff[n]{y}{x}
 %%    \pdiff[n]{y}{x}
+%%    \pdiff{w}{x,y,z}
 %%    \pdiffc[y]{z}{x}
-%%    \pdiffm{w}{x,y,z}
 %%    \fdf{S}{q(t)}
-%%    \fdfm{S}{q(t),p(t')}
+%%    \fdf{S}{q(t),p(t')}
 %%    \pdl[\mu]
 %%    \pdr[\mu]
 %%    \pdlr[\mu]
@@ -101,28 +101,32 @@
     \int_set_eq:NN \l_tmpa_int #2
     \tl_set_eq:NN \l__slderivs_one_order_tl #3
 %
-    \tl_put_right:NV \l__slderivs_one_denom_tl #4
-%
-    \int_compare:nNnTF { \seq_count:N \l_tmpb_seq } = {1}
+    \tl_if_eq:nnTF {...} {#5}
+      { \tl_put_right:Nn \l__slderivs_one_denom_tl { \cdots \g_slderivs_sep_tl } }
       {
-        \int_incr:N \l_tmpa_int
-        \tl_put_right:Nn \l__slderivs_one_denom_tl {#5}
-      }
-      {
-        \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
-        \tl_put_right:NV \l__slderivs_one_denom_tl \l_tmpa_tl
-        \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
-%
-        \sltools_tl_if_num:VTF \l_tmpa_tl
+        \tl_put_right:NV \l__slderivs_one_denom_tl #4
+    %
+        \int_compare:nNnTF { \seq_count:N \l_tmpb_seq } = {1}
           {
-            \__slderivs_raise:NV \l__slderivs_one_denom_tl \l_tmpa_tl
-            \tl_put_right:NV \l__slderivs_one_denom_tl \g_slderivs_sep_tl
-            \int_add:Nn \l_tmpa_int { \l_tmpa_tl }
+            \int_incr:N \l_tmpa_int
+            \tl_put_right:Nn \l__slderivs_one_denom_tl {#5}
           }
           {
-            \__slderivs_raise:NV \l__slderivs_one_denom_tl \l_tmpa_tl
-            \__slderivs_append_to_order:NN \l__slderivs_one_order_tl \l_tmpa_tl
-            \tl_put_right:NV \l__slderivs_one_denom_tl \g_slderivs_sep_tl
+            \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
+            \tl_put_right:NV \l__slderivs_one_denom_tl \l_tmpa_tl
+            \seq_pop_left:NN \l_tmpb_seq \l_tmpa_tl
+    %
+            \sltools_tl_if_num:VTF \l_tmpa_tl
+              {
+                \__slderivs_raise:NV \l__slderivs_one_denom_tl \l_tmpa_tl
+                \tl_put_right:NV \l__slderivs_one_denom_tl \g_slderivs_sep_tl
+                \int_add:Nn \l_tmpa_int { \l_tmpa_tl }
+              }
+              {
+                \__slderivs_raise:NV \l__slderivs_one_denom_tl \l_tmpa_tl
+                \__slderivs_append_to_order:NN \l__slderivs_one_order_tl \l_tmpa_tl
+                \tl_put_right:NV \l__slderivs_one_denom_tl \g_slderivs_sep_tl
+              }
           }
       }
     \sltools_tl_uset:NV #1 \l__slderivs_one_denom_tl
@@ -298,7 +302,7 @@
     { #1 \!\! }
   \! \mathrm{d}#2 \, \mathopen{}
 }
-\NewDocumentCommand \integ { o o m } {
+\NewDocumentCommand \integ { o d<> m } {
   \int
   \IfNoValueTF {#1}
     {}

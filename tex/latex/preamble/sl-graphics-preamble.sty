@@ -37,7 +37,7 @@
     panels / unknown .code:n =
       \msg_warning:nnxxx { slgraphics } { unknown-choice }
         { panels } { paralist, enumitem, none } % Name of choice key, Valid choices
-        { \exp_not:n {#1} }                     % Invalid choice given
+        { \exp_not:n {#1} },                    % Invalid choice given
     panels .value_required:n = true,
     panels .initial:n = none,
     unknown .code:n = { \PassOptionsToPackage{\CurrentOption}{graphicx} },

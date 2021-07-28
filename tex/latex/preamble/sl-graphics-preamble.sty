@@ -60,17 +60,17 @@
 {%
   \file_if_exist:nT { "C:/Program~Files/Inkscape/inkscape.exe" }
     {
-      \tl_gset:Nn \g__slslides_inkdir_tl { C:/Program~Files/Inkscape/ }
+      \tl_gset:Nn \g__slgraphics_inkdir_tl { C:/Program~Files/Inkscape/ }
     }
   \file_if_exist:nT { "/Applications/Inkscape.app/Contents/Resources/bin/inkscape" }
     {
-      \tl_gset:Nn \g__slslides_inkdir_tl { /Applications/Inkscape.app/Contents/Resources/bin/ }
+      \tl_gset:Nn \g__slgraphics_inkdir_tl { /Applications/Inkscape.app/Contents/Resources/bin/ }
     }
     %
   \sys_if_output_pdf:T
     {
       \epstopdfDeclareGraphicsRule {.svg} {pdf} {.pdf}
-        { "\g__slslides_inkdir_tl inkscape"~-f~#1~-C~-A~\OutputFile }
+        { "\g__slgraphics_inkdir_tl inkscape"~-f~#1~-C~-A~\OutputFile }
     }
 }
 %

@@ -22,6 +22,7 @@
 \RequirePackage{l3keys2e}
 \tl_new:N \g__slgraphics_inkdir_tl
 \tl_new:N \g__slgraphics_panels_tl
+\tl_const:Nn \c__slgraphics_space_tl {~}
 \bool_new:N \g__slgraphics_svg_bool
 %--------------------------------------------------------------------------------
 % Package options
@@ -50,7 +51,7 @@
 \RequirePackage{xcolor}
 \RequirePackage{ifpdf}
 \RequirePackage[hypcap]{caption}%links to figures
-\RequirePackage{graphicx}
+\RequirePackage[final]{graphicx}
 \RequirePackage{epstopdf}
 %
 \epstopdfsetup{update,suffix=-generated}
@@ -58,19 +59,24 @@
 %
 \bool_if:NT \g__slgraphics_svg_bool
 {%
-  \file_if_exist:nT { "C:/Program~Files/Inkscape/inkscape.exe" }
+  \file_if_exist:nT { "C:/Program~Files/Inkscape/bin/inkscape.exe" }
     {
-      \tl_gset:Nn \g__slgraphics_inkdir_tl { C:/Program~Files/Inkscape/ }
+      \tl_gset:Nn \g__slgraphics_inkdir_tl { C:/Program~Files/Inkscape/bin/ }
     }
   \file_if_exist:nT { "/Applications/Inkscape.app/Contents/Resources/bin/inkscape" }
     {
       \tl_gset:Nn \g__slgraphics_inkdir_tl { /Applications/Inkscape.app/Contents/Resources/bin/ }
     }
     %
+  % \tl_show:N \g__slgraphics_inkdir_tl
   \sys_if_output_pdf:T
     {
       \epstopdfDeclareGraphicsRule {.svg} {pdf} {.pdf}
-        { "\g__slgraphics_inkdir_tl inkscape"~-f~#1~-C~-A~\OutputFile }
+        {
+        "\g__slgraphics_inkdir_tl inkscape"~~
+        ~~--export-filename=\OutputFile \c__slgraphics_space_tl~~
+        ~~--export-area-page~~#1~~
+        }
     }
 }
 %

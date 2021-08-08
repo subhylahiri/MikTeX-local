@@ -4,23 +4,24 @@
 %%
 %% e.g.
 %%    \begin{equation}
-%%      \diff[2]{u}{v} = \pdiffm{f}{x,y,z} \pdiff{w}{k}.
+%%      \diff[2]{u}{v} = \pdiffm{f}{x;y;z} \pdiff{w}{k}.
 %%    \end{equation}
 %%
 %% Derivatives defined:
 %%    \diff[n]{y}{x}
 %%    \pdiff[n]{y}{x}
-%%    \pdiff{w}{x,y,z}
-%%    \pdiffc[y]{z}{x}
+%%    \pdiff{w}{x;y;z}
+%%    \pdiff{w}{x;y,2;z,c}
+%%    \pdiffc<y>{z}{x}
 %%    \fdf{S}{q(t)}
-%%    \fdf{S}{q(t),p(t')}
+%%    \fdf{S}{q(t);p(t')}
 %%    \pdl[\mu]
 %%    \pdr[\mu]
 %%    \pdlr[\mu]
 %%    \bp[\mu]
 %%    \pdg[\mu]
 %%    \intd[_0^\infty]{t} f(t)
-%%    \integ[_0^\infty][f(x)]{x}
+%%    \integ[_0^\infty]<f(x)>{x}
 %%
 %% History: 2018/03/17 v1.0      copied & updated defns from sl_definitions.tex
 %%          2019/09/10 v2.0      using expl3
@@ -270,7 +271,7 @@
 \NewDerivUni \diff { \mathrm{d} }
 % partial derivatives (higher order/constant independent variables)
 \NewDerivMulti \pdiff { \partial }
-\NewDocumentCommand \pdiffc { o o m m } {
+\NewDocumentCommand \pdiffc { d<> o m m } {
   \IfNoValueTF {#1}
     { \left(\pdiff[#2]{#3}{#4}\right) }
     { \left(\pdiff[#2]{#3}{#4}\right)_{\!\!#1} }

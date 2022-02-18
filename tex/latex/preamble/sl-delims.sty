@@ -52,13 +52,15 @@
 \tl_new:N \l__sldelims_argspec_tl
 \tl_new:N \l__sldelims_arguse_tl
 \tl_new:N \l__sldelims_code_tl
+\tl_new:N \g_sldelims_placeholder_tl
+\tl_cs_gset:Nn \g_sldelims_placeholder_tl { \:\cdot\: }
 %--------------------------------------------------------------------------------
 % Replace omitted argument with placeholder.
 % #1: optional argument
 \cs_new:Nn \__sldelims_opt:n
   {
     \tl_if_blank:nTF {#1}
-      { \:\cdot\: }
+      { \g_sldelims_placeholder_tl }
       { #1 }
   }
 %--------------------------------------------------------------------------------
@@ -201,6 +203,7 @@
 \__sldelims_frac:Nnn \brkfrac { \lbrack } { \rbrack }
 \__sldelims_frac:Nnn \absfrac { \lvert } { \rvert }
 \__sldelims_frac:Nnn \nrmfrac { \lVert } { \rVert }
+\__sldelims_frac:Nnn \avfrac { \langle } { \rangle }
 \__sldelims_frac:Nnn \ceilfrac { \lceil } { \rceil }
 \__sldelims_frac:Nnn \floorfrac { \lfloor } { \rfloor }
 %================================================================================

@@ -47,7 +47,31 @@
 \RequirePackage{xparse}
 \RequirePackage{mathtools}
 \RequirePackage{MnSymbol}
+%================================================================================
+\msg_new:nnnn { sldelims } { unknown-option }
+  { Unknown~option~'#2'! }
+  { Known~options:~'#1'. }
+% Options
+\bool_new:N \g__sldelims_star_bool
+\RequirePackage{l3keys2e}
 %--------------------------------------------------------------------------------
+% Package options
+\keys_define:nn { sldelims }
+  {
+    nostar .bool_gset_inverse:N = \g__sldelims_star_bool,
+    nostar .default:n = true,
+    star .bool_gset:N = \g__sldelims_star_bool,
+    star .default:n = true,
+    star .initial:n = false,
+    unknown .code:n =
+      {
+        \msg_warning:nnxx { sldelims } { unknown-option }
+          { star, nostar } { \exp_not:n {#1} }
+          % Valid options, Invalid option given
+      },
+  }
+\ProcessKeysPackageOptions { slprsldelimseamble }
+%================================================================================
 \tl_new:N \l__sldelims_csname_tl
 \tl_new:N \l__sldelims_argspec_tl
 \tl_new:N \l__sldelims_arguse_tl
@@ -88,6 +112,42 @@
   }
 \cs_generate_variant:Nn \__sldelims_choose:Nnnn { c }
 %================================================================================
+% Functions to create document commands
+%================================================================================
+\bool_if:NTF \g__sldelims_star_bool
+ {
+%--------------------------------------------------------------------------------
+% Like \DeclarePairedDelimiter<...>, but default placeholder
+%--------------------------------------------------------------------------------
+% % Define delimiters with one argument, simple insertion
+% Define delimiters with one argument, simple insertion
+% #1: Command to define
+% #2: Left delimiter
+% #3: Right delimiter
+\cs_new_protected:Nn \__sldelims_new:Nnn
+  {
+    \DeclarePairedDelimiterX  #1
+      [1] {#2} {#3}
+      { \__sldelims_opt:n { ##1 } }
+  }
+%--------------------------------------------------------------------------------
+% Define delimiters with multiple argument and code for insertion
+% really just \DeclarePairedDelimiterX, only needed because of nostar version
+% #1: Command to define
+% #2: Left delimiter
+% #3: Right delimiter
+% #4: Integer - Number of arguments
+% #5: Code for insertion
+\cs_new_protected:Nn \__sldelims_new:Nnnnn
+  {
+    \DeclarePairedDelimiterX #1
+      [#4] {#2} {#3} {#5}
+  }
+%--------------------------------------------------------------------------------
+ }{
+%--------------------------------------------------------------------------------
+% Like \DeclarePairedDelimiter<...>, but swapping star/no star & default placeholder
+%--------------------------------------------------------------------------------
 % Define delimiters with one argument, simple insertion
 % #1: Command to define
 % #2: Left delimiter
@@ -147,15 +207,9 @@
   }
 \cs_generate_variant:Nn \__sldelims_new:Nnnnn { c }
 %--------------------------------------------------------------------------------
-% % Define delimiters with one argument, simple insertion
-% % #1: Command to define
-% % #2: Left delimiter
-% % #3: Right delimiter
-% \cs_new_protected:Nn \__sldelims_new:Nnn
-%   {
-%     \__sldelims_new:Nnnnn #1 {#2} {#3} {1} { \__sldelims_opt:n {##1} }
-%   }
-%--------------------------------------------------------------------------------
+ }
+\cs_generate_variant:Nn \__sldelims_new:Nnnnn { c }
+%================================================================================
 % Define delimited fraction with two arguments, inserted in a \frac{}{}
 % #1: Command to define
 % #2: Left delimiter
@@ -165,6 +219,10 @@
     \__sldelims_new:Nnnnn #1 {#2} {#3} {2} { \frac{##1}{##2} }
   }
 %================================================================================
+% Document commands
+%================================================================================
+\NewDocumentCommand \given {}
+  { \delimsize \mvert \mathopen{} }
 % brackets etc.
 \__sldelims_new:Nnn \prn { \lparen } { \rparen }
 \__sldelims_new:Nnn \brc { \lbrace } { \rbrace }
@@ -175,26 +233,25 @@
 \__sldelims_new:Nnn \ceil { \lceil } { \rceil }
 \__sldelims_new:Nnn \floor { \lfloor } { \rfloor }
 \__sldelims_new:Nnnnn \avc { \langle } { \rangle } {2}
-  { \__sldelims_opt:n{#1} \delimsize \mvert \mathopen{} \__sldelims_opt:n{#2} }
+  { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 %\newenvironment{cases}{\dleft\{\begin{aligned}}{\end{aligned}\dright.}
 %
 % Sets
 \__sldelims_new:Nnnnn \set { \lbrace } { \rbrace } {2}
-  { \__sldelims_opt:n{#1} \delimsize \mvert \mathopen{} \__sldelims_opt:n{#2} }
+  { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 \__sldelims_new:Nnnnn \cond { \lparen } { \rparen } {2}
-  { \__sldelims_opt:n{#1}  \delimsize \mvert \mathopen{} \__sldelims_opt:n{#2} }
+  { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 \__sldelims_new:Nnnnn \condb { \lbrack } { \rbrack } {2}
-  { \__sldelims_opt:n{#1}  \delimsize \mvert \mathopen{} \__sldelims_opt:n{#2} }
+  { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 %
 % QM Dirac notation
 \__sldelims_new:Nnn \bra { \langle } { \rvert }
 \__sldelims_new:Nnn \ket { \lvert } { \rangle }
 \__sldelims_new:Nnnnn \braket { \langle } { \rangle } {2}
-  { \__sldelims_opt:n{#1}  \delimsize \mvert \mathopen{} \__sldelims_opt:n{#2} }
+  { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 \__sldelims_new:Nnnnn \brackets { \langle } { \rangle } {3}
   {
-    \__sldelims_opt:n{#1} \delimsize \mvert \mathopen{}
-    \__sldelims_opt:n{#2} \delimsize \mvert \mathopen{} \__sldelims_opt:n{#3}
+    \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} \given \__sldelims_opt:n{#3}
   }
 %
 % Bracketed fractions

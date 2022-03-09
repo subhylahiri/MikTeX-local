@@ -47,13 +47,14 @@
 \RequirePackage{xparse}
 \RequirePackage{mathtools}
 \RequirePackage{MnSymbol}
+\RequirePackage{l3keys2e}
 %================================================================================
 \msg_new:nnnn { sldelims } { unknown-option }
   { Unknown~option~'#2'! }
   { Known~options:~'#1'. }
 % Options
 \bool_new:N \g__sldelims_star_bool
-\RequirePackage{l3keys2e}
+\tl_new:N \g_sldelims_placeholder_tl
 %--------------------------------------------------------------------------------
 % Package options
 \keys_define:nn { sldelims }
@@ -63,10 +64,13 @@
     star .bool_gset:N = \g__sldelims_star_bool,
     star .default:n = true,
     star .initial:n = false,
+    placeholder .tl_gset:N = \g_sldelims_placeholder_tl,
+    placeholder .value_required:n = true,
+    placeholder .initial:n = { \:\cdot\: },
     unknown .code:n =
       {
         \msg_warning:nnxx { sldelims } { unknown-option }
-          { star, nostar } { \exp_not:n {#1} }
+          { star, nostar, placeholder } { \exp_not:n {#1} }
           % Valid options, Invalid option given
       },
   }
@@ -76,8 +80,6 @@
 \tl_new:N \l__sldelims_argspec_tl
 \tl_new:N \l__sldelims_arguse_tl
 \tl_new:N \l__sldelims_code_tl
-\tl_new:N \g_sldelims_placeholder_tl
-\tl_gset:Nn \g_sldelims_placeholder_tl { \:\cdot\: }
 %--------------------------------------------------------------------------------
 % Replace omitted argument with placeholder.
 % #1: optional argument
@@ -88,13 +90,6 @@
       { #1 }
   }
 %--------------------------------------------------------------------------------
-% Put 2nd token list in braces and append to 1st
-% #1: tl-var to append to
-% #2: token list to be put in braces and appended
-\cs_new_protected:Nn \__sldelims_tl_put_right_braced:Nn
-  { \tl_put_right:Nn #1 { {#2} } }
-\cs_generate_variant:Nn \__sldelims_tl_put_right_braced:Nn { NV }
-%--------------------------------------------------------------------------------
 % Choose which version of delimiter command to use, swapping starred/unstarred
 % #1: Private function that implements deliiters
 % #2: Boolean - Was there a star on the public function?
@@ -104,17 +99,10 @@
   {
     \IfNoValueTF {#3}
       {
-        \bool_if:NTF \g__sldelims_star_bool
-          {
-            \IfBooleanTF {#2}
-              { #1* #4 }
-              { #1 #4 }
-          }
-          {
-            \IfBooleanTF {#2}
-              { #1 #4 }
-              { #1* #4 }
-          }
+        % Assuming xparse and expl3 use the same booleans
+        \bool_xor:nnTF {#2} { \g__sldelims_star_bool }
+          { #1 #4 }
+          { #1* #4 }
       }
       { #1 [#3] #4 }
   }
@@ -205,9 +193,9 @@
 %--------------------------------------------------------------------------------
 % Define delimiters with multiple argument and code for insertion
 % #1: Command to define
+% #4: Integer - Number of arguments
 % #2: Left delimiter
 % #3: Right delimiter
-% #4: Integer - Number of arguments
 % #5: Code for insertion
 \cs_new_protected:Nn \__sldelims_new:Nnnnn
   {
@@ -216,7 +204,7 @@
     % declare the private function
     \exp_args:Nc
     \DeclarePairedDelimiterX { \l__sldelims_csname_tl }
-      [#4] {#2} {#3} {#5}
+      [#2] {#3} {#4} {#5}
     % % Define the public function
     % \exp_args:NNVV
     % \NewDocumentCommand #1 \l__sldelims_argspec_tl \l__sldelims_code_tl
@@ -225,12 +213,12 @@
 %--------------------------------------------------------------------------------
 % Define delimiters with multiple argument and code for insertion, pre and post
 % #1: Command to define
-% #2: Left delimiter
-% #3: Right delimiter
-% #4: Integer - Number of arguments
-% #5: Code for insertion
-% #6: Pre code
-% #7: Post code
+% #2: Integer - Number of arguments
+% #3: Pre code
+% #4: Left delimiter
+% #5: Right delimiter
+% #6: Post code
+% #7: Code for insertion
 \cs_new_protected:Nn \__sldelims_new:Nnnnnnn
   {
     % Define the public function
@@ -238,7 +226,7 @@
     % declare the private function
     \exp_args:Nc
     \DeclarePairedDelimiterXPP  { \l__sldelims_csname_tl }
-      [#4] {#6} {#2} {#3} {#7} {#5}
+      [#2] {#3} {#4} {#5} {#6} {#7}
   }
 %================================================================================
 % Define delimited fraction with two arguments, inserted in a \frac{}{}
@@ -265,26 +253,28 @@
 \__sldelims_new:Nnn \av { \langle } { \rangle }
 \__sldelims_new:Nnn \ceil { \lceil } { \rceil }
 \__sldelims_new:Nnn \floor { \lfloor } { \rfloor }
-\__sldelims_new:Nnnnn \avc { \langle } { \rangle } {2}
+\__sldelims_new:Nnnnn \avc {2} { \langle } { \rangle }
   { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 %\newenvironment{cases}{\dleft\{\begin{aligned}}{\end{aligned}\dright.}
 %
 % Sets
-\__sldelims_new:Nnnnn \set { \lbrace } { \rbrace } {2}
+\__sldelims_new:Nnnnn \set {2} { \lbrace } { \rbrace }
   { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
-\__sldelims_new:Nnnnn \cond { \lparen } { \rparen } {2}
+\__sldelims_new:Nnnnn \cond {2} { \lparen } { \rparen }
   { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
-\__sldelims_new:Nnnnn \condb { \lbrack } { \rbrack } {2}
+\__sldelims_new:Nnnnn \condb {2} { \lbrack } { \rbrack }
   { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
 %
 % QM Dirac notation
 \__sldelims_new:Nnn \bra { \langle } { \rvert }
 \__sldelims_new:Nnn \ket { \lvert } { \rangle }
-\__sldelims_new:Nnnnn \braket { \langle } { \rangle } {2}
+\__sldelims_new:Nnnnn \braket {2} { \langle } { \rangle }
   { \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} }
-\__sldelims_new:Nnnnn \brackets { \langle } { \rangle } {3}
+\__sldelims_new:Nnnnn \brackets {3} { \langle } { \rangle }
   {
-    \__sldelims_opt:n{#1} \given \__sldelims_opt:n{#2} \given \__sldelims_opt:n{#3}
+    \__sldelims_opt:n{#1} \given
+    \__sldelims_opt:n{#2} \given
+    \__sldelims_opt:n{#3}
   }
 %
 % Bracketed fractions
@@ -298,8 +288,9 @@
 \__sldelims_frac:Nnn \floorfrac { \lfloor } { \rfloor }
 %
 % Evaluate at
-\__sldelims_new:Nnnnnnn \evalat {.} {\rvert} {2}
-  { \__sldelims_opt:n{#1} } {} {\c_math_subscript_token{#2}}
+\__sldelims_new:Nnnnnnn \evalat {2}
+  {} {.} {\rvert} { \c_math_subscript_token {#2} }
+  { \__sldelims_opt:n{#1} }
 %================================================================================
 \ExplSyntaxOff
 \endinput

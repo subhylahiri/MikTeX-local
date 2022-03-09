@@ -33,9 +33,9 @@
 %%    \brcfrac{}{}
 %%    \brkfrac{}{}
 %%    \absfrac{}{}
-%%    \nrmrac{}{}
-%%    \ceilrac{}{}
-%%    \floorrac{}{}
+%%    \nrmfrac{}{}
+%%    \ceilfrac{}{}
+%%    \floorfrac{}{}
 %%
 %% History: 2018/03/17 v1.0      copied & updated defns from sl_definitions.tex
 %%          2021/08/07 v2.0      use expl3
@@ -70,14 +70,14 @@
           % Valid options, Invalid option given
       },
   }
-\ProcessKeysPackageOptions { slprsldelimseamble }
+\ProcessKeysPackageOptions { sldelims }
 %================================================================================
 \tl_new:N \l__sldelims_csname_tl
 \tl_new:N \l__sldelims_argspec_tl
 \tl_new:N \l__sldelims_arguse_tl
 \tl_new:N \l__sldelims_code_tl
 \tl_new:N \g_sldelims_placeholder_tl
-\tl_cs_gset:Nn \g_sldelims_placeholder_tl { \:\cdot\: }
+\tl_gset:Nn \g_sldelims_placeholder_tl { \:\cdot\: }
 %--------------------------------------------------------------------------------
 % Replace omitted argument with placeholder.
 % #1: optional argument
@@ -104,48 +104,83 @@
   {
     \IfNoValueTF {#3}
       {
-        \IfBooleanTF {#2}
-          { #1 #4 }
-          { #1* #4 }
+        \bool_if:NTF \g__sldelims_star_bool
+          {
+            \IfBooleanTF {#2}
+              { #1* #4 }
+              { #1 #4 }
+          }
+          {
+            \IfBooleanTF {#2}
+              { #1 #4 }
+              { #1* #4 }
+          }
       }
       { #1 [#3] #4 }
   }
 \cs_generate_variant:Nn \__sldelims_choose:Nnnn { c }
 %================================================================================
+% Builders
+%--------------------------------------------------------------------------------
+% Put name of private version of function in tl variable
+% #1: Public function
+% #2: tl-variable for csname
+\cs_new_protected:Nn \__sldelims_private_csname:NN
+  {
+    \tl_set:Nx #2 { \cs_to_str:N #1 }
+    % name of private fn to implement public one
+    \tl_put_left:Nn #2 { __slderivs_ }
+  }
+%--------------------------------------------------------------------------------
+% Buld argspec for xparse and argument token list for \__sldelims_choose:Nnnn
+% #1: tl-variable for argspec
+% #2: tl-variable for argument token list
+% #3: Integer - Number of arguments
+\cs_new_protected:Nn \__sldelims_build_args:NNn
+  {
+    % build the argument specification for xparse
+    \tl_set:Nn #1 { s~o }
+    % build the argument token list for \__sldelims_choose:Nnnn
+    \tl_clear:N #2
+    \int_step_inline:nn {#3}
+      {
+        \tl_put_right:Nn #1 { ~m }
+        \tl_put_right:Nx #2 { ~{ ######## \int_eval:n{##1 + 2} } }
+      }
+    % \tl_log:N \l__sldelims_argspec_tl
+    % \tl_log:N \l__sldelims_arguse_tl
+  }
+%--------------------------------------------------------------------------------
+% build the code for the public function
+% #1: tl-variable for code
+% #2: private function that implements delimiters
+% #3: additional argument token list
+\cs_new_protected:Nn \__sldelims_build_code:NNn
+  {
+    \tl_set:Nn #1 { \__sldelims_choose:Nnnn #2 }
+    \tl_put_right:Nn #1 { {##1} {##2} {#3} }
+    % \tl_show:N \l__sldelims_code_tl
+  }
+\cs_generate_variant:Nn \__sldelims_build_code:NNn { Nc, NcV }
+%--------------------------------------------------------------------------------
+% build public function
+% #1: Public function
+% #2: tl-variable for csname of private function that implements delimiters
+% #3: Integer - Number of arguments
+\cs_new_protected:Nn \__sldelims_build_public:NNn
+  {
+    % name of private fn to implement public one
+    \__sldelims_private_csname:NN #1 #2
+    % build the argument specification for xparse & \__sldelims_choose:cnnn
+    \__sldelims_build_args:NNn \l__sldelims_argspec_tl \l__sldelims_arguse_tl {#3}
+    % build the code for the public function
+    \__sldelims_build_code:NcV \l__sldelims_code_tl {#2} \l__sldelims_arguse_tl
+    \exp_args:NNVV
+    \NewDocumentCommand #1 \l__sldelims_argspec_tl \l__sldelims_code_tl
+}
+%================================================================================
 % Functions to create document commands
 %================================================================================
-\bool_if:NTF \g__sldelims_star_bool
- {
-%--------------------------------------------------------------------------------
-% Like \DeclarePairedDelimiter<...>, but default placeholder
-%--------------------------------------------------------------------------------
-% % Define delimiters with one argument, simple insertion
-% Define delimiters with one argument, simple insertion
-% #1: Command to define
-% #2: Left delimiter
-% #3: Right delimiter
-\cs_new_protected:Nn \__sldelims_new:Nnn
-  {
-    \DeclarePairedDelimiterX  #1
-      [1] {#2} {#3}
-      { \__sldelims_opt:n { ##1 } }
-  }
-%--------------------------------------------------------------------------------
-% Define delimiters with multiple argument and code for insertion
-% really just \DeclarePairedDelimiterX, only needed because of nostar version
-% #1: Command to define
-% #2: Left delimiter
-% #3: Right delimiter
-% #4: Integer - Number of arguments
-% #5: Code for insertion
-\cs_new_protected:Nn \__sldelims_new:Nnnnn
-  {
-    \DeclarePairedDelimiterX #1
-      [#4] {#2} {#3} {#5}
-  }
-%--------------------------------------------------------------------------------
- }{
-%--------------------------------------------------------------------------------
 % Like \DeclarePairedDelimiter<...>, but swapping star/no star & default placeholder
 %--------------------------------------------------------------------------------
 % Define delimiters with one argument, simple insertion
@@ -154,19 +189,16 @@
 % #3: Right delimiter
 \cs_new_protected:Nn \__sldelims_new:Nnn
   {
-    \tl_set:Nx \l__sldelims_csname_tl { \cs_to_str:N #1 }
-    \tl_put_left:Nn \l__sldelims_csname_tl { __slderivs_ }
-    % \tl_show:N \l__sldelims_csname_tl
-    \exp_args:Nc \DeclarePairedDelimiterX  \l__sldelims_csname_tl
+    % Define the public function
+    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {1}
+    % declare the private function
+    \exp_args:Nc
+    \DeclarePairedDelimiterX  \l__sldelims_csname_tl
       [1] {#2} {#3}
       { \__sldelims_opt:n { ##1 } }
     % \cs_show:c { \l__sldelims_csname_tl }
-    \tl_set:Nn \l__sldelims_code_tl { \__sldelims_choose:cnnn }
-    \__sldelims_tl_put_right_braced:NV \l__sldelims_code_tl \l__sldelims_csname_tl
-    \tl_put_right:Nn \l__sldelims_code_tl { {##1} {##2} { {##3} } }
-    % \tl_show:N \l__sldelims_code_tl
-    \exp_args:NNnV
-    \NewDocumentCommand #1 { s o m } \l__sldelims_code_tl
+    % \exp_args:NNnV
+    % \NewDocumentCommand #1 { s o m } \l__sldelims_code_tl
     % \cs_log:N #1
     % \cs_log:c { \cs_to_str:N #1 ~code }
   }
@@ -179,36 +211,35 @@
 % #5: Code for insertion
 \cs_new_protected:Nn \__sldelims_new:Nnnnn
   {
-    \tl_set:Nx \l__sldelims_csname_tl { \cs_to_str:N #1 }
-    % name of private fn to implement public one
-    \tl_put_left:Nn \l__sldelims_csname_tl { __slderivs_ }
-    % declare the private function
-    \exp_args:Nc \DeclarePairedDelimiterX { \tl_use:N \l__sldelims_csname_tl }
-      [#4] {#2} {#3} {#5}
-    % build the argument specification for xparse
-    \tl_set:Nn \l__sldelims_argspec_tl { s~o }
-    % build the argument token list for \__sldelims_choose:Nnnn
-    \tl_clear:N \l__sldelims_arguse_tl
-    \int_step_inline:nn {#4}
-      {
-        \tl_put_right:Nn \l__sldelims_argspec_tl { ~m }
-        \tl_put_right:Nx \l__sldelims_arguse_tl { ~{ ######## \int_eval:n{##1 + 2} } }
-      }
-    % build the code for the public function
-    \tl_set:Nn \l__sldelims_code_tl { \__sldelims_choose:cnnn }
-    \__sldelims_tl_put_right_braced:NV \l__sldelims_code_tl \l__sldelims_csname_tl
-    \tl_put_right:Nn \l__sldelims_code_tl { {##1} {##2} }
-    \__sldelims_tl_put_right_braced:NV \l__sldelims_code_tl \l__sldelims_arguse_tl
-    % \tl_log:N \l__sldelims_argspec_tl
-    % \tl_log:N \l__sldelims_arguse_tl
     % Define the public function
-    \exp_args:NNVV
-    \NewDocumentCommand #1 \l__sldelims_argspec_tl \l__sldelims_code_tl
+    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {#4}
+    % declare the private function
+    \exp_args:Nc
+    \DeclarePairedDelimiterX { \l__sldelims_csname_tl }
+      [#4] {#2} {#3} {#5}
+    % % Define the public function
+    % \exp_args:NNVV
+    % \NewDocumentCommand #1 \l__sldelims_argspec_tl \l__sldelims_code_tl
   }
 \cs_generate_variant:Nn \__sldelims_new:Nnnnn { c }
 %--------------------------------------------------------------------------------
- }
-\cs_generate_variant:Nn \__sldelims_new:Nnnnn { c }
+% Define delimiters with multiple argument and code for insertion, pre and post
+% #1: Command to define
+% #2: Left delimiter
+% #3: Right delimiter
+% #4: Integer - Number of arguments
+% #5: Code for insertion
+% #6: Pre code
+% #7: Post code
+\cs_new_protected:Nn \__sldelims_new:Nnnnnnn
+  {
+    % Define the public function
+    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {#4}
+    % declare the private function
+    \exp_args:Nc
+    \DeclarePairedDelimiterXPP  { \l__sldelims_csname_tl }
+      [#4] {#6} {#2} {#3} {#7} {#5}
+  }
 %================================================================================
 % Define delimited fraction with two arguments, inserted in a \frac{}{}
 % #1: Command to define
@@ -223,6 +254,8 @@
 %================================================================================
 \NewDocumentCommand \given {}
   { \delimsize \mvert \mathopen{} }
+\NewDocumentCommand \SetDelimPlaceholder { m }
+  { \tl_gset:Nn \g_sldelims_placeholder_tl {#1} }
 % brackets etc.
 \__sldelims_new:Nnn \prn { \lparen } { \rparen }
 \__sldelims_new:Nnn \brc { \lbrace } { \rbrace }
@@ -263,6 +296,10 @@
 \__sldelims_frac:Nnn \avfrac { \langle } { \rangle }
 \__sldelims_frac:Nnn \ceilfrac { \lceil } { \rceil }
 \__sldelims_frac:Nnn \floorfrac { \lfloor } { \rfloor }
+%
+% Evaluate at
+\__sldelims_new:Nnnnnnn \evalat {.} {\rvert} {2}
+  { \__sldelims_opt:n{#1} } {} {\c_math_subscript_token{#2}}
 %================================================================================
 \ExplSyntaxOff
 \endinput

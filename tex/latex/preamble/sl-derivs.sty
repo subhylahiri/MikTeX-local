@@ -21,8 +21,8 @@
 %%    \pdlr[\mu]
 %%    \bp[\mu]
 %%    \pdg[\mu]
-%%    \intd[_0^\infty]{t} f(t)
-%%    \integ[_0^\infty]<f(x)>{x}
+%%    \intd[_0^\infty]{t} f(t) or \intd[_0^\infty]<f(t)>{t}
+%%    \integ[_0^\infty]<f(x)>{x} (uses placeholder if <> omitted)
 %%
 %% History: 2018/03/17 v1.0      copied & updated defns from sl_definitions.tex
 %%          2019/09/10 v2.0      using expl3
@@ -41,6 +41,8 @@
 \int_new:N \l__slderivs_order_int
 % separator for denominator entries in output:
 \tl_new:N \g_slderivs_sep_tl
+\tl_new:N \g_slderivs_placeholder_tl
+\tl_cs_gset:Nn \g_slderivs_placeholder_tl { \cdots }
 
 %--------------------------------------------------------------------------------
 % Append string to order of derivative
@@ -104,7 +106,10 @@
     \tl_set_eq:NN \l__slderivs_one_order_tl #3
 %
     \tl_if_eq:nnTF {...} {#5}
-      { \tl_put_right:Nn \l__slderivs_one_denom_tl { \cdots \g_slderivs_sep_tl } }
+      {
+        \tl_put_right:Nn \l__slderivs_one_denom_tl
+          { \g_slderivs_placeholder_tl \g_slderivs_sep_tl }
+      }
       {
         \tl_put_right:NV \l__slderivs_one_denom_tl #4
     %
@@ -265,6 +270,29 @@
   }
 }
 %================================================================================
+\NewDocumentCommand \SetDerivPlaceholder { m }
+  { \tl_gset:Nn \g_slderivs_placeholder_tl {#1} }
+%
+\NewDocumentCommand \intd { o d<> m } {
+  \int
+  \IfNoValueTF {#1}
+    {}
+    { #1 \!\! }
+  \IfNoValueTF {#2}
+    { \! \mathrm{d}#3 \, \mathopen{} }
+    { \! #2 \, \mathrm{d}#3 }
+}
+\NewDocumentCommand \integ { o d<> m } {
+  \int
+  \IfNoValueTF {#1}
+    {}
+    { #1 \!\! }
+  \IfNoValueTF {#2}
+    { \g_slderivs_placeholder_tl \; }
+    { \! #2 \, }
+  \mathrm{d}#3
+}
+%================================================================================
 \ExplSyntaxOff
 %================================================================================
 % Derivatives, etc. First argument is optional.
@@ -296,24 +324,6 @@
 \NewDocumentCommand \dy {} {\mathrm{d}y}
 \NewDocumentCommand \dz {} {\mathrm{d}z}
 \NewDocumentCommand \dzb {} {\mathrm{d}\bar{z}}
-%
-\NewDocumentCommand \intd { o m } {
-  \int
-  \IfNoValueTF {#1}
-    {}
-    { #1 \!\! }
-  \! \mathrm{d}#2 \, \mathopen{}
-}
-\NewDocumentCommand \integ { o d<> m } {
-  \int
-  \IfNoValueTF {#1}
-    {}
-    { #1 \!\! }
-  \IfNoValueTF {#2}
-    { \cdots \; }
-    { \! #2 \, }
-  \mathrm{d}#3
-}
 %
 %================================================================================
 \endinput

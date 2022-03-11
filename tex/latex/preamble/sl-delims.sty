@@ -46,8 +46,12 @@
 %================================================================================
 \RequirePackage{xparse}
 \RequirePackage{mathtools}
-\RequirePackage{MnSymbol}
 \RequirePackage{l3keys2e}
+% \RequirePackage{MnSymbol}
+%--------------------------------------------------------------------------------
+\@ifpackageloaded{MnSymbol}{}{
+  \DeclareMathDelimiter{\mvert}{\mathrel}{symbols}{"6A}{largesymbols}{"0C}
+}
 %================================================================================
 \msg_new:nnnn { sldelims } { unknown-option }
   { Unknown~option~'#2'! }
@@ -193,14 +197,14 @@
 %--------------------------------------------------------------------------------
 % Define delimiters with multiple argument and code for insertion
 % #1: Command to define
-% #4: Integer - Number of arguments
-% #2: Left delimiter
-% #3: Right delimiter
+% #2: Integer - Number of arguments
+% #3: Left delimiter
+% #4: Right delimiter
 % #5: Code for insertion
 \cs_new_protected:Nn \__sldelims_new:Nnnnn
   {
     % Define the public function
-    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {#4}
+    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {#2}
     % declare the private function
     \exp_args:Nc
     \DeclarePairedDelimiterX { \l__sldelims_csname_tl }
@@ -222,7 +226,7 @@
 \cs_new_protected:Nn \__sldelims_new:Nnnnnnn
   {
     % Define the public function
-    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {#4}
+    \__sldelims_build_public:NNn #1 \l__sldelims_csname_tl {#2}
     % declare the private function
     \exp_args:Nc
     \DeclarePairedDelimiterXPP  { \l__sldelims_csname_tl }
@@ -235,13 +239,13 @@
 % #3: Right delimiter
 \cs_new_protected:Nn \__sldelims_frac:Nnn
   {
-    \__sldelims_new:Nnnnn #1 {#2} {#3} {2} { \frac{##1}{##2} }
+    \__sldelims_new:Nnnnn #1 {2} {#2} {#3} { \frac{##1}{##2} }
   }
 %================================================================================
 % Document commands
 %================================================================================
 \NewDocumentCommand \given {}
-  { \delimsize \mvert \mathopen{} }
+  { \mathclose{} \delimsize \mvert \mathopen{} }
 \NewDocumentCommand \SetDelimPlaceholder { m }
   { \tl_gset:Nn \g_sldelims_placeholder_tl {#1} }
 % brackets etc.

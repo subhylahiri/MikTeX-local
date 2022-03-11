@@ -34,6 +34,7 @@
 %\RequirePackage{interface3}
 \RequirePackage{xparse}
 \RequirePackage{sltools}
+\RequirePackage{l3keys2e}
 \ExplSyntaxOn
 %================================================================================
 \tl_new:N \l__slderivs_numer_tl
@@ -42,9 +43,29 @@
 % separator for denominator entries in output:
 \tl_new:N \g_slderivs_sep_tl
 \tl_new:N \g_slderivs_placeholder_tl
-\tl_cs_gset:Nn \g_slderivs_placeholder_tl { \cdots }
-
 %--------------------------------------------------------------------------------
+\msg_new:nnnn { slderivs } { unknown-option }
+  { Unknown~option~'#2'! }
+  { Known~options:~'#1'. }
+%--------------------------------------------------------------------------------
+% Package options
+\keys_define:nn { slderivs }
+  {
+    separator .tl_gset:N = \g_slderivs_sep_tl,
+    separator .value_required:n = true,
+    separator .initial:n = {  },
+    placeholder .tl_gset:N = \g_slderivs_placeholder_tl,
+    placeholder .value_required:n = true,
+    placeholder .initial:n = { \cdots },
+    unknown .code:n =
+      {
+        \msg_warning:nnxx { slderivs } { unknown-option }
+          { separator, placeholder } { \exp_not:n {#1} }
+          % Valid options, Invalid option given
+      },
+  }
+\ProcessKeysPackageOptions { slderivs }
+%================================================================================
 % Append string to order of derivative
 % #1: derivative order tok_list-variable to append to
 % #2: to be added to order, tok_list variable
@@ -270,27 +291,30 @@
   }
 }
 %================================================================================
+\NewDocumentCommand \SetDerivSeparator { m }
+  { \tl_gset:Nn \g_slderivs_sep_tl {#1} }
 \NewDocumentCommand \SetDerivPlaceholder { m }
   { \tl_gset:Nn \g_slderivs_placeholder_tl {#1} }
 %
-\NewDocumentCommand \intd { o d<> m } {
+\NewDocumentCommand \intd { s o d<> m } {
   \int
-  \IfNoValueTF {#1}
-    {}
-    { #1 \!\! }
   \IfNoValueTF {#2}
-    { \! \mathrm{d}#3 \, \mathopen{} }
-    { \! #2 \, \mathrm{d}#3 }
+    {}
+    { \IfBooleanT {#1} {\limits}#2 \!\! }
+  \!
+  \IfNoValueTF {#4}
+    { \mathrm{d}#3 \, \mathopen{} }
+    { \mathopen{} #3 \, \mathclose{} \mathrm{d}#4 }
 }
-\NewDocumentCommand \integ { o d<> m } {
+\NewDocumentCommand \integ { s o d<> m } {
   \int
-  \IfNoValueTF {#1}
-    {}
-    { #1 \!\! }
   \IfNoValueTF {#2}
+    {}
+    { \IfBooleanT {#1} {\limits}#2 \!\! }
+  \IfNoValueTF {#3}
     { \g_slderivs_placeholder_tl \; }
-    { \! #2 \, }
-  \mathrm{d}#3
+    { \! \mathopen{} #3 \, \mathclose{} }
+  \mathrm{d}#4
 }
 %================================================================================
 \ExplSyntaxOff
